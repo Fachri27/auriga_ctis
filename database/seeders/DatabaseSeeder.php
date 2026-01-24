@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,11 +14,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            RolePermissionSeeder::class,
+            UserSeeder::class,
+            StatusSeeder::class,
+            ProvinceSeeder::class,
+            CategorySeeder::class,
+            // Use realistic combined seeder for process/task/templates
+            RealisticProcessTaskSeeder::class,
+            ReportSeeder::class,   // harus sebelum
+            CaseSeeder::class,     // dijalankan
+            RealisticCasesSeeder::class, // development helper: insert 10 realistic cases
+            RealisticCaseSeeder::class,  // development helper: insert 1 realistic case with full workflow
+            UpdateStatusNamesSeeder::class,
         ]);
     }
 }

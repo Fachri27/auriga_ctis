@@ -12,7 +12,7 @@ return [
     | Here you may specify which of the database connections below you wish
     | to use as your default connection for database operations. This is
     | the connection which will be utilized unless another connection
-    | is explicitly specified when you execute a query / statement.
+    | is explicitly specified when you execute a query / statement. 
     |
     */
 
@@ -85,13 +85,11 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
+            'host' => env('DB_HOST_GEO', '127.0.0.1'),
+            'port' => env('DB_PORT_GEO', '5432'),
+            'database' => env('DB_DATABASE_GEO', 'laravel'),
+            'username' => env('DB_USERNAME_GEO', 'root'),
+            'password' => env('DB_PASSWORD_GEO', ''),
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',

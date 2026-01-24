@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -31,8 +30,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
-
         /*
         |--------------------------------------------------------------------------
         | CATEGORIES + TRANSLATIONS
@@ -56,8 +53,6 @@ return new class extends Migration
             $table->timestamps();
             $table->unique(['category_id', 'locale']);
         });
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -110,8 +105,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
-
         /*
         |--------------------------------------------------------------------------
         | STATUSES (STATUS CASE/REPORT)
@@ -125,8 +118,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
-
         /*
         |--------------------------------------------------------------------------
         | REPORT SYSTEM
@@ -137,16 +128,34 @@ return new class extends Migration
             $table->id();
             $table->string('report_code')->unique();
 
-            $table->string('name')->nullable();
-            $table->string('contact')->nullable();
+            // IDENTITAS LENGKAP
+            $table->string('nama_lengkap')->nullable();
+            $table->string('nik')->nullable();
+            $table->enum('jenis_kelamin', ['L', 'P'])->nullable();
+            $table->date('tanggal_lahir')->nullable();
+            $table->string('alamat')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('email')->nullable();
+            $table->string('pekerjaan')->nullable();
+            $table->string('kewarganegaraan')->nullable();
+            $table->string('status_perkawinan')->nullable();
 
+            // LOKASI KEJADIAN ATAU TEMUAN
             $table->decimal('lat', 10, 7)->nullable()->index();
             $table->decimal('lng', 10, 7)->nullable()->index();
 
+            // BUKTI
             $table->json('evidence')->nullable();
 
-            $table->foreignId('status_id')->nullable()->constrained('statuses')->nullOnDelete();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            // STATUS
+            $table->foreignId('status_id')->nullable()
+                ->constrained('statuses')->nullOnDelete();
+
+            $table->foreignId('category_id')->nullable()->constrained()->nullOnDelete();
+
+            // USER (JIKA ADA)
+            $table->foreignId('created_by')->nullable()
+                ->constrained('users')->nullOnDelete();
 
             $table->softDeletes();
             $table->timestamps();
@@ -160,8 +169,6 @@ return new class extends Migration
             $table->timestamps();
             $table->unique(['report_id', 'locale']);
         });
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -206,8 +213,6 @@ return new class extends Migration
             $table->unique(['case_id', 'locale']);
         });
 
-
-
         /*
         |--------------------------------------------------------------------------
         | CASE TIMELINES
@@ -225,8 +230,6 @@ return new class extends Migration
             $table->json('attachments')->nullable();
             $table->timestamps();
         });
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -247,8 +250,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
-
         /*
         |--------------------------------------------------------------------------
         | CASE DISCUSSION (CHAT)
@@ -264,7 +265,40 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('case_tasks', function (Blueprint $table) {
+            $table->id();
 
+            $table->unsignedBigInteger('case_id');
+            $table->unsignedBigInteger('task_id');
+
+            $table->enum('status', ['pending', 'submitted', 'approved', 'rejected'])
+                ->default('pending');
+
+            $table->timestamp('submitted_at')->nullable();
+            $table->timestamp('approved_at')->nullable();
+
+            $table->unsignedBigInteger('approved_by')->nullable();
+            $table->text('admin_notes')->nullable();
+
+            $table->timestamps();
+
+            $table->foreign('case_id')->references('id')->on('cases')->cascadeOnDelete();
+            $table->foreign('task_id')->references('id')->on('tasks')->cascadeOnDelete();
+        });
+
+        Schema::create('case_task_requirements', function (Blueprint $table) {
+            $table->id();
+
+            $table->unsignedBigInteger('case_task_id');
+            $table->unsignedBigInteger('requirement_id'); // FK task_requirements
+
+            $table->text('value')->nullable(); // TEXT, FILE PATH, JSON
+
+            $table->timestamps();
+
+            $table->foreign('case_task_id')->references('id')->on('case_tasks')->cascadeOnDelete();
+            $table->foreign('requirement_id')->references('id')->on('task_requirements')->cascadeOnDelete();
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -280,8 +314,6 @@ return new class extends Migration
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -299,26 +331,18 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SEED DEFAULT STATUS
-        |--------------------------------------------------------------------------
-        */
-
-        DB::table('statuses')->insert([
-            ['key' => 'open', 'name' => 'Open'],
-            ['key' => 'investigation', 'name' => 'Investigation'],
-            ['key' => 'prosecution', 'name' => 'Prosecution'],
-            ['key' => 'trial', 'name' => 'Trial'],
-            ['key' => 'executed', 'name' => 'Executed'],
-            ['key' => 'closed', 'name' => 'Closed'],
-            ['key' => 'rejected', 'name' => 'Rejected'],
-        ]);
+        Schema::create('case_geometries', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('case_id')->constrained()->cascadeOnDelete();
+            $table->geometry('geom'); // POINT / POLYGON
+            $table->string('title');
+            $table->string('category')->nullable();
+            $table->string('status')->default('draft');
+            $table->boolean('is_public')->default(false);
+            $table->timestamps();
+        });
 
     }
-
 
     public function down(): void
     {
@@ -348,5 +372,8 @@ return new class extends Migration
         Schema::dropIfExists('provinces');
 
         Schema::dropIfExists('statuses');
+        Schema::dropIfExists('case_tasks');
+        Schema::dropIfExists('case_task_requirements');
+        Schema::dropIfExists('case_geometries');
     }
 };
