@@ -12,12 +12,12 @@
                 {{-- <p class="text-gray-500 text-[15px] mt-1">Manage workflow processes for each category</p> --}}
             </div>
 
-            @can('process.create')
             <a href="{{ route('process.create') }}" class="px-4 py-2.5 bg-black text-white text-[15px] rounded-xl shadow 
                        hover:bg-gray-900 active:scale-[.98] transition-all">
                 + New
             </a>
-            @endcan
+            {{-- @can('process.create')
+            @endcan --}}
         </div>
 
         <!-- Filters -->

@@ -27,4 +27,9 @@ class Category extends Model
     {
         return $this->translations->where('locale', $locale)->first();
     }
+
+    public function artikel()
+    {
+        return $this->hasMany(Artikel::class);
+    }
 }

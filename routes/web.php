@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCaseController;
 use App\Http\Controllers\PublicDashboardController;
+use App\Livewire\Artikels\ArtikelForm;
 use App\Livewire\Cases\CaseDetail;
 use App\Livewire\Cases\CaseList;
 use App\Livewire\Categories\CategoriesForm;
@@ -109,6 +110,8 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('/verification/rejected', \App\Livewire\Verification\RejectedCases::class)
         ->middleware('auth')
         ->name('verification.rejected');
+
+    Route::get('cms/artikels/create/', ArtikelForm::class)->name('artikel.create');
 
 });
 

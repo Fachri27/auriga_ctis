@@ -8,7 +8,7 @@
                 {{-- LEFT --}}
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
-                        {{ $case->title }}
+                        {!! $case->title !!}
                     </h1>
                     <p class="text-sm text-gray-500">
                         {{ $case->case_number }}
@@ -130,13 +130,13 @@
                 <div class="col-span-2 space-y-4">
                     <section>
                         <h2 class="font-semibold text-lg mb-1">Summary</h2>
-                        <p class="text-gray-700">{{ $case->summary }}</p>
+                        <p class="text-gray-700">{!! $case->summary !!}</p>
                     </section>
 
                     <section>
                         <h2 class="font-semibold text-lg mb-1">Description</h2>
                         <p class="whitespace-pre-line text-gray-700">
-                            {{ $case->description }}
+                            {!! $case->description !!}
                         </p>
                     </section>
                 </div>

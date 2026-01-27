@@ -165,6 +165,7 @@
     </script>
 
     @stack('scripts')
+    <script src="/js/tinymce/tinymce.min.js"></script>
 </body>
 
 </html>

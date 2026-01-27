@@ -34,10 +34,10 @@
                     <h2 class="font-semibold text-lg mb-3">Deskripsi Laporan</h2>
 
                     <p class="text-gray-700 leading-relaxed whitespace-pre-line">
-                        {{
+                        {!!
                         $report->translations->where('locale','id')->first()->description
                         ?? 'Tidak ada deskripsi.'
-                        }}
+                        !!}
                     </p>
                 </div>
 

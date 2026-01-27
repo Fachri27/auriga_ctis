@@ -38,12 +38,12 @@
 
                     {{-- DESCRIPTION --}}
                     <p class="text-gray-700 text-sm max-w-2xl line-clamp-2">
-                        {{
+                        {!!
                             optional(
                                 $r->translations->where('locale','id')->first()
                             )->description
                             ?? 'No description provided by reporter.'
-                        }}
+                        !!}
                     </p>
 
                     {{-- META --}}

@@ -13,11 +13,10 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    @can('task.create')
                     <button @click="$dispatch('open-task-modal')" class="px-4 py-2 bg-black text-white">
                         + New Task
                     </button>
-                    @endcan
+                   
                 </div>
             </div>
 
