@@ -45,7 +45,7 @@ Route::group([
         return view('front.about');
     })->name('about-user');
 
-    Route::get('/reports/create', ReportForm::class)->name('report.form');
+    Route::get('/reports/create', ReportForm::class)->middleware('auth')->name('report.form');
 
     // Route::get('/verify-case/{case_number}',
     //     [PublicCaseController::class, 'show']
