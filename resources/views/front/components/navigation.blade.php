@@ -43,10 +43,10 @@
             <div class="lg:hidden md:flex justify-end items-center max-w-7xl mx-auto px-5 py-2 text-sm">
                 <div class="flex space-x-1 text-gray-400">
                     <a href="{{ route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => 'en'])) }}"
-                        class="hover:text-green-900 {{ app()->getLocale() === 'en' ? 'font-bold text-red-600' : '' }}">EN</a>
+                        class="hover:text-green-900 {{ app()->getLocale() === 'en' ? 'font-bold text-white' : '' }}">EN</a>
                     <span>|</span>
                     <a href="{{ route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => 'id'])) }}"
-                        class="hover:text-green-900 {{ app()->getLocale() === 'id' ? 'font-bold text-red-600' : '' }}">ID</a>
+                        class="hover:text-green-900 {{ app()->getLocale() === 'id' ? 'font-bold text-white' : '' }}">ID</a>
                 </div>
             </div>
 
