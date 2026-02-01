@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Artikel;
 use App\Models\CaseModel;
 use App\Services\ReverseGeocoder;
 
@@ -36,6 +37,15 @@ class PublicCaseController extends Controller
             );
         }
 
-        return view('public.case-detail', compact('case', 'location'));
+        $artikel = Artikel::with('translation')
+            ->where('status', 'active')
+            ->when($case->category_id, function ($q) use ($case) {
+                $q->where('category_id', $case->category_id);
+            })
+            ->latest()
+            ->limit(6)
+            ->get();
+
+        return view('public.case-detail', compact('case', 'location', 'artikel'));
     }
 }

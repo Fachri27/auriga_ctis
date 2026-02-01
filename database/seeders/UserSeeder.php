@@ -26,11 +26,12 @@ class UserSeeder extends Seeder
         // ]);
 
         // LEGACY: previous seeder that used role assignments via spatie
-        
+
         $super = User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@ctis.id',
             'password' => bcrypt('123456'),
+            'role_id' => 1,
         ]);
         $super->assignRole('superadmin');
 
@@ -38,6 +39,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@ctis.id',
             'password' => bcrypt('123456'),
+            'role_id' => 2,
         ]);
         $admin->assignRole('admin');
 
@@ -45,8 +47,9 @@ class UserSeeder extends Seeder
             'name' => 'CSO',
             'email' => 'cso@ctis.id',
             'password' => bcrypt('123456'),
+            'role_id' => 3,
         ]);
         $cso->assignRole('cso');
-    
+
     }
 }

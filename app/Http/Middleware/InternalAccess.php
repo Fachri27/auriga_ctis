@@ -27,7 +27,7 @@ class InternalAccess
         $user = auth()->user();
 
         // Only allow admin and cso roles
-        if (! $user->hasRole(['admin', 'cso'])) {
+        if (! $user->hasRole(roles: ['admin', 'cso'])) {
             // Public users or invalid roles are redirected to home
             return redirect('/')->with('error', 'You do not have access to this area.');
         }

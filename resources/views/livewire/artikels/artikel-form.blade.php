@@ -35,47 +35,54 @@
                             </div>
 
                             {{-- Title & Slug ID --}}
-                            <div x-show="lang === 'id'" x-data="{
-                                title: @js(old('title_id', $titleId ?? '')),
-                                slug: @js(old('slugId', $slugId ?? '')),
-                                makeSlug(text) {
-                                    return text.toLowerCase()
-                                        .replace(/[^a-z0-9]+/g, '-')
-                                        .replace(/^-+|-+$/g, '');
-                                }
-                             }" x-init="if(title && !slug){ slug = makeSlug(title) }">
+                            {{-- Title --}}
+                            <div x-show="lang === 'id'">
+                                <div x-data="{
+                        title: @js(old('titleId', $titleId ?? '')),
+                        slug: @js(old('slug', $slug ?? '')),
+                        makeSlug(text) {
+                            return text
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')
+                                .replace(/^-+|-+$/g, '');
+                        }
+                    }" x-init="if(title && !slug){ slug = makeSlug(title) }">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Title (ID)</label>
+                                    <input type="text" wire:model="titleId" name="title_id" x-model="title"
+                                        @input="slug = makeSlug(title)"
+                                        class="w-full border border-gray-500 rounded p-2">
+                                    @error('title_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
 
-                                <label class="font-medium">Title (ID)</label>
-                                <input type="text" wire:model="titleId" x-model="title" @input="slug = makeSlug(title)"
-                                    class="w-full border rounded-lg px-3 py-2 mt-1">
-
-                                <label class="text-sm mt-2 block">Slug</label>
-                                <input type="text" x-model="slug" readonly
-                                    class="w-full bg-gray-100 border rounded-lg px-3 py-2">
+                                    <label class="block font-medium mb-1 mt-3">Slug</label>
+                                    <input type="text" name="slug" x-model="slug" readonly
+                                        class="w-full border border-gray-500 rounded p-2 bg-gray-100">
+                                </div>
                             </div>
 
-                            {{-- Title EN --}}
-                            <div x-show="lang === 'en'" x-data="{
-                                slug: @js(old('slugEn', $slugEn ?? '')),
-                                makeSlug(text) {
-                                    return text.toLowerCase()
-                                        .replace(/[^a-z0-9]+/g, '-')
-                                        .replace(/^-+|-+$/g, '');
-                                }
-                             }" x-init="if(title && !slug){ slug = makeSlug(title) }">
-                                <label class="font-medium">Title (EN)</label>
-                                <input type="text" wire:model="titleEn" class="w-full border rounded-lg px-3 py-2 mt-1">
-
-                                <label class="text-sm mt-2 block">Slug</label>
-                                <input type="text" x-model="slug" readonly
-                                    class="w-full bg-gray-100 border rounded-lg px-3 py-2">
+                            {{-- Title & Slug (EN) --}}
+                            <div x-show="lang === 'en'">
+                                <div x-data="{
+                        title: @js(old('titleEn', $titleEn ?? '')),
+                        makeSlug(text) {
+                            return text
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')
+                                .replace(/^-+|-+$/g, '');
+                        }
+                    }" x-init="if(title && !slug){ slug = makeSlug(title) }">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Title (EN)</label>
+                                    <input type="text" wire:model="titleEn" name="title_en" x-model="title"
+                                        @input="slug = makeSlug(title)"
+                                        class="w-full border border-gray-500 rounded p-2">
+                                    @error('title_en') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                                </div>
                             </div>
 
                             {{-- Publish + Page Type --}}
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="text-sm">📅 Publish</label>
-                                    <input type="date" wire:model="published_at"
+                                    <input type="date" wire:model="publishedAt"
                                         class="w-full border rounded-lg px-2 py-2">
                                 </div>
 
@@ -85,6 +92,16 @@
                                         <option value="internal">Internal</option>
                                         <option value="eksternal">Eksternal</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div x-show="type === 'eksternal'">
+                                {{-- Link --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Link</label>
+                                    <input type="text" wire:model="link"
+                                        class="w-full border border-gray-500 rounded p-2"
+                                        placeholder="https://contoh.com/resource">
                                 </div>
                             </div>
 
@@ -106,13 +123,14 @@
 
                             {{-- categories --}}
                             <div>
-                                <label class="text-sm">Sectors</label>
-                                <select wire:model="type" class="w-full border rounded-lg px-2 py-2">
-                                    <option value="">Pilih Sector</option>
-                                    @foreach ($categories as $item)
-                                    <option value="{{ $item->slug }}">{{ $item->slug }}</option>
+                                <label class="text-sm">Sector</label>
+                                <select wire:model="categoryId" class="w-full border px-3 py-2">
+                                    <option value="">Select Sector</option>
+                                    @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name ?? $cat->slug }}</option>
                                     @endforeach
                                 </select>
+                                @error('category_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Status --}}

@@ -29,7 +29,7 @@ class Artikel extends Model
 
     public function translation()
     {
-        return $this->belongsTo(ArtikelTranslation::class);
+        return $this->hasMany(ArtikelTranslation::class);
     }
     
 }

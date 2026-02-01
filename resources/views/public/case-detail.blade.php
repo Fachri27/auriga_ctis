@@ -70,7 +70,7 @@
     </section>
 
     {{-- two column --}}
-    
+
 
     {{-- DESKRIPSI --}}
     <section class="max-w-7xl mx-auto px-6 py-12">
@@ -78,7 +78,7 @@
             <div class="md:border-r-1 mb-5">
                 <h2 class="text-2xl font-bold mb-4">Kronologi Kasus</h2>
                 <div class="prose prose-gray max-w-none mb-10 pr-15">
-                    {!!  optional($case->translations->first())->description !!}
+                    {!! optional($case->translations->first())->description !!}
                 </div>
                 <h2 class="text-2xl font-bold mb-6">Perkembangan Kasus</h2>
 
@@ -111,29 +111,33 @@
                 <h2 class="text-2xl font-bold mb-4">Artikel Terkait</h2>
                 <div class="overflow-hidden transition">
                     {{-- two column --}}
+                    @foreach ($artikel as $data)
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <div>
-                            <img src="" alt="" class="w-full h-[200px] object-cover">
+                            <img src="{{ asset('storage/'. $data->image) }}" alt=""
+                                class="w-full h-[200px] object-cover">
                         </div>
                         <div class="pl-3">
                             <h3 class="text-lg font-bold  mb-1">
                                 <a href="">
-                                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quae, rem!
+                                    {{ $data->translation->first()->title ?? '' }}
                                 </a>
                             </h3>
                             <p>
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit, reprehenderit blanditiis! Deserunt sapiente cum eius, et tempora temporibus doloribus officia?
+                                {!! $data->translation->first()->excerpt ?? '' !!}
                             </p>
                         </div>
                     </div>
+                    @endforeach
+                    
                 </div>
             </div>
-        </div>  
+        </div>
     </section>
 
     {{-- TIMELINE --}}
     {{-- <section class="max-w-4xl mx-auto px-6 pb-16">
-        
+
     </section> --}}
 
 </div>

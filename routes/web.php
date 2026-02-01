@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCaseController;
 use App\Http\Controllers\PublicDashboardController;
 use App\Livewire\Artikels\ArtikelForm;
+use App\Livewire\Artikels\ArtikelTable;
 use App\Livewire\Cases\CaseDetail;
 use App\Livewire\Cases\CaseList;
 use App\Livewire\Categories\CategoriesForm;
@@ -21,6 +22,7 @@ use App\Livewire\Tasks\TaskForm;
 use App\Livewire\Tasks\TaskList;
 use App\Livewire\Tasks\TaskRequirementForm;
 use App\Livewire\Tasks\TaskRequirementList;
+use App\Livewire\UserList;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -112,6 +114,12 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
         ->name('verification.rejected');
 
     Route::get('cms/artikels/create/', ArtikelForm::class)->name('artikel.create');
+    Route::get('cms/artikels/', ArtikelTable::class)->name('artikel.index');
+    Route::get('cms/artikels/{artikelId}/edit/', ArtikelForm::class)->name('artikel.edit');
+
+    Route::get('cms/users/', UserList::class)->name('user.index');
+    
+
 
 });
 

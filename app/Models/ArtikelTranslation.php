@@ -16,6 +16,6 @@ class ArtikelTranslation extends Model
 
     public function artikel()
     {
-        return $this->hasMany(Artikel::class);
+        return $this->belongsTo(Artikel::class);
     }
 }
