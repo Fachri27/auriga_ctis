@@ -166,7 +166,7 @@
         }
 
         // View Detail link (dummy href as requested)
-        popupContent += '<a href="#" class="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition">View Detail</a>';
+        popupContent += ''
         popupContent += '</div>';
 
         marker.bindPopup(popupContent);

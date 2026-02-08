@@ -28,11 +28,12 @@
                     <option value="rejected">Rejected Case</option>
                 </select>
 
-                <button class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
-                    @click="$dispatch('open-case-modal')">
-                    <span class="text-lg">＋</span>
-                    New Case
-                </button>
+                <a href="{{ route('case.create') }}">
+                    <button class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
+                        <span class="text-lg">＋</span>
+                        New Case
+                    </button>
+                </a>
             </div>
 
         </div>
@@ -97,10 +98,9 @@
                                     View
                                 </a>
 
-                                <button class="text-gray-600 hover:underline"
-                                    @click="$dispatch('open-edit-case-modal', { caseId: {{ $c->id }} })">
+                                <a href="{{ route('case.edit', $c->id) }}" class="text-blue-600 hover:underline">
                                     Edit
-                                </button>
+                                </a>
 
                                 <button wire:click="deleteCase({{ $c->id }})"
                                     onclick="confirm('Delete this case?') || event.stopImmediatePropagation()"

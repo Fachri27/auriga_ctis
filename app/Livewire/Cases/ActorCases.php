@@ -85,7 +85,7 @@ class ActorCases extends Component
                 'type' => $this->type,
                 'name' => $this->name,
                 'description' => $this->description,
-                'metadata' => $this->metadata,
+                'metadata' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -94,7 +94,7 @@ class ActorCases extends Component
                 'type' => $this->type,
                 'name' => $this->name,
                 'description' => $this->description,
-                'metadata' => $this->metadata,
+                'metadata' => null,
                 'updated_at' => now(),
             ]);
         }

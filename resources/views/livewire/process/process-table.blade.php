@@ -107,7 +107,7 @@
                                 class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 shadow-xl rounded-xl py-1 z-50">
 
 
-                                @can('process.update')
+                                
                                 <a href="{{ route('process.edit', $proc->id) }}">
                                     <button
                                         class="w-full text-left px-4 py-2 text-[14px] text-gray-700 hover:bg-gray-50">
@@ -115,15 +115,15 @@
                                         ✏️ Edit
                                     </button>
                                 </a>
-                                @endcan
+                                
 
 
-                                @can('process.delete')
+                                
                                 <button wire:click="delete({{ $proc->id }})"
                                     class="w-full text-left px-4 py-2 text-[14px] text-red-600 hover:bg-red-50">
                                     🗑️ Delete
                                 </button>
-                                @endcan
+                                
                             </div>
                         </td>
 

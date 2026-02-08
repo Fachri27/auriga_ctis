@@ -295,40 +295,6 @@
                 this.marker = L.marker([lat, lng]).addTo(this.map);
             },
 
-            setPolygon(geometry) {
-                console.log('GEOMETRY:', geometry);
-                if (!geometry) {
-                    if (this.marker) {
-                        this.map.setView(
-                            [this.marker.getLatLng().lat, this.marker.getLatLng().lng],
-                            14
-                        );
-                    }
-                    return;
-                }
-
-                if (this.regionLayer) {
-                    this.map.removeLayer(this.regionLayer);
-                }
-
-                const feature = {
-                    type: "Feature",
-                    properties: {},
-                    geometry: geometry
-                };
-
-                this.regionLayer = L.geoJSON(feature, {
-                    style: {
-                        color: '#00323C',
-                        weight: 2,
-                        fillColor: '#00323C',
-                        fillOpacity: 0.3
-                    }
-                }).addTo(this.map);
-
-                this.map.fitBounds(this.regionLayer.getBounds());
-            }
-
         }
     }
 </script>

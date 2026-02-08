@@ -279,10 +279,18 @@
                 <div class="p-4 border-l-4 border-black bg-gray-50 rounded">
                     <p>{{ $log->notes }}</p>
                     <p class="text-sm text-gray-500 mt-1">{{ $log->created_at }}</p>
+                    <button class="text-sm text-gray-700 underline"
+                        wire:click="$dispatch('open-edit-timeline-modal', { timelineId: {{ $log->id }} })"
+                        title="Ubah metadata dokumen">Sunting</button>
                 </div>
                 @endforeach
+
+                <button class="px-4 py-2 bg-black text-white rounded mt-4"
+                    x-on:click="$dispatch('open-upload-timeline-modal', { caseId: {{ $case->id }} })">Tambah
+                    Timeline</button>
             </div>
             @endif
+
 
         </div>
     </div>
@@ -290,4 +298,16 @@
     @livewire('cases.task-requirement-case')
     @livewire('cases.upload-document-case')
     @livewire('cases.actor-cases')
+    @livewire('cases.case-timeline')
+
+    @if (session('success'))
+    <div x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-2" x-init="setTimeout(() => show = false, 3000)"
+        class="fixed bottom-6 right-6 bg-green-400 text-white p-10 shadow-lg 
+               hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
+        {{ session('success') }}
+    </div>
+    @endif
 </div>

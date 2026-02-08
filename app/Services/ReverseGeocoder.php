@@ -76,10 +76,10 @@ class ReverseGeocoder
         }
     }
 
-    protected function extractPrimaryName(string $name): string 
+    protected function extractPrimaryName(?string $name): string 
     {
-        if (! $name) {
-            return null;
+        if ($name) {
+            return '';
         }
 
         preg_match('/\[(.*?)\]/', $name, $matches);

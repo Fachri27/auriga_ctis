@@ -1,5 +1,5 @@
 <div>
-    <div class="flex flex-col justify-center items-center">
+    <div class="flex flex-col justify-center items-center mt-20">
         <div class="bg-white shadow rounded-lg p-6 overflow">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Daftar Halaman</h2>
@@ -45,10 +45,10 @@
                             @endif
                         </td>
                         <td class="p-3">
-                            {{-- <a href="{{ route('user.edit', $data->id) }}"
-                                class="bg-yellow-600 px-3 py-1 rounded text-white">Edit</a> --}}
-                            {{-- <button wire:click='delete({{ $data->id }})'
-                                class="bg-red-600 px-3 py-1 rounded text-white">Delete</button> --}}
+                            <a href="{{ route('user.edit', $data->id) }}"
+                                class="bg-yellow-600 px-3 py-1 rounded text-white">Edit</a>
+                            <button wire:click='delete({{ $data->id }})'
+                                class="bg-red-600 px-3 py-1 rounded text-white">Delete</button>
                         </td>
                     </tr>
                 </tbody>

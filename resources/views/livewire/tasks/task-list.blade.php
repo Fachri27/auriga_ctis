@@ -99,19 +99,19 @@
                                         class="text-green-600 mr-3">Save</button>
                                     <button wire:click="cancelInlineEdit" class="text-gray-600">Cancel</button>
                                     @else
-                                    @can('task.update')
+                                    
                                     <button wire:click="startInlineEdit({{ $task->id }})"
                                         class="text-blue-600 mr-3">Edit</button>
-                                    @endcan
+                                    
 
-                                    @can('task.update')
+                                    
                                     <a href="{{ route('task.edit', $task->id) }}" class="text-indigo-600 mr-3">Open</a>
-                                    @endcan
+                                    
 
-                                    @can('task.delete')
+                                    
                                     <button onclick="confirm('Delete this task?') || event.stopImmediatePropagation()"
                                         wire:click="deleteTask({{ $task->id }})" class="text-red-600">Delete</button>
-                                    @endcan
+                                    
                                     @endif
                                 </div>
                             </td>

@@ -22,6 +22,13 @@ class CaseModel extends Model
         'tasks_completed_at',
         'created_by',
         'verified_by',
+        'bukti',
+        'korban',
+        'pekerjaan',
+        'jenis_kelamin',
+        'jumlah_korban',
+        'konflik',
+
     ];
 
     protected $casts = [
@@ -29,6 +36,7 @@ class CaseModel extends Model
         'tasks_completed_at' => 'datetime',
         'is_tasks_completed' => 'boolean',
         'is_public' => 'boolean',
+        'bukti' => 'array',
     ];
 
     /**

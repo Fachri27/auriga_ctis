@@ -22,10 +22,10 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             // Use realistic combined seeder for process/task/templates
             RealisticProcessTaskSeeder::class,
-            // ReportSeeder::class,   // harus sebelum
-            // CaseSeeder::class,     // dijalankan
-            // RealisticCasesSeeder::class, // development helper: insert 10 realistic cases
-            // RealisticCaseSeeder::class,  // development helper: insert 1 realistic case with full workflow
+            ReportSeeder::class,   // harus sebelum
+            CaseSeeder::class,     // dijalankan
+            RealisticCasesSeeder::class, // development helper: insert 10 realistic cases
+            RealisticCaseSeeder::class,  // development helper: insert 1 realistic case with full workflow
             UpdateStatusNamesSeeder::class,
         ]);
     }

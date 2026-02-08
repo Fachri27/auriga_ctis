@@ -88,7 +88,6 @@
                     </svg>
                 </button>
             </div> --}}
-
         </div>
 
     </div>
@@ -246,7 +245,15 @@
                                     ${f.properties.status_key ? `<div style="font-size:12px;color:#666;margin-bottom:6px">Status: ${escapeHtml(f.properties.status_key)}</div>` : ''}
                                     ${f.properties.event_date ? `<div style="font-size:12px;color:#666;margin-bottom:6px">Tanggal: ${escapeHtml(f.properties.event_date)}</div>` : ''}
                                     ${f.properties.case_description ? `<div style="font-size:13px;color:#333;margin-bottom:8px">${escapeHtml(f.properties.case_description)}</div>` : ''}
-                                    ${caseNumber ? `<div class="text-black"><a href="${detailBase}${encodeURIComponent(caseNumber)}" class="text-xs inline-block px-3 py-1 bg-green-600 text-black rounded">Lihat Detail</a></div>` : ''}
+                                    ${caseNumber ? `
+                                    <button
+                                        class="text-xs inline-block px-3 py-1 bg-green-600 text-white rounded cursor-pointer"
+                                        onclick="window.location.href='${detailBase}${encodeURIComponent(caseNumber)}'"
+                                    >
+                                        Lihat Detail
+                                    </button>
+                                    ` : ''}
+
                                 </div>
                             `;
 

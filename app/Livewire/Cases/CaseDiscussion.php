@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Cases;
 
-use Livewire\Component;
-use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\DB;
+use Livewire\{Component, WithFileUploads};
 
 class CaseDiscussion extends Component
 {
@@ -59,14 +58,6 @@ class CaseDiscussion extends Component
             'attachments' => json_encode($files),
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
-
-        // Insert timeline
-        DB::table('case_timelines')->insert([
-            'case_id' => $this->caseId,
-            'actor_id' => auth()->id(),
-            'notes' => "New discussion message added.",
-            'created_at' => now(),
         ]);
 
         $this->reset(['message', 'attachments']);

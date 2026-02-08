@@ -3,8 +3,7 @@
 namespace App\Livewire\Cases;
 
 use Illuminate\Support\Facades\DB;
-use Livewire\Component;
-use Livewire\WithFileUploads;
+use Livewire\{Component, WithFileUploads};
 
 class UploadDocumentCase extends Component
 {
@@ -175,6 +174,20 @@ class UploadDocumentCase extends Component
 
         $this->open = false;
         $this->dispatch('refresh-case-detail');
+    }
+
+    public function delete()
+    {
+        if (! $this->document_id) {
+            return;
+        }
+
+        DB::table('case_documents')->where('id', $this->document_id)->delete();
+
+        $this->open = false;
+        $this->dispatch('refresh-case-detail');
+        session()->flash('success', 'Dokumen berhasil dihapus.');
+
     }
 
     public function render()

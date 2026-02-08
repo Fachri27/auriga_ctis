@@ -43,6 +43,16 @@ class CaseModal extends Component
 
     public $desc_en;
 
+    public $searchLocation = '';
+
+    public $results = [];
+
+    public $selectedId = null;
+
+    public $selectedText = null;
+
+    public $open = false;
+
     protected $listeners = [
         'open-case-modal' => 'openCreate',
         'open-edit-case-modal' => 'openEdit',
@@ -54,6 +64,202 @@ class CaseModal extends Component
         'event_date' => 'required|date',
         'title_id' => 'required|string|max:255',
     ];
+    
+    // location
+    public function updatedSearchLocation($value)
+    {
+        if (strlen($this->searchLocation) < 3) {
+            $this->results = [];
+        }
+
+        // reset lat lng kalo user hapus input
+        if (strlen($value) < 3) {
+            $this->resetLocation();
+
+            return;
+        }
+        // dd($this->loadDistricts());
+        $this->loadDistricts();
+    }
+
+    public function loadDistricts()
+    {
+        // $cacheKey = 'districts_'.md5($this->searchLocation);
+        // $this->results = Cache::remember($cacheKey, 60, function () {
+        //     try {
+        //         $req = Http::get('https://aws.simontini.id/geoserver/proteus/wfs', [
+        //             'service' => 'WFS',
+        //             'version' => '2.0.0',
+        //             'request' => 'GetFeature',
+        //             'typeName' => 'proteus:POLITICAL_LEVEL_6_dissolved',
+        //             'propertyName' => 'NAME,latitude,longtitude',
+        //             'cql_filter' => "NAME ILIKE '%{$this->searchLocation}%'",
+        //             'count' => 10,
+        //             'outputFormat' => 'application/json',
+        //         ]);
+
+        //         $json = $req->json();
+
+        //         return collect($json['features'] ?? [])
+        //             ->map(function ($item) {
+        //                 return [
+        //                     'id' => $item['properties']['NAME'],
+        //                     'text' => $this->formatName($item['properties']['NAME']),
+        //                     'lat' => $item['properties']['latitude'],
+        //                     'long' => $item['properties']['longtitude'],
+        //                 ];
+        //             })
+        //             ->values()
+        //             ->toArray();
+        //     } catch (\Exception $e) {
+        //         logger()->error('Error fetching districts', ['error' => $e->getMessage()]);
+
+        //         return [];
+        //     }
+        // });
+        // try {
+        //     $req = Http::get('https://aws.simontini.id/geoserver/proteus/wfs', [
+        //         'service' => 'WFS',
+        //         'version' => '2.0.0',
+        //         'request' => 'GetFeature',
+        //         'typeName' => 'proteus:POLITICAL_LEVEL_6_dissolved',
+        //         'propertyName' => 'NAME,latitude,longtitude',
+        //         'cql_filter' => "NAME ILIKE '%{$this->searchLocation}%'",
+        //         'count' => 10,
+        //         // 'maxFeatures' => 10,
+        //         'outputFormat' => 'application/json',
+        //     ]);
+        //     // logger()->info('GEOJSON STATUS', ['status' => $req->status(), 'body' => $req->body()]);
+        //     $json = $req->json();
+
+        //     // logger()->info('GEOJSON RESPONSE', ['response' => $json]);
+
+        //     $this->results = collect($json['features'] ?? [])
+        //         ->map(function ($item) {
+        //             $name = $item['properties']['NAME'] ?? [];
+
+        //             if (is_array($name)) {
+        //                 $name = [$name];
+        //             }
+
+        //             $raw = trim($name, '[]');
+        //             $parts = explode('][', $raw);
+        //             if (is_numeric(end($parts))) {
+        //                 array_pop($parts);
+        //             }
+        //             $name = collect($parts)
+        //                 ->take(3)
+        //                 ->implode(' - ');
+
+        //             return [
+        //                 'id' => $item['properties']['NAME'],
+        //                 'text' => $name,
+        //                 'lat' => $item['properties']['latitude'],
+        //                 'long' => $item['properties']['longtitude'],
+        //                 // 'geometry' => $item['geometry'],
+        //             ];
+        //         })
+        //         ->values()
+        //         ->toArray();
+
+        //     // logger()->info('MAPPED RESULTS', ['results' => $this->results]);
+        // } catch (\Exception $e) {
+        //     logger()->error('Error fetching districts', ['error' => $e->getMessage()]);
+        //     $this->results = $e;
+        // }
+
+        // AMBIL LANGSUNG DARI DATABASE
+        try {
+            $req = DB::connection('pgsql')->table('proteus.POLITICAL_LEVEL_6_dissolved')
+                ->select('NAME', 'latitude', 'longtitude')
+                ->where('NAME', 'ILIKE', ["%{$this->searchLocation}%"])
+                ->limit(10)
+                ->get();
+
+            $this->results = $req->map(fn ($item) => [
+                'id' => $item->NAME,
+                'text' => $this->formatName($item->NAME),
+                'lat' => $item->latitude,
+                'long' => $item->longtitude,
+            ])->toArray();
+        } catch (\Exception $e) {
+            logger()->error('Error fetching districts', ['error' => $e->getMessage()]);
+            $this->results = [];
+        }
+
+        // logger()->info('RESULT COUNT', ['count' => count($this->results)]);
+    }
+
+    public function select($id, $text, $lat, $lng)
+    {
+        $this->selectedId = $id;
+        $this->selectedText = $text;
+        $this->searchLocation = $text;
+        $this->lat = $lat;
+        $this->lng = $lng;
+
+        $this->results = [];
+        $this->open = false;
+
+        $geometry = $this->loadGeometry($id);
+
+        $this->dispatch('location-updated', lat: $this->lat, lng: $this->lng, geometry: $geometry);
+    }
+
+    private function formatName($name)
+    {
+        if (is_array($name)) {
+            $name = $name[0] ?? '';
+        }
+
+        $raw = trim($name, '[]');
+        $parts = explode('][', $raw);
+
+        if (is_numeric(end($parts))) {
+            array_pop($parts);
+        }
+
+        return collect($parts)->take(3)->implode(' - ');
+    }
+
+    private function loadGeometry($name)
+    {
+        try {
+            $req = Http::timeout(10)->get(
+                'https://aws.simontini.id/geoserver/proteus/wfs',
+                [
+                    'service' => 'WFS',
+                    'version' => '2.0.0',
+                    'request' => 'GetFeature',
+                    'typeName' => 'proteus:POLITICAL_LEVEL_6_dissolved',
+
+                    // 🎯 EXACT MATCH = CEPAT
+                    'cql_filter' => "NAME = '{$name}'",
+                    'outputFormat' => 'application/json',
+                ]
+            );
+
+            return $req->json()['features'][0]['geometry'] ?? null;
+
+        } catch (\Throwable $e) {
+            logger()->error('GEO POLYGON ERROR', ['e' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    public function resetLocation()
+    {
+        $this->lat = null;
+        $this->lng = null;
+        $this->selectedId = null;
+        $this->selectedText = null;
+        $this->results = [];
+        $this->open = false;
+
+        // 🔥 event KHUSUS reset
+        $this->dispatch('location-reset');
+    }
 
     /* ============================================================
      * OPEN CREATE CASE

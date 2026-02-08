@@ -1,214 +1,240 @@
 @php
-    $breadcrumbs = [
-        ['label' => 'Dashboard', 'url' => route('dashboard')]
-    ];
-    $pageTitle = 'Dashboard Overview';
-    $pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
+$breadcrumbs = [
+['label' => 'Dashboard', 'url' => route('dashboard')]
+];
+$pageTitle = 'Dashboard Overview';
+$pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
 @endphp
 
 <x-internal-layout>
-            
-            {{-- ================= SUMMARY CARDS ================= --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {{-- Total Cases Card --}}
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Cases</p>
-                                <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($totalCases) }}</p>
-                                <p class="mt-1 text-xs text-gray-500">All cases in system</p>
-                            </div>
-                            <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                {{-- New Reports Today Card --}}
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">New Reports Today</p>
-                                <p class="mt-2 text-3xl font-bold text-green-600">{{ number_format($newReportsToday) }}</p>
-                                <p class="mt-1 text-xs text-gray-500">Created today</p>
-                            </div>
-                            <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </div>
-                        </div>
+    {{-- ================= SUMMARY CARDS ================= --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto mt-10">
+        {{-- Total Cases Card --}}
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Cases</p>
+                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($totalCases) }}</p>
+                        <p class="mt-1 text-xs text-gray-500">All cases in system</p>
                     </div>
-                </div>
-
-                {{-- Published Cases Card --}}
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Published</p>
-                                <p class="mt-2 text-3xl font-bold text-purple-600">{{ number_format($publishedCases) }}</p>
-                                <p class="mt-1 text-xs text-gray-500">Public cases</p>
-                            </div>
-                            <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Unpublished Cases Card --}}
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Unpublished</p>
-                                <p class="mt-2 text-3xl font-bold text-orange-600">{{ number_format($unpublishedCases) }}</p>
-                                <p class="mt-1 text-xs text-gray-500">Private cases</p>
-                            </div>
-                            <div class="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
-                                <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                                </svg>
-                            </div>
-                        </div>
+                    <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
                     </div>
                 </div>
             </div>
+        </div>
 
-            {{-- ================= CHARTS SECTION ================= --}}
-            {{-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"> --}}
-                {{-- Bar Chart: Cases per Category --}}
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Cases per Category</h3>
-                        <div style="position: relative; height: 300px;">
-                            <canvas id="categoryChart"></canvas>
-                        </div>
+        {{-- New Reports Today Card --}}
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">New Reports Today</p>
+                        <p class="mt-2 text-3xl font-bold text-green-600">{{ number_format($newReportsToday) }}</p>
+                        <p class="mt-1 text-xs text-gray-500">Created today</p>
+                    </div>
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                            </path>
+                        </svg>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                {{-- Pie Chart: Case Status Distribution --}}
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Case Status Distribution</h3>
-                        <div style="position: relative; height: 300px;">
-                            <canvas id="statusChart"></canvas>
-                        </div>
+        {{-- Published Cases Card --}}
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Published</p>
+                        <p class="mt-2 text-3xl font-bold text-purple-600">{{ number_format($publishedCases) }}</p>
+                        <p class="mt-1 text-xs text-gray-500">Public cases</p>
+                    </div>
+                    <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                            </path>
+                        </svg>
                     </div>
                 </div>
-            {{-- </div> --}}
+            </div>
+        </div>
 
-            {{-- Line Chart: Reports Over Time --}}
-            {{-- <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8"> --}}
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Reports Over Time (Last 30 Days)</h3>
-                    <div style="position: relative; height: 300px;">
-                        <canvas id="timeChart"></canvas>
+        {{-- Unpublished Cases Card --}}
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Unpublished</p>
+                        <p class="mt-2 text-3xl font-bold text-orange-600">{{ number_format($unpublishedCases) }}</p>
+                        <p class="mt-1 text-xs text-gray-500">Private cases</p>
+                    </div>
+                    <div class="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-            {{-- </div> --}}
 
-            {{-- ================= MAP SECTION ================= --}}
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Case Locations</h3>
-                    <p class="text-sm text-gray-500 mt-1">All cases with location data (published and unpublished)</p>
+    {{-- ================= CHARTS SECTION ================= --}}
+    {{-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"> --}}
+        {{-- Bar Chart: Cases per Category --}}
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 max-w-7xl mx-auto">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Cases per Category</h3>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="categoryChart"></canvas>
                 </div>
-                <div id="caseMap" class="w-full" style="height: 500px;"></div>
             </div>
+        </div>
 
-            {{-- ================= LATEST CASES TABLE ================= --}}
-            {{-- <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200"> --}}
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Latest Cases</h3>
-                    <p class="text-sm text-gray-500 mt-1">Most recently created cases</p>
+        {{-- Pie Chart: Case Status Distribution --}}
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 max-w-7xl mx-auto">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Case Status Distribution</h3>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="statusChart"></canvas>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case Number</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Date</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Public?</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($latestCases as $case)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {{ $case->case_number }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $case->category?->translation('id')?->name ?? $case->category?->slug ?? 'Uncategorized' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-internal.badge 
-                                        variant="{{ $case->status?->key === 'new' || $case->status?->key === 'unverified' ? 'new' : ($case->status?->key === 'investigation' || $case->status?->key === 'in_progress' ? 'investigation' : ($case->is_public ? 'published' : 'default')) }}">
-                                        {{ $case->status?->name ?? 'Unknown' }}
-                                    </x-internal.badge>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $case->event_date ? \Carbon\Carbon::parse($case->event_date)->format('M d, Y') : 'N/A' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    @if($case->is_public)
-                                        <span class="text-green-600 font-medium">Yes</span>
-                                    @else
-                                        <span class="text-gray-500">No</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end items-center gap-2">
-                                        <a href="{{ route('case.detail', $case->id) }}" 
-                                           class="text-blue-600 hover:text-blue-900">
-                                            View
-                                        </a>
-                                        @can('case.update', $case)
-                                            @if(!$case->is_public)
-                                                <a href="{{ route('case.detail', $case->id) }}" class="text-purple-600 hover:text-purple-900">
-                                                    Publish
-                                                </a>
-                                            @else
-                                                <a href="{{ route('case.detail', $case->id) }}" class="text-orange-600 hover:text-orange-900">
-                                                    Unpublish
-                                                </a>
-                                            @endif
-                                        @endcan
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
-                                    No cases found.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            {{-- </div> --}}
+            </div>
+        </div>
+        {{--
+    </div> --}}
 
-@push('styles')
+    {{-- Line Chart: Reports Over Time --}}
+    {{-- <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8"> --}}
+        <div class="p-6 max-w-7xl mx-auto">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Reports Over Time (Last 30 Days)</h3>
+            <div style="position: relative; height: 300px;">
+                <canvas id="timeChart"></canvas>
+            </div>
+        </div>
+        {{--
+    </div> --}}
+
+    {{-- ================= MAP SECTION ================= --}}
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8 max-w-7xl mx-auto">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Case Locations</h3>
+            <p class="text-sm text-gray-500 mt-1">All cases with location data (published and unpublished)</p>
+        </div>
+        <div id="caseMap" class="w-full" style="height: 500px;"></div>
+    </div>
+
+    {{-- ================= LATEST CASES TABLE ================= --}}
+    <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 max-w-7xl mx-auto mb-20">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Latest Cases</h3>
+            <p class="text-sm text-gray-500 mt-1">Most recently created cases</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case
+                            Number</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Category</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event
+                            Date</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Public?</th>
+                        <th scope="col"
+                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($latestCases as $case)
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ $case->case_number }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $case->category?->translation('id')?->name ?? $case->category?->slug ?? 'Uncategorized'
+                            }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <x-internal.badge
+                                variant="{{ $case->status?->key === 'new' || $case->status?->key === 'unverified' ? 'new' : ($case->status?->key === 'investigation' || $case->status?->key === 'in_progress' ? 'investigation' : ($case->is_public ? 'published' : 'default')) }}">
+                                {{ $case->status?->name ?? 'Unknown' }}
+                            </x-internal.badge>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $case->event_date ? \Carbon\Carbon::parse($case->event_date)->format('M d, Y') : 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            @if($case->is_public)
+                            <span class="text-green-600 font-medium">Yes</span>
+                            @else
+                            <span class="text-gray-500">No</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end items-center gap-2">
+                                <a href="{{ route('case.detail', $case->id) }}"
+                                    class="text-blue-600 hover:text-blue-900">
+                                    View
+                                </a>
+                                @can('case.update', $case)
+                                @if(!$case->is_public)
+                                <a href="{{ route('case.detail', $case->id) }}"
+                                    class="text-purple-600 hover:text-purple-900">
+                                    Publish
+                                </a>
+                                @else
+                                <a href="{{ route('case.detail', $case->id) }}"
+                                    class="text-orange-600 hover:text-orange-900">
+                                    Unpublish
+                                </a>
+                                @endif
+                                @endcan
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
+                            No cases found.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        {{--
+    </div> --}}
+
+    @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-@endpush
+    @endpush
 
-{{-- @push('scripts')
+    @push('scripts')
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -424,5 +450,5 @@
             border: none !important;
         }
     </style>
-@endpush --}}
+    @endpush
 </x-internal-layout>

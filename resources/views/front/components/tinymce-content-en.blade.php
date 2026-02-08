@@ -1,5 +1,5 @@
 <div x-show="lang === 'en'" x-data="{
-                    content_en: @entangle('content_en'),
+                    desc_en: @entangle('desc_en'),
                     initEditor() {
                         let self = this;
                         if (tinymce.get('editor_en')) tinymce.get('editor_en').remove();
@@ -43,10 +43,10 @@
                             entity_encoding: 'raw',
                             setup(editor) {
                                 editor.on('init', () => {
-                                    editor.setContent(self.content_en || '');
+                                    editor.setContent(self.desc_en || '');
                                 });
                                 editor.on('change keyup', () => {
-                                    self.content_en = editor.getContent();
+                                    self.desc_en = editor.getContent();
                                 });
 
                                 editor.ui.registry.addButton('addVideo', {
@@ -147,6 +147,6 @@
                         });
                     }
                 }" x-init="initEditor" wire:ignore>
-    <label class="block font-medium mb-1">Content (EN)</label>
+    <label class="block font-medium mb-1">Description (EN)</label>
     <textarea x-ref="editor_en" id="editor_en"></textarea>
 </div>

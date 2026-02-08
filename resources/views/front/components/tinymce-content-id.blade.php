@@ -1,5 +1,5 @@
 <div x-show="lang === 'id'" x-data="{
-                    content_id: @entangle('content_id'),
+                    desc_id: @entangle('desc_id'),
                     initEditor() {
                         let self = this;
                         if (tinymce.get('editor_id')) tinymce.get('editor_id').remove();
@@ -44,10 +44,10 @@
                             entity_encoding: 'raw',
                             setup(editor) {
                                 editor.on('init', () => {
-                                    editor.setContent(self.content_id || '');
+                                    editor.setContent(self.desc_id || '');
                                 });
                                 editor.on('change keyup', () => {
-                                    self.content_id = editor.getContent();
+                                    self.desc_id = editor.getContent();
                                 });
 
                                 {{-- editor.ui.registry.addButton('addImage', {
@@ -163,7 +163,7 @@
                         });
                     }
                 }" x-init="initEditor" wire:ignore>
-    <label class="block font-medium mb-1">Content (ID)</label>
+    <label class="block font-medium mb-1">Deskripsi (ID)</label>
     <textarea x-ref="editor_id" id="editor_id"></textarea>
 </div>
 

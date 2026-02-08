@@ -15,7 +15,9 @@ class RolePermissionSeeder extends Seeder
             'report.view', 'report.verify', 'report.reject', 'report.publish',
 
             // Cases
-            'case.create', 'case.view', 'case.update', 'case.change-status', 'case.publish', 'case.map.publish', 'case.publish.request', 'case.publish.approve', 'case.unpublish',
+            'case.create', 'case.view', 'case.update', 'case.change-status',
+            'case.publish', 'case.map.publish', 'case.publish.request',
+            'case.publish.approve', 'case.unpublish',
 
             // Case tasks
             'case.task.submit', 'case.task.approve', 'case.task.view',
@@ -25,62 +27,57 @@ class RolePermissionSeeder extends Seeder
 
             // Actors & Timeline
             'case.actor.manage', 'case.timeline.view', 'case.timeline.add',
-
-            // Misc / system
-            'system.all',
         ];
 
-        foreach ($permissions as $p) {
-            Permission::firstOrCreate(['name' => $p]);
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // LEGACY: previous minimal permissions (kept for rollback/debug)
-        /*
-        $legacy_permissions = [
-            'category.view', 'category.create', 'category.update', 'category.delete',
-            'process.view', 'process.create', 'process.update', 'process.delete',
-            'task.view', 'task.create', 'task.update', 'task.delete',
-            'report.view', 'report.verify',
-            'case.view', 'case.update',
-        ];
-
-        foreach ($legacy_permissions as $p) {
-            Permission::firstOrCreate(['name' => $p]);
-        }
-        */
-
-        $super = Role::firstOrCreate(['name' => 'superadmin']);
-        $admin = Role::firstOrCreate(['name' => 'admin']);
-        $cso = Role::firstOrCreate(['name' => 'cso']);
+        $superadmin   = Role::firstOrCreate(['name' => 'superadmin']);
+        $admin        = Role::firstOrCreate(['name' => 'admin']);
+        $cso          = Role::firstOrCreate(['name' => 'cso']);
         $investigator = Role::firstOrCreate(['name' => 'investigator']);
-        $public = Role::firstOrCreate(['name' => 'public']);
+        $public       = Role::firstOrCreate(['name' => 'public']);
 
-        // Assign permissions
-        // superadmin gets everything (via system.all AND all permissions as safety)
-        $super->givePermissionTo(Permission::pluck('name')->toArray());
-        $super->givePermissionTo('system.all');
+        // superadmin → semua permission
+        $superadmin->syncPermissions(Permission::all());
 
-        // admin: broad access
-        $adminPerms = [
+        // admin
+        $admin->syncPermissions([
             'report.view', 'report.verify', 'report.reject', 'report.publish',
-            'case.create', 'case.view', 'case.update', 'case.change-status', 'case.publish', 'case.publish.approve', 'case.unpublish', 'case.map.publish',
+            'case.create', 'case.view', 'case.update', 'case.change-status',
+            'case.publish', 'case.publish.approve', 'case.unpublish',
+            'case.map.publish',
             'case.task.view', 'case.task.submit', 'case.task.approve',
             'case.document.upload', 'case.document.delete', 'case.document.view',
             'case.actor.manage', 'case.timeline.view', 'case.timeline.add',
-        ];
-        $admin->givePermissionTo($adminPerms);
-
-        // investigator: mostly view/update assigned cases and tasks (can request publish)
-        $investigator->givePermissionTo([
-            'report.view', 'case.create', 'case.view', 'case.update', 'case.task.view', 'case.task.submit', 'case.timeline.view', 'case.publish.request',
         ]);
 
-        // cso: support role with publish request ability (and limited publish)
-        $cso->givePermissionTo([
-            'report.view', 'case.create', 'case.view', 'case.update', 'case.publish', 'case.publish.request', 'case.document.upload', 'case.document.view', 'case.timeline.view', 'case.timeline.add', 'case.actor.manage',
+        // investigator
+        $investigator->syncPermissions([
+            'report.view',
+            'case.create', 'case.view', 'case.update',
+            'case.task.view', 'case.task.submit',
+            'case.timeline.view',
+            'case.publish.request',
         ]);
 
-        // public: read-only public content
-        $public->givePermissionTo(['report.view', 'case.view', 'case.document.view', 'case.timeline.view']);
+        // cso
+        $cso->syncPermissions([
+            'report.view',
+            'case.create', 'case.view', 'case.update',
+            'case.publish', 'case.publish.request',
+            'case.document.upload', 'case.document.view',
+            'case.timeline.view', 'case.timeline.add',
+            'case.actor.manage',
+        ]);
+
+        // public
+        $public->syncPermissions([
+            'report.view',
+            'case.view',
+            'case.document.view',
+            'case.timeline.view',
+        ]);
     }
 }

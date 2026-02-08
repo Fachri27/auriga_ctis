@@ -1,29 +1,16 @@
 <?php
 
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\CaseGeometryController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublicCaseController;
-use App\Http\Controllers\PublicDashboardController;
-use App\Livewire\Artikels\ArtikelForm;
-use App\Livewire\Artikels\ArtikelTable;
-use App\Livewire\Cases\CaseDetail;
-use App\Livewire\Cases\CaseList;
-use App\Livewire\Categories\CategoriesForm;
-use App\Livewire\Categories\CategoriesTable;
-use App\Livewire\Process\ProcessForm;
-use App\Livewire\Process\ProcessTable;
-use App\Livewire\Reports\ReportDetail;
-use App\Livewire\Reports\ReportForm;
-use App\Livewire\Reports\ReportTable;
-use App\Livewire\Status\StatusList;
-use App\Livewire\Tasks\TaskForm;
-use App\Livewire\Tasks\TaskList;
-use App\Livewire\Tasks\TaskRequirementForm;
-use App\Livewire\Tasks\TaskRequirementList;
-use App\Livewire\UserList;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{AdminDashboardController, CaseGeometryController, HomeController, ProfileController, PublicCaseController, PublicDashboardController};
+use App\Livewire\Artikels\{ArtikelForm, ArtikelTable};
+use App\Livewire\Cases\{CaseDetail, CaseForm, CaseList};
+use App\Livewire\Categories\{CategoriesForm, CategoriesTable};
+use App\Livewire\Process\{ProcessForm, ProcessTable};
+use App\Livewire\Reports\{ReportDetail, ReportForm, ReportTable};
+use App\Livewire\Status\StatusList;
+use App\Livewire\Tasks\{TaskForm, TaskList, TaskRequirementForm, TaskRequirementList};
+use App\Livewire\{UserForm, UserList};
+use App\Livewire\Permission\ManagePermission;
 
 Route::get('/', function () {
     return redirect('/id');
@@ -94,7 +81,9 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('/cms/task-requirements/{id}/edit', TaskRequirementForm::class)->name('taskreq.edit');
 
     Route::get('/cms/cases', CaseList::class)->name('case.index');
+    Route::get('/cms/cases/create', CaseForm::class)->name('case.create');
     Route::get('/cms/cases/{id}/detail', CaseDetail::class)->name('case.detail');
+    Route::get('/cms/cases/{caseId}/edit', CaseForm::class)->name('case.edit');
 
     Route::get('/cms/reports/detail/{id}', ReportDetail::class)->name('reports.detail');
 
@@ -118,6 +107,11 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('cms/artikels/{artikelId}/edit/', ArtikelForm::class)->name('artikel.edit');
 
     Route::get('cms/users/', UserList::class)->name('user.index');
+    Route::get('cms/users/create', UserForm::class)->name('user.create');
+    Route::get('cms/users/{userId}/edit', UserForm::class)->name('user.edit');
+
+
+    Route::get('cms/permissions/', ManagePermission::class)->name('permission');
     
 
 

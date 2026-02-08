@@ -9,7 +9,9 @@ class CaseTranslation extends Model
     protected $fillable = [
         'case_id',
         'locale',
-        'title'
+        'title',
+        'summary',
+        'description'
     ];
 
     public function case()

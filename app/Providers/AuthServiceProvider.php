@@ -43,6 +43,12 @@ class AuthServiceProvider extends ServiceProvider
             return null;
         });
 
+
+        // gate superadmin
+        Gate::before(function ($user) {
+            return $user->hasRole('superadmin') ? true : null;
+        });
+
         // Generic publish gate — map model base name to permission
         Gate::define('publish', function ($user, $model) {
             $type = strtolower(class_basename($model));
