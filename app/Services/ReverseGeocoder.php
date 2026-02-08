@@ -78,7 +78,7 @@ class ReverseGeocoder
 
     protected function extractPrimaryName(?string $name): string 
     {
-        if ($name) {
+        if (! $name) {
             return '';
         }
 
