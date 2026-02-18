@@ -62,12 +62,16 @@ class CaseForm extends Component
     public $jenis_kelamin;
     public $jumlah_korban;
     public $konflik;
+    public $category_ids = [];
+    public $existingBukti = [];
 
     protected $rules = [
-        'category_id' => 'required',
+        // 'category_id' => 'required',
         'status_id' => 'required',
         'event_date' => 'required|date',
         'title_id' => 'required|string|max:255',
+        'category_ids' => 'required|array|min:1',
+        'category_ids.*' => 'integer|exists:categories,id',
     ];
 
     public function mount($caseId = null) 
@@ -84,13 +88,13 @@ class CaseForm extends Component
                 'summary_en' => $enTranslation->summary ??'',
                 'desc_id' => $idTranslation->description ??'',
                 'desc_en' => $enTranslation->description ?? '',
-                'category_id' => $this->case->category_id,
+                'category_ids' => $this->case->category_ids,
                 'status_id' => $this->case->status_id,
                 'event_date' => $this->case->event_date,
                 'lat' => $this->case->latitude,
                 'lng' => $this->case->longitude,
                 'is_public' => $this->case->is_public,
-                'bukti' => $this->case->bukti,
+                // 'bukti' => $this->case->bukti,
                 'korban' => $this->case->korban,
                 'pekerjaan' => $this->case->pekerjaan,
                 'jenis_kelamin' => $this->case->jenis_kelamin,
@@ -99,6 +103,9 @@ class CaseForm extends Component
             ]);
 
             // dd($this->case);
+
+            $this->existingBukti = $this->case->bukti ?? [];
+            $this->bukti = [];
 
         }
     }
@@ -308,7 +315,7 @@ class CaseForm extends Component
 
         $data = [
             'case_number' => $caseNumber,
-            'category_id' => $this->category_id,
+            'category_ids' => $this->category_ids,
             'report_id' => $this->report_id,
             'status_id' => $this->status_id,
             'event_date' => $this->event_date,
@@ -338,25 +345,44 @@ class CaseForm extends Component
             );
         }
 
+        // \dd($case);
+
+        logger()->info('CATEGORY IDS', [
+    'raw' => $case->category_ids,
+    'type' => gettype($case->category_ids),
+]);
+
+
         // 3.1️⃣ Auto-generate tasks for this category (if templates exist)
         $generated = 0;
         try {
-            $generated = CaseTaskGenerator::generate($case->id, $case->category_id);
+            $generated = CaseTaskGenerator::generate($case->id, $case->category_ids);
         } catch (\Throwable $e) {
             // don't block case creation; log and continue
             \Log::error('Case task generation failed: '.$e->getMessage());
+            
         }
 
         $paths = [];
+
         foreach ($this->bukti ?? [] as $file) {
-            $paths[] = $file->store('cases/', 'public');
+            if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                $paths[] = $file->store('cases/', 'public');
+            }
         }
 
-        if (! empty($paths)) {
-            $case->update([
-                'bukti' => $paths ?? [],
-            ]);
+        // Ambil bukti lama
+        $existing = $this->existingBukti ?? [];
+
+        // Gabungkan kalau ada file baru
+        if (!empty($paths)) {
+            $existing = array_merge($existing, $paths);
         }
+
+        // Update
+        $case->update([
+            'bukti' => $existing,
+        ]);
 
         // dd($data);
 

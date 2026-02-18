@@ -7,86 +7,133 @@
         </h1>
 
         @if(session('success'))
-            <div class="p-4 mb-5 text-green-700 bg-green-100 rounded">
-                {{ session('success') }}
-            </div>
+        <div class="p-4 mb-5 text-green-700 bg-green-100 rounded">
+            {{ session('success') }}
+        </div>
         @endif
 
         {{-- TWO COLUMNS RESPONSIVE --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ type: @entangle('type_pelapor') }">
             <div class="bg-gray-50 p-6 rounded-xl mb-6">
-                <h2 class="text-xl font-semibold mb-4">Identitas Pelapor</h2>
-                <!-- ========================= -->
-                <!-- IDENTITAS LENGKAP -->
-                <!-- ========================= -->
-                <div class="bg-gray-50 p-6 rounded-xl mb-6">
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="mb-10">
+                    <label>Tipe Pelapor</label>
+                    <select wire:model="type_pelapor" class="w-full border rounded p-2 mt-1">
+                        <option value="">Pilih...</option>
+                        <option value="individu">Individu</option>
+                        <option value="organisasi">Organisasi / Perusahaan</option>
+                    </select>
+                </div>
+                <div x-show="type === 'individu'">
+                    <h2 class="text-xl font-semibold mb-4">Identitas Pelapor</h2>
+                    <!-- ========================= -->
+                    <!-- IDENTITAS LENGKAP -->
+                    <!-- ========================= -->
+                    <div class="bg-gray-50 p-6 rounded-xl mb-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Nama Lengkap</label>
+                                <input type="text" wire:model="nama_lengkap" class="w-full border rounded p-2 mt-1">
+                            </div>
 
-                        <div>
-                            <label>Nama Lengkap</label>
-                            <input type="text" wire:model="nama_lengkap" class="w-full border rounded p-2 mt-1">
+                            <div>
+                                <label>NIK</label>
+                                <input type="text" wire:model="nik" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div>
+                                <label>Jenis Kelamin</label>
+                                <select wire:model="jenis_kelamin" class="w-full border rounded p-2 mt-1">
+                                    <option value="">Pilih...</option>
+                                    <option value="L">Laki-laki</option>
+                                    <option value="P">Perempuan</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label>Tanggal Lahir</label>
+                                <input type="date" wire:model="tanggal_lahir" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div class="col-span-2">
+                                <label>Alamat</label>
+                                <input type="text" wire:model="alamat" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div>
+                                <label>No HP</label>
+                                <input type="text" wire:model="no_hp" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div>
+                                <label>Email</label>
+                                <input type="email" wire:model="email" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div>
+                                <label>Pekerjaan</label>
+                                <input type="text" wire:model="pekerjaan" class="w-full border rounded p-2 mt-1">
+                            </div>
                         </div>
-
-                        <div>
-                            <label>NIK</label>
-                            <input type="text" wire:model="nik" class="w-full border rounded p-2 mt-1">
-                        </div>
-
-                        <div>
-                            <label>Jenis Kelamin</label>
-                            <select wire:model="jenis_kelamin" class="w-full border rounded p-2 mt-1">
-                                <option value="">Pilih...</option>
-                                <option value="L">Laki-laki</option>
-                                <option value="P">Perempuan</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label>Tanggal Lahir</label>
-                            <input type="date" wire:model="tanggal_lahir" class="w-full border rounded p-2 mt-1">
-                        </div>
-
-                        <div class="col-span-2">
-                            <label>Alamat</label>
-                            <input type="text" wire:model="alamat" class="w-full border rounded p-2 mt-1">
-                        </div>
-
-                        <div>
-                            <label>No HP</label>
-                            <input type="text" wire:model="no_hp" class="w-full border rounded p-2 mt-1">
-                        </div>
-
-                        <div>
-                            <label>Email</label>
-                            <input type="email" wire:model="email" class="w-full border rounded p-2 mt-1">
-                        </div>
-
-                        <div>
-                            <label>Pekerjaan</label>
-                            <input type="text" wire:model="pekerjaan" class="w-full border rounded p-2 mt-1">
-                        </div>
-
-                        <div>
-                            <label>Status Perkawinan</label>
-                            <input type="text" wire:model="status_perkawinan" class="w-full border rounded p-2 mt-1">
-                        </div>
-
                     </div>
+                </div>
+                <div x-show="type === 'organisasi'">
+                    <h2 class="text-xl font-semibold mb-4">Identitas Organisasi / Perusahaan</h2>
+                    <!-- ========================= -->
+                    <!-- IDENTITAS ORGANISASI -->
+                    <!-- ========================= -->
+                    <div class="bg-gray-50 p-6 rounded-xl mb-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label>Nama Organisasi / Perusahaan</label>
+                                <input type="text" wire:model="nama_lengkap" class="w-full border rounded p-2 mt-1">
+                            </div>
 
+                            <div>
+                                <label>Alamat Kantor</label>
+                                <input type="text" wire:model="alamat" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div>
+                                <label>No HP</label>
+                                <input type="text" wire:model="no_hp" class="w-full border rounded p-2 mt-1">
+                            </div>
+
+                            <div>
+                                <label>Email Organisasi / Perusahaan</label>
+                                <input type="text" wire:model="email" class="w-full border rounded p-2 mt-1">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="bg-gray-50 p-6 rounded-xl mb-6">
                 <h2 class="text-xl font-semibold mb-4">Deskripsi Laporan</h2>
                 <!-- Category -->
-                <div class="mb-6">
-                    <label class="text-sm">Category</label>
-                    <select wire:model="category_id" class="w-full border px-3 py-2">
-                        <option value="">Select category…</option>
+                <div x-data="{
+        ts: null,
+        init() {
+            this.ts = new TomSelect(this.$refs.select, {
+                plugins: ['remove_button'],
+                closeAfterSelect: false,
+                hideSelected: true,
+                onChange: (values) => {
+                    const parsed = values.map(v => Number(v))
+
+                    // 🔥 PAKSA SET KE LIVEWIRE
+                    @this.set('category_ids', parsed)
+                }
+            })
+        }
+    }" wire:ignore class="mb-6">
+                    <label class="text-sm font-medium">Category</label>
+
+                    <select x-ref="select" multiple>
                         @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}">{{ $cat->name ?? $cat->slug }}</option>
+                        <option value="{{ $cat->id }}">
+                            {{ $cat->name ?? $cat->slug }}
+                        </option>
                         @endforeach
                     </select>
-                    @error('category_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
                 </div>
 
 
@@ -99,13 +146,13 @@
                     <input type="file" wire:model="evidence_files" multiple>
 
                     @if ($evidence_files)
-                        <div class="grid grid-cols-4 gap-3 mt-3">
-                            @foreach ($evidence_files as $file)
-                                <div class="p-2 rounded bg-white border text-xs text-center">
-                                    {{ $file->getClientOriginalName() }}
-                                </div>
-                            @endforeach
+                    <div class="grid grid-cols-4 gap-3 mt-3">
+                        @foreach ($evidence_files as $file)
+                        <div class="p-2 rounded bg-white border text-xs text-center">
+                            {{ $file->getClientOriginalName() }}
                         </div>
+                        @endforeach
+                    </div>
                     @endif
                 </div>
             </div>
@@ -194,21 +241,21 @@
 
                     {{-- DROPDOWN --}}
                     @if(count($results) > 0)
-                        <div x-show="open" x-transition x-cloak @click.away="open = false" class="absolute left-0 right-0 z-[9999] mt-1
+                    <div x-show="open" x-transition x-cloak @click.away="open = false" class="absolute left-0 right-0 z-40 mt-1
                                bg-white border border-gray-300
                                rounded-lg shadow-lg max-h-60 overflow-auto">
-                            @foreach($results as $item)
-                                <div wire:click="select(
+                        @foreach($results as $item)
+                        <div wire:click="select(
                                                 '{{ $item['id'] }}',
                                                 '{{ $item['text'] }}',
                                                 '{{ $item['lat'] }}',
                                                 '{{ $item['long'] }}'
                                             )" @click="open = false"
-                                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
-                                    {{ $item['text'] }}
-                                </div>
-                            @endforeach
+                            class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                            {{ $item['text'] }}
                         </div>
+                        @endforeach
+                    </div>
                     @endif
 
                 </div>
@@ -238,7 +285,7 @@
             @include('front.components.tinymce-id')
 
             @error('description')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
+            <p class="text-red-600 text-sm">{{ $message }}</p>
             @enderror
         </div>
 

@@ -81,49 +81,88 @@ auth()->user()->can('case.update')
 
 @include('front.components.peta')
 @include('front.components.card', ['limit' => 3, 'offset' => 0])
-<div class="w-full bg-[#00323C] py-20 px-4 md:mb-10 mb-5 poppins-regular">
-    {{-- <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+<div class="relative w-full bg-gradient-to-br from-[#002E36] via-[#003C45] to-[#002A31] py-28 text-white overflow-hidden">
 
-        <!-- IMAGE -->
-        <div class="w-full h-[250px] sm:h-[320px] lg:h-[360px] bg-gray-500 overflow-hidden">
-            <img src="" alt="image" class="w-full h-full object-cover">
+    <!-- Soft Glow Effects -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl"></div>
+
+    <div class="relative max-w-6xl mx-auto px-6 text-center">
+
+        <!-- Small Label -->
+        <div class="text-sm tracking-[0.3em] text-white/60 uppercase mb-6">
+            Public Transparency
         </div>
 
-        <!-- TEXT CONTENT -->
-        <div class="text-white space-y-6">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight">
-                {{ $case->title ?? "Case Title" }}
-            </h1>
+        <!-- Title -->
+        <h2 class="text-4xl md:text-5xl font-semibold leading-tight">
+            Transparency & <span class="text-teal-300">Case Statistics</span>
+        </h2>
 
-            <p class="text-base sm:text-lg leading-relaxed tracking-wide md:text-left text-justify">
-                {{$case->description ?? "Case Description"}}
-            </p>
+        <!-- Description -->
+        <p class="mt-8 text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
+            Explore verified public reports and monitor environmental case progress 
+            across Indonesia in real time.
+        </p>
 
-            <div class="uppercase tracking-wider font-semibold cursor-pointer hover:underline">
-                view ->
-            </div>
-
+        <!-- Decorative Divider -->
+        <div class="mt-10 flex justify-center">
+            <div class="w-24 h-[2px] bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
         </div>
-    </div> --}}
 
-    {{-- chart case --}}
-    {{-- <div class="max-w-7xl mx-auto bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-        <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Cases per Category</h3>
-            <div style="position: relative; height: 300px;">
-                <canvas id="categoryChart"></canvas>
-            </div>
-        </div>
-    </div> --}}
-    <div class="max-w-7xl mx-auto bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-        <div class="p-6">
-            {{-- <h3 class="text-lg font-semibold text-gray-900 mb-4">Cases per Category</h3> --}}
-            <div id="container" style="height: 450px;"></div>
-        </div>
     </div>
 </div>
-{{-- @include('front.components.dokumentasi') --}}
-{{-- @include('front.components.footer') --}}
+
+
+
+<div class="bg-white py-20">
+    <div class="max-w-7xl mx-auto px-4">
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+            <div class="bg-gray-50 rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold mb-6">
+                    Cases per Category
+                </h3>
+                <div id="categoryChart" style="height: 400px;"></div>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold mb-6">
+                    Cases per Status
+                </h3>
+                <div id="statusChart" style="height: 400px;"></div>
+            </div>
+
+        </div>
+
+        <div class="bg-gray-50 rounded-xl shadow-sm p-6 mt-10">
+            <h3 class="text-lg font-semibold mb-6">
+                Case Development Over Time
+            </h3>
+            <div id="monthlyChart" style="height: 400px;"></div>
+        </div>
+
+    </div>
+</div>
+
+{{-- button form report --}}
+<div class="bg-[#00323C] py-20 text-center border-b border-t border-white">
+    <div class="max-w-3xl mx-auto px-4">
+        <h2 class="text-3xl font-bold mb-6 text-white">
+            Submit a Public Report
+        </h2>
+        <p class="text-white/80 mb-8">
+            Help us maintain transparency and accountability by reporting issues.
+        </p>
+
+        <a href="{{ route('report.form', app()->getLocale()) }}"
+            class="bg-white text-[#00323C] px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+            Submit Report
+        </a>
+    </div>
+</div>
+
 
 @endsection
 @push('scripts')
@@ -184,88 +223,76 @@ auth()->user()->can('case.update')
             });
         });         
 </script> --}}
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const categories = @json($casesByCategory);
-        const colorMap = {
-            Fraud: '#dc2626',
-            Abuse: '#2563eb',
-            Corruption: '#7c3aed',
-            Environment: '#16a34a',
-        };
-        // console.log(categories);
-        // const categoryCtx = document.getElementById('container').getContext('2d');
-        Highcharts.chart('container', {
-            chart: {
-                type: 'bar',
-                animation: true,
-                scrollablePlotArea: {
-            minHeight: 600,   // ⬅️ makin besar → bisa scroll
-            scrollPositionY: 0
-        }
-            },
-            title: {
-                text: 'Cases per Sector'
-            },
-            xAxis: {
-                categories: categories.map(item => item.category_name),
-                title: {
-                    text: 'Category'
-                },
-                // crosshair: true,
-                min: 0
-                // max: 4,
-                // scrollbar: {
-                //     enabled: true
-                // },
-                // ticklength: 0
-            },
-            yAxis: {
-                min: 0,
-                // max: 1200,
-                title: {
-                    text: 'Number of Cases'
-                },
-                allowDecimals: false
-            },
-            legend: {
-                enabled: false
-            },
-            tooltip: {
-                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-                    '<td style="padding:0"><b>{point.y}</b></td></tr>',
-                footerFormat: '</table>',
-                shared: true,
-                useHTML: true
-            },
-            responsive: {
-                rules: [{
-                    condition: {
-                        maxWidth: 500
-                    },
-                    chartOptions: {
-                        legend: {
-                            layout: 'horizontal',
-                            align: 'center',
-                            verticalAlign: 'bottom'
-                        }
-                    }
-                }]
-            },
-            series: [{
-                name: 'Cases',
-                data: categories.map(item => ({
-                    name: item.category_name,
-                    y: item.count,
-                    color: colorMap[item.category_name] || '#0f766e'
-                }))
-            }],
-            credits: {
-                enabled: false
-            }
-        });
+
+    const categories = @json($casesByCategory);
+    const statuses = @json($status);
+    const months = @json($casesPerMonth);
+
+    // ======================
+    // CATEGORY CHART
+    // ======================
+    Highcharts.chart('categoryChart', {
+        chart: { type: 'column' },
+        title: { text: null },
+        xAxis: {
+            categories: categories.map(item => item.category_name)
+        },
+        yAxis: {
+            min: 0,
+            title: { text: 'Total Cases' },
+            allowDecimals: false
+        },
+        legend: { enabled: false },
+        series: [{
+            name: 'Cases',
+            data: categories.map(item => item.count)
+        }],
+        credits: { enabled: false }
     });
+
+    // ======================
+    // STATUS CHART
+    // ======================
+    Highcharts.chart('statusChart', {
+        chart: { type: 'pie' },
+        title: { text: null },
+        series: [{
+            name: 'Cases',
+            data: statuses.map(item => ({
+                name: item.status_name,
+                y: item.count
+            }))
+        }],
+        credits: { enabled: false }
+    });
+
+    // ======================
+    // MONTHLY DEVELOPMENT
+    // ======================
+    Highcharts.chart('monthlyChart', {
+        chart: { type: 'line' },
+        title: { text: null },
+        xAxis: {
+            categories: months.map(item => item.month)
+        },
+        yAxis: {
+            title: { text: 'Number of Cases' },
+            allowDecimals: false
+        },
+        series: [{
+            name: 'Cases',
+            data: months.map(item => item.count)
+        }],
+        credits: { enabled: false }
+    });
+
+});
 </script>
+
+
+
 
 @endpush

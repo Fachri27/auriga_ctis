@@ -52,12 +52,15 @@ class ReportDetail extends Component
             ]);
 
         // Reload the report model to reflect status change
-        $this->report = Report::with(['translations', 'status'])->find($this->report->id);
+        // $this->report = Report::with(['translations', 'status'])->find($this->report->id);
 
-        session()->flash('success', 'Report verified.');
+        //convert to case
+        $this->convertToCase();
 
-        // Dispatch browser event for immediate feedback
-        $this->dispatch('notify', ['type' => 'success', 'message' => 'Report verified.']);
+        // session()->flash('success', 'Report verified.');
+
+        // // Dispatch browser event for immediate feedback
+        // $this->dispatch('notify', ['type' => 'success', 'message' => 'Report verified.']);
 
         // Refresh component state
         $this->dispatch('refresh-report-detail');
@@ -149,7 +152,7 @@ class ReportDetail extends Component
                 ->where('locale', 'id')
                 ->first();
 
-            $categoryId = $report->category_id;
+            $categoryId = $report->category_ids;
 
             $caseNumber = 'CASE-'.strtoupper(Str::random(5));
 
@@ -170,7 +173,7 @@ class ReportDetail extends Component
             $caseId = DB::table('cases')->insertGetId([
                 'case_number' => $caseNumber,
                 'report_id' => $report->id,
-                'category_id' => $categoryId,
+                'category_ids' => $categoryId,
                 'status_id' => $investigationStatusId,
                 'latitude' => $report->lat,
                 'longitude' => $report->lng,
@@ -201,25 +204,6 @@ class ReportDetail extends Component
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
-            // 3.1️⃣ Auto-generate tasks for this category (if templates exist)
-            $generated = 0;
-            try {
-                $generated = CaseTaskGenerator::generate($caseId, $categoryId);
-            } catch (\Throwable $e) {
-                // don't block case creation; log and continue
-                \Log::error('Case task generation failed: '.$e->getMessage());
-            }
-
-            if ($generated > 0) {
-                DB::table('case_timelines')->insert([
-                    'case_id' => $caseId,
-                    'actor_id' => auth()->id(),
-                    'notes' => "Auto-generated {$generated} task(s) from templates.",
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
 
             // 4️⃣ UPDATE REPORT STATUS
             DB::table('reports')->where('id', $report->id)->update([

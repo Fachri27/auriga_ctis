@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes};
 
 class Report extends Model
 {
@@ -44,6 +43,8 @@ class Report extends Model
         'is_published',
         'published_at',
         'published_by',
+        'category_ids',
+        'type_pelapor',
     ];
 
     protected $casts = [
@@ -51,6 +52,7 @@ class Report extends Model
         'tanggal_lahir' => 'date',
         'published_at' => 'datetime',
         'is_published' => 'boolean',
+        'category_ids' => 'array',
     ];
 
     public function publishedBy()

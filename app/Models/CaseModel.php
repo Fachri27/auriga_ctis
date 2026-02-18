@@ -28,6 +28,7 @@ class CaseModel extends Model
         'jenis_kelamin',
         'jumlah_korban',
         'konflik',
+        'category_ids',
 
     ];
 
@@ -37,6 +38,7 @@ class CaseModel extends Model
         'is_tasks_completed' => 'boolean',
         'is_public' => 'boolean',
         'bukti' => 'array',
+        'category_ids' => 'array',
     ];
 
     /**
@@ -154,5 +156,10 @@ class CaseModel extends Model
     public function getLastUpdateDateAttribute()
     {
         return $this->updated_at?->toDateTimeString();
+    }
+
+    public function actions()
+    {
+        return $this->hasMany(CaseAction::class, 'case_id');
     }
 }

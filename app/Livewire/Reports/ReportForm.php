@@ -2,21 +2,17 @@
 
 namespace App\Livewire\Reports;
 
-use App\Models\Category;
-use App\Models\Report;
-use App\Models\ReportTranslation;
-use App\Models\Status;
+use Illuminate\Support\Facades\{Cache, Http};
+use App\Models\{Category, Report, ReportTranslation, Status};
 use DB;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Livewire\Component;
-use Livewire\WithFileUploads;
 use Str;
+use Livewire\{Component, WithFileUploads};
 
 class ReportForm extends Component
 {
     use WithFileUploads;
 
+    public $id;
     public $nama_lengkap;
 
     public $nik;
@@ -71,6 +67,9 @@ class ReportForm extends Component
     public $selectedText = null;
 
     public $open = false;
+
+    public $category_ids = [];
+    public $type_pelapor;
 
     public function mount($locale)
     {
@@ -281,6 +280,9 @@ class ReportForm extends Component
             'lat' => 'nullable|numeric',
             'lng' => 'nullable|numeric',
             'evidence_files.*' => 'nullable|file|max:5120',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => 'integer|exists:categories,id',
+            'type_pelapor' => 'required',
         ]);
 
         // ambil status open
@@ -295,22 +297,26 @@ class ReportForm extends Component
             'no_hp' => $this->no_hp,
             'email' => $this->email,
             'pekerjaan' => $this->pekerjaan,
-            'status_perkawinan' => $this->status_perkawinan,
+            'status_perkawinan' => null,
             'kewarganegaraan' => $this->kewarganegaraan,
             'description' => $this->description,
             'status_id' => $statusOpen ? $statusOpen->id : null,
-            'category_id' => $this->category_id,
+            'category_ids' => $this->category_ids,
             'lat' => $this->lat,
             'lng' => $this->lng,
             'evidence' => null,
             'created_by' => auth()->id(),
+            'type_pelapor' => $this->type_pelapor,
         ]);
+
+        // \dd($report);
 
         ReportTranslation::updateOrCreate([
             'report_id' => $report->id,
             'locale' => $this->locale,
             'description' => $this->description,
         ]);
+        
 
         $paths = [];
         foreach ($this->evidence_files as $file) {
@@ -322,11 +328,12 @@ class ReportForm extends Component
                 'evidence' => $paths,
             ]);
         }
+        
 
         session()->flash('success', __('Your report has been submitted successfully!'));
 
         // Clear form
-        $this->reset('nama_lengkap', 'description', 'lat', 'lng', 'evidence_files', 'nik', 'jenis_kelamin', 'tanggal_lahir', 'alamat', 'no_hp', 'email', 'pekerjaan', 'status_perkawinan', 'city_id', 'district_id', 'province_id', 'category_id', 'description', 'results');
+        $this->reset('nama_lengkap', 'description', 'lat', 'lng', 'evidence_files', 'nik', 'jenis_kelamin', 'tanggal_lahir', 'alamat', 'no_hp', 'email', 'pekerjaan', 'status_perkawinan', 'city_id', 'district_id', 'province_id', 'category_id', 'results');
     }
 
     public function render()

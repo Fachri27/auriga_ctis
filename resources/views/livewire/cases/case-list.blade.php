@@ -1,5 +1,10 @@
 <div>
     <div class="mx-10 p-6 space-y-6">
+        @if(session('success'))
+        <div class="p-4 mb-5 text-green-700 bg-green-100 rounded">
+            {{ session('success') }}
+        </div>
+        @endif
 
         {{-- HEADER --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

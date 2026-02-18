@@ -181,55 +181,9 @@
 
                 {{-- Tasks --}}
                 <section>
-                    <h2 class="font-semibold text-lg mb-2">Tugas</h2>
-
-                    @if($tasks->isEmpty())
-                    <div class="border border-dashed rounded-lg p-6 text-center text-gray-500">
-                        <p class="font-medium">Belum ada tugas</p>
-                        <p class="text-sm mt-1">Tugas akan muncul otomatis berdasarkan kategori kasus, atau dapat
-                            ditambahkan oleh admin.</p>
-                    </div>
-                    @endif
-
-                    <div class="space-y-4">
-                        @foreach($tasks as $task)
-                        <div class="p-4 border rounded-lg bg-white shadow-sm">
-                            <div class="flex justify-between items-center">
-
-                                <div>
-                                    <h3 class="font-semibold">{{ $task->name }}</h3>
-                                    <span class="text-xs px-2 py-1 rounded
-                                            @if($task->status === 'approved') bg-green-100 text-green-700
-                                            @elseif($task->status === 'submitted') bg-blue-100 text-blue-700
-                                            @else bg-gray-100 text-gray-600 @endif">
-                                        {{ ucfirst($task->status) }}
-                                    </span>
-                                </div>
-
-                                <div class="flex gap-2">
-                                    <button @click="$dispatch('open-task-requirement-modal', { id: '{{ $task->id }}' })"
-                                        class="px-3 py-1 border rounded text-sm"
-                                        title="Lihat detail tugas dan requirement">Lihat</button>
-
-                                    @if($task->status !== 'approved')
-                                    @if(auth()->user()->can('case.task.approve') || (method_exists(auth()->user(),
-                                    'isAdmin') && auth()->user()->isAdmin()))
-                                    <button wire:click="approveTask({{ $task->id }})"
-                                        class="px-3 py-1 bg-green-600 text-white rounded text-sm"
-                                        title="Hanya supervisor/admin yang dapat menyetujui tugas">Setujui</button>
-                                    @else
-                                    <button disabled
-                                        class="px-3 py-1 bg-green-600 text-white rounded text-sm opacity-60 cursor-not-allowed"
-                                        title="Anda tidak memiliki izin untuk menyetujui tugas">Setujui</button>
-                                    @endif
-                                    @endif
-                                </div>
-
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
+                    <livewire:cases.case-actions :case-id="$case->id" />
                 </section>
+
 
                 {{-- Documents & Discussion side-by-side --}}
                 <section>
@@ -299,13 +253,15 @@
     @livewire('cases.upload-document-case')
     @livewire('cases.actor-cases')
     @livewire('cases.case-timeline')
+    
+
+    {{-- SUCCESS TOAST --}}
 
     @if (session('success'))
     <div x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-500"
         x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
         x-transition:leave="transition ease-in duration-500" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-2" x-init="setTimeout(() => show = false, 3000)"
-        class="fixed bottom-6 right-6 bg-green-400 text-white p-10 shadow-lg 
+        x-transition:leave-end="opacity-0 translate-y-2" x-init="setTimeout(() => show = false, 3000)" class="fixed bottom-6 right-6 bg-green-400 text-white p-10 shadow-lg 
                hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
         {{ session('success') }}
     </div>

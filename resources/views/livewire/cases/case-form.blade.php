@@ -35,15 +35,38 @@
         {{-- TWO COLUMNS RESPONSIVE --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             <!-- Category -->
-            <div>
-                <label class="text-sm">Category</label>
-                <select wire:model="category_id" class="w-full border p-2 mt-1 bg-gray-50">
-                    <option value="">Select category…</option>
+            <div x-data="{
+        ts: null,
+        init() {
+            this.ts = new TomSelect(this.$refs.select, {
+                plugins: ['remove_button'],
+                closeAfterSelect: false,
+                hideSelected: true,
+                onChange: (values) => {
+                    const parsed = values.map(v => Number(v))
+
+                    //PAKSA SET KE LIVEWIRE
+                    @this.set('category_ids', parsed)
+                }
+            })
+
+            //SET VALUE SAAT COMPONENT LOAD
+            this.$nextTick(() => {
+                if (@this.get('category_ids')?.length) {
+                    this.ts.setValue(@this.get('category_ids').map(v => String(v)))
+                }
+            })
+        }
+    }" wire:ignore class="mb-6">
+                <label class="text-sm font-medium">Category</label>
+
+                <select x-ref="select" multiple class="w-full border p-1 mt-1 bg-gray-50">
                     @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->name ?? $cat->slug }}</option>
+                    <option value="{{ $cat->id }}">
+                        {{ $cat->name ?? $cat->slug }}
+                    </option>
                     @endforeach
                 </select>
-                @error('category_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
 
             <!-- Status -->
@@ -58,7 +81,7 @@
                 @error('status_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
 
-            
+
         </div>
         <!-- Event Date -->
         <div>
@@ -270,9 +293,9 @@
 
             <input type="file" wire:model="bukti" multiple>
 
-            @if ($bukti)
+            @if ($existingBukti)
             <div class="grid grid-cols-4 gap-3 mt-3">
-                @foreach ($bukti as $file)
+                @foreach ($existingBukti as $file)
                 <div class="p-2 rounded bg-white border text-xs text-center">
                     {{ basename($file) }}
                 </div>

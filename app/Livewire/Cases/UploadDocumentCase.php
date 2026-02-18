@@ -119,7 +119,7 @@ class UploadDocumentCase extends Component
     public function storeNew()
     {
         $this->validate([
-            'process_id' => 'required|integer',
+            // 'process_id' => 'required|integer',
             'title' => 'required|string|max:255',
             'file' => 'required|file|max:10240', // max 10MB
         ]);
@@ -131,7 +131,7 @@ class UploadDocumentCase extends Component
         DB::table('case_documents')->insert([
             'case_id' => $this->caseId,
             'uploaded_by' => auth()->id(),
-            'process_id' => $this->process_id,
+            'process_id' => $this->process_id ?? null,
             'title' => $this->title,
             'file_path' => $filePath,
             'mime' => $mimeType,
@@ -140,6 +140,8 @@ class UploadDocumentCase extends Component
         ]);
 
         $this->open = false;
+
+        $this->dispatch('refresh-case-detail');
     }
 
     public function updateExisting()

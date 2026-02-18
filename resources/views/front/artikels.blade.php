@@ -1,11 +1,6 @@
-@php
-$limit = $limit ?? null;
-$offset = $offset ?? 0;
+@extends('layouts.main')
 
-$cases = $limit
-? $cases->skip($offset)->take($limit)
-: $cases->skip($offset);
-@endphp
+@section('content')
 <style>
     .corner-triangle {
         width: 0;
@@ -19,16 +14,13 @@ $cases = $limit
     }
 </style>
 
-<div class="max-w-7xl mx-auto mt-10 px-4 mb-20 poppins-regular">
+<div class="max-w-7xl mx-auto mt-30 px-4 mb-20 poppins-regular">
     <h2 class="text-slate-500 text-sm font-semibold tracking-wider mb-3">Artikel</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
         <!-- CARD 1 -->
         @foreach ($artikels as $c)
-        @php
-            $translation = $c->translation->first();
-        @endphp
         <div class="bg-[#f2f2f3] border border-gray-300 shadow-sm">
             <div class="w-full aspect-[16/9] overflow-hidden">
                 <img src="{{ asset('storage/'. $c->image) }}" class="w-full object-cover">
@@ -39,13 +31,13 @@ $cases = $limit
                 <!-- Category -->
                 <div class="min-h-[140px] flex flex-col">
                     <p class="text-xl tracking-wider uppercase font-semibold text-[#003974]">
-                        {!! $translation->title !!}
+                        {!! $c->title !!}
                     </p>
 
                     <!-- Title -->
                     <a href="{{ route('public.artikel.detail', ['slug'=>$c->slug]) }}">
                         <p class="mt-1 text-lg leading-snug text-white font-normal">
-                            {!! $c->translation->first()->excerpt !!}
+                            {!! $c->excerpt !!}
                         </p>
                     </a>
                 </div>
@@ -57,3 +49,4 @@ $cases = $limit
         @endforeach
     </div>
 </div>
+@endsection

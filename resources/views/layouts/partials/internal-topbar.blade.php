@@ -42,14 +42,14 @@
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('statuse.*') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             Statuses
         </a>
-        <a href="{{ route('process.index') }}"
+        {{-- <a href="{{ route('process.index') }}"
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('process.*') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             Processes
         </a>
         <a href="{{ route('task.index') }}"
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('task.*') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             Tasks
-        </a>
+        </a> --}}
         <a href="{{ route('artikel.index') }}"
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('artikel.*') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             Artikels

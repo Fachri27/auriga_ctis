@@ -28,7 +28,7 @@
 
     <div class="flex items-center gap-2">
         <button wire:click="applyFilter" class="px-4 py-2 bg-[#024b63] text-white rounded">Apply</button>
-        <button wire:click="resetFilter" class="px-4 py-2 bg-gray-300 rounded">Reset</button>
+        <button wire:click="resetFilter" class="px-4 py-2 bg-gray-300 rounded text-black">Reset</button>
         {{-- <button type="button" id="locateMe" class="px-3 py-2 bg-white/10 rounded">Use my location</button> --}}
     </div>
 </div>

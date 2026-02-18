@@ -19,7 +19,7 @@ class CaseTaskGenerator
      * Generate case tasks + requirements from process/task templates
      * Returns number of tasks created or updated
      */
-    public static function generate(int $caseId, int $categoryId): int
+    public static function generate(int $caseId, array $categoryId): int
     {
         $created = 0;
 

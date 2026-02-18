@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{AdminDashboardController, CaseGeometryController, HomeController, ProfileController, PublicCaseController, PublicDashboardController};
+use App\Http\Controllers\{AdminDashboardController, ArtikelController, CaseGeometryController, HomeController, ProfileController, PublicCaseController, PublicDashboardController};
 use App\Livewire\Artikels\{ArtikelForm, ArtikelTable};
-use App\Livewire\Cases\{CaseDetail, CaseForm, CaseList};
+use App\Livewire\Cases\{CaseAction, CaseDetail, CaseForm, CaseList};
 use App\Livewire\Categories\{CategoriesForm, CategoriesTable};
 use App\Livewire\Process\{ProcessForm, ProcessTable};
 use App\Livewire\Reports\{ReportDetail, ReportForm, ReportTable};
@@ -46,6 +46,9 @@ Route::group([
     // Public dashboard route
     Route::get('/dashboard', [PublicDashboardController::class, 'index'])
         ->name('public.dashboard');
+
+    Route::get('/artikel/{slug}', [HomeController::class,'preview'])->name('public.artikel.detail');
+    Route::get('/artikels', [ArtikelController::class,'showArtikel'])->name('public.artikel.list');
 
 });
 
@@ -112,6 +115,7 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
 
 
     Route::get('cms/permissions/', ManagePermission::class)->name('permission');
+    Route::get('cms/task/create/{case}', CaseDetail::class)->name('case.task.create');
     
 
 
