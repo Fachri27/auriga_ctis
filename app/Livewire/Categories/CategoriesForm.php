@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Categories;
 
-use App\Models\Category;
-use App\Models\CategoryTranslation;
-use Livewire\Component;
+use App\Models\{Category, CategoryTranslation};
 use Str;
+use Livewire\Component;
 
 class CategoriesForm extends Component
 {
@@ -59,7 +58,6 @@ class CategoriesForm extends Component
 
         $this->validate([
             'name_id' => 'required|string|max:255',
-            'name_en' => 'required|string|max:255',
         ]);
 
         $data = [
@@ -75,8 +73,8 @@ class CategoriesForm extends Component
             CategoryTranslation::updateOrCreate(
                 ['category_id' => $category->id, 'locale' => $locale],
                 [
-                    'name' => $locale === 'id' ? $this->name_id : $this->name_en,
-                    'description' => $locale === 'id' ? $this->desc_id : $this->desc_en,
+                    'name' => $locale === 'id' ? $this->name_id : $this->name_en ?? '',
+                    'description' => $locale === 'id' ? $this->desc_id : $this->desc_en ?? '',
                 ]
             );
         }

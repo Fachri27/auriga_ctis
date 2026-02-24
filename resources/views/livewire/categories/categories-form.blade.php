@@ -11,11 +11,11 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <!-- Icon -->
-                <div>
+                {{-- <div>
                     <label class="text-sm font-medium">Icon</label>
                     <input type="text" wire:model="icon" class="w-full mt-1 rounded-xl border-gray-300 bg-gray-50 px-4 py-2.5
                        focus:ring-black focus:bg-white">
-                </div>
+                </div> --}}
 
                 <!-- Active Toggle -->
                 <div>
@@ -74,9 +74,9 @@
                     <input type="text" x-model="slug" readonly class="w-full mt-1 rounded-xl bg-gray-50 border-gray-300 px-4 py-2.5
                        focus:ring-black focus:bg-white">
 
-                    <label class="block text-sm font-medium mt-4 mb-1">Description</label>
+                    {{-- <label class="block text-sm font-medium mt-4 mb-1">Description</label>
                     <textarea wire:model="desc_id" rows="5" class="w-full mt-1 rounded-xl bg-gray-50 border-gray-300 px-4 py-2.5
-                       focus:ring-black focus:bg-white"></textarea>
+                       focus:ring-black focus:bg-white"></textarea> --}}
 
                 </div>
             </div>
@@ -91,11 +91,11 @@
                        focus:ring-black focus:bg-white">
                 </div>
 
-                <div>
+                {{-- <div>
                     <label class="text-sm">Description</label>
                     <textarea wire:model="desc_en" rows="4" class="w-full mt-1 rounded-xl bg-gray-50 border-gray-300 px-4 py-2.5
                           focus:ring-black focus:bg-white"></textarea>
-                </div>
+                </div> --}}
             </div>
 
             <!-- SUBMIT -->

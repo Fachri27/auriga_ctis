@@ -2,14 +2,12 @@
 
 namespace App\Livewire\Artikels;
 
-use App\Models\Artikel;
-use App\Models\ArtikelTranslation;
+use Illuminate\Support\Facades\Storage;
+use App\Models\{Artikel, ArtikelTranslation};
 use Auth;
 use DB;
-use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
-use Livewire\WithFileUploads;
 use Str;
+use Livewire\{Component, WithFileUploads};
 
 
 class ArtikelForm extends Component
@@ -133,9 +131,9 @@ class ArtikelForm extends Component
             ArtikelTranslation::updateOrCreate(
                 ['artikel_id' => $artikel->id, 'locale' => $locale],
                 [
-                    'title' => $locale === 'id' ? $this->titleId : $this->titleEn,
-                    'excerpt' => $locale === 'id' ? $this->excerpt_id : $this->excerpt_en,
-                    'content' => $locale === 'id' ? $this->content_id : $this->content_en,
+                    'title' => $locale === 'id' ? $this->titleId : $this->titleEn ?? '',
+                    'excerpt' => $locale === 'id' ? $this->excerpt_id : $this->excerpt_en ?? '',
+                    'content' => $locale === 'id' ? $this->content_id : $this->content_en ?? '',
                 ]
             );
         }
