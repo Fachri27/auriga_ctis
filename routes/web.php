@@ -27,6 +27,9 @@ Route::group([
     // })->name('dashboard-user');
 
     Route::get('/', [HomeController::class, 'index'])->name('dashboard-user');
+
+    // Verified & Published Cases (public)
+    Route::get('/verified-cases', [\App\Http\Controllers\Front\VerifiedCaseController::class, 'index'])->name('front.verified-cases');
     // Public verification page (locale-aware): /{locale}/verify-case/{case_number}
     Route::get('/verify-case/{case_number}', [\App\Http\Controllers\Public\CaseVerificationController::class, 'show'])->name('verify-case');
 

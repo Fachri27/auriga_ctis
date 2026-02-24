@@ -64,14 +64,13 @@
                 <h4 class="font-semibold">
                     {{ $action->title }}
                 </h4>
-
-                <select wire:change="updateStatus({{ $action->id }}, $event.target.value)"
-                    class="border p-1 rounded text-sm">
-                    <option value="open" {{ $action->status == 'open' ? 'selected' : '' }}>Open</option>
-                    <option value="in_progress" {{ $action->status == 'in_progress' ? 'selected' : '' }}>In Progress
-                    </option>
-                    <option value="done" {{ $action->status == 'done' ? 'selected' : '' }}>Done</option>
-                </select>
+                <div class="flex gap-2">
+                    <button wire:click="editAction({{ $action->id }})"
+                        class="px-3 py-1 bg-yellow-400 text-white rounded text-xs hover:bg-yellow-500">Edit</button>
+                    <button wire:click="deleteAction({{ $action->id }})"
+                        class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                        onclick="return confirm('Hapus tugas ini?')">Delete</button>
+                </div>
             </div>
 
             <p class="text-sm text-gray-600 mt-2">

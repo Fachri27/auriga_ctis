@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Cases;
 
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\{Auth, Storage};
 use App\Models\{CaseAction, CaseActionFile, CaseModel};
 use Livewire\{Component, WithFileUploads};
 
@@ -82,6 +82,23 @@ class CaseActions extends Component
     {
         $action = CaseAction::findOrFail($actionId);
         $action->update(['status' => $status]);
+    }
+
+    public function deleteAction($actionId)
+    {
+        $action = CaseAction::with('files')->findOrFail($actionId);
+
+        foreach ($action->files as $file) {
+            if ($file->file_path) {
+                Storage::disk('public')->delete($file->file_path);
+            }
+
+            $file->delete();
+        }
+
+        $action->delete();
+
+        session()->flash('success', 'Tugas berhasil dihapus');
     }
 
     public function render()

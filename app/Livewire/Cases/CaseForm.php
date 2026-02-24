@@ -338,9 +338,9 @@ class CaseForm extends Component
             CaseTranslation::updateOrCreate(
                 ['case_id' => $case->id, 'locale' => $locale],
                 [
-                    'title' => $locale === 'id' ? $this->title_id : $this->title_en,
-                    'summary' => $locale === 'id' ? $this->summary_id : $this->summary_en,
-                    'description' => $locale === 'id' ? $this->desc_id : $this->desc_en,
+                    'title' => $locale === 'id' ? $this->title_id : $this->title_en ?? '',
+                    'summary' => $locale === 'id' ? $this->summary_id : $this->summary_en ?? '',
+                    'description' => $locale === 'id' ? $this->desc_id : $this->desc_en ?? '',
                 ]
             );
         }

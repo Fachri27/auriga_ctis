@@ -12,7 +12,10 @@ class ReportForm extends Component
 {
     use WithFileUploads;
 
+    #[Locked]
     public $id;
+
+
     public $nama_lengkap;
 
     public $nik;
@@ -34,10 +37,12 @@ class ReportForm extends Component
     // public $contact;
     public $kewarganegaraan = 'Indonesia';
 
+    
     public $locale;
 
     public $description;
 
+    #[Locked]
     public $category_id;
 
     public $lat;
@@ -62,12 +67,14 @@ class ReportForm extends Component
 
     public $results = [];
 
+    #[Locked]
     public $selectedId = null;
 
     public $selectedText = null;
 
     public $open = false;
 
+    #[Locked]
     public $category_ids = [];
     public $type_pelapor;
 

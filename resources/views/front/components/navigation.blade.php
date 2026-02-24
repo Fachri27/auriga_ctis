@@ -33,8 +33,8 @@
 
             <a href="{{ route('report.form', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Report a
                 Case</a>
-            <a href="{{ route('report.form', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Artikel</a>
-            <a href="#" class="hover:text-gray-300">Verified Case</a>
+            <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Artikel</a>
+            <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Verified Case</a>
             {{-- <a href="#" class="hover:text-gray-300">Documentation</a> --}}
         </div>
 
