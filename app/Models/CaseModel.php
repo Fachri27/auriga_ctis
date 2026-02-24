@@ -65,6 +65,11 @@ class CaseModel extends Model
         return $this->belongsTo(Status::class);
     }
 
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
     /**
      * Legacy: returns timeline entries that may be tied to processes/tasks.
      * @deprecated Complex workflow-based timeline. Kept for backward compatibility.

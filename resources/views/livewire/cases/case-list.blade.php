@@ -49,7 +49,9 @@
             <table class="w-full text-sm">
                 <thead class="bg-gray-50 text-gray-600">
                     <tr>
-                        <th class="p-4 text-left font-medium">Case</th>
+                        <th class="p-4 text-left font-medium">No Kasus</th>
+                        <th class="p-4 text-left font-medium">Judul Kasus</th>
+                        <th class="p-4 text-left font-medium">Deskripsi</th>
                         <th class="p-4 text-left font-medium">Event Date</th>
                         <th class="p-4 text-left font-medium">Visibility</th>
                         <th class="p-4 text-left font-medium">Verified by</th>
@@ -59,12 +61,20 @@
 
                 <tbody class="divide-y">
                     @forelse($cases as $c)
+                    @php
+                        $tr = $c->translations->firstWhere('locale', 'id');
+                        $title = $tr?->title ?? '-';
+                        $desc = $tr?->description ?? '-';
+                    @endphp
                     <tr class="hover:bg-gray-50 transition">
                         {{-- CASE --}}
                         <td class="p-4">
                             <div class="font-semibold">{{ $c->case_number }}</div>
                             <div class="text-xs text-gray-500">ID: {{ $c->id }}</div>
                         </td>
+
+                        <td class="p-4 text-gray-700">{!! $title !!}</td>
+                        <td class="p-4 text-gray-700">{!! Str::limit($desc, 50) !!}</td>
 
                         {{-- DATE --}}
                         <td class="p-4 text-gray-700">
@@ -89,7 +99,7 @@
                         {{-- VERIFIED BY --}}
                         <td class="p-4 text-gray-700">
                             @if($c->verified_by)
-                            {{ $c->verified_by_name }}
+                            {{ $c->verifiedBy?->name ?? '-' }}
                             @else
                             <span class="text-gray-400 italic">Not verified</span>
                             @endif
@@ -100,7 +110,7 @@
                             <div class="flex justify-end items-center gap-4 text-sm">
 
                                 <a href="{{ route('case.detail', $c->id) }}" class="text-blue-600 hover:underline">
-                                    View
+                                    Detail
                                 </a>
 
                                 <a href="{{ route('case.edit', $c->id) }}" class="text-blue-600 hover:underline">
