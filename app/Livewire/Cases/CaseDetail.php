@@ -2,13 +2,10 @@
 
 namespace App\Livewire\Cases;
 
-use App\Models\CaseModel;
-use App\Services\CaseActionService;
-use App\Services\CaseStatusService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Livewire\Component;
-use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\{DB, Log};
+use App\Models\{CaseModel, Status};
+use App\Services\{CaseActionService, CaseStatusService};
+use Livewire\{Component, WithFileUploads};
 
 class CaseDetail extends Component
 {
@@ -20,12 +17,24 @@ class CaseDetail extends Component
 
     public $activeTab = 'overview';
 
-    public array $availableStatuses = [
-        'investigation' => 'Penyelidikan',
-        'prosecution' => 'Penuntutan',
-        'trial' => 'Pengadilan',
-        'closed' => 'Ditutup',
-    ];
+    // public array $availableStatuses = [
+    //     'investigation' => 'Penyelidikan',
+    //     'prosecution' => 'Penuntutan',
+    //     'trial' => 'Pengadilan',
+    //     'closed' => 'Ditutup',
+    //     'rejected' => 'Ditolak',
+    //     'executed' => 'Eksekusi',
+    //     'published' => 'Publikasi',
+    //     'open' => 'Terbuka',
+    //     'completed' => 'Selesai',
+    //     'penyidikan' => 'Penyidikan',
+    //     'vonis' => 'Vonis',
+    //     'verdict' => 'Putusan',
+    //     'berkekuatan-hukum-tetap' => 'Berkekuatan Hukum Tetap',
+    //     'sanksi-administratif' => 'Sanksi Administrasi',
+    // ];
+
+    public array $availableStatuses = [];
 
     protected $listeners = [
         'refresh-case-detail' => '$refresh',
@@ -33,6 +42,7 @@ class CaseDetail extends Component
 
     public function mount($id)
     {
+        // app()->setlocale(\session('locale', 'id')); // pastikan locale sudah di-set sebelum load case
         // Validate case ID
         if (! is_numeric($id) || $id <= 0) {
             abort(404, 'Invalid case ID');
@@ -45,14 +55,28 @@ class CaseDetail extends Component
         if (! $this->case) {
             abort(404, 'Case not found');
         }
+
+        $this->availableStatuses = Status::pluck('name','key')->toArray();
     }
 
     private function loadCase()
     {
+        $locale = app()->getLocale();
+
+        // Ambil semua translations untuk case ini
+        $translations = DB::table('case_translations')
+            ->where('case_id', $this->case_id)
+            ->get();
+
+        // Pilih translation: locale aktif → 'id' → apapun yang ada
+        $trans = $translations->firstWhere('locale', $locale)
+            ?? $translations->firstWhere('locale', 'id')
+            ?? $translations->first();
+
         $this->case = DB::table('cases')
-            ->leftJoin('case_translations', function ($q) {
+            ->leftJoin('case_translations', function ($q) use ($trans) {
                 $q->on('case_translations.case_id', '=', 'cases.id')
-                    ->where('case_translations.locale', 'id');
+                    ->where('case_translations.id', $trans?->id ?? 0);
             })
             ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
             ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
@@ -67,6 +91,10 @@ class CaseDetail extends Component
             )
             ->where('cases.id', $this->case_id)
             ->first();
+
+        if ($this->case) {
+            $this->case->bukti = json_decode($this->case->bukti, true) ?? [];
+        }
     }
 
     public function setTab($tab)
@@ -229,6 +257,11 @@ class CaseDetail extends Component
             return;
         }
 
+        if($this->case->is_public) {
+            $this->unpublishCase();
+            return;
+        }
+
         DB::beginTransaction();
 
         try {
@@ -282,39 +315,8 @@ class CaseDetail extends Component
                 ->first();
 
             // 🌍 SYNC GEOMETRY (IDEMPOTENT & AMAN)
-            if (! is_null($case->latitude) && ! is_null($case->longitude)) {
-
-                $exists = DB::table('case_geometries')
-                    ->where('case_id', $this->case_id)
-                    ->exists();
-
-                if (! $exists) {
-                    $lat = (float) $case->latitude;
-                    $lon = (float) $case->longitude;
-
-                    if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
-                        throw new \InvalidArgumentException('Invalid latitude / longitude.');
-                    }
-
-                    $wkt = sprintf('POINT(%.15f %.15f)', $lat, $lon);
-
-                    DB::statement(
-                        'INSERT INTO case_geometries
-                    (case_id, geom, title, category, status, is_public, created_at, updated_at)
-                    VALUES (?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?)',
-                        [
-                            $this->case_id,
-                            $wkt,
-                            $case->title ?? ('Case '.$case->case_number),
-                            $case->category_name ?? null,
-                            'published',
-                            1,
-                            now(),
-                            now(),
-                        ]
-                    );
-                }
-            }
+            $this->syncGeometry($case);
+            
 
             DB::commit();
 
@@ -330,6 +332,123 @@ class CaseDetail extends Component
             session()->flash('error', $th->getMessage());
         }
     }
+
+    protected function syncGeometry(object $case): void
+{
+    if (is_null($case->latitude) || is_null($case->longitude)) {
+        return;
+    }
+
+    $lat = (float) $case->latitude;
+    $lon = (float) $case->longitude;
+
+    if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
+        throw new \InvalidArgumentException('Invalid latitude / longitude.');
+    }
+
+    $wkt = sprintf('POINT(%.15f %.15f)', $lat, $lon);
+
+    // Ambil semua translations — prioritas id, fallback ke yang pertama ada
+    $translations = DB::table('case_translations')
+        ->where('case_id', $this->case_id)
+        ->get();
+
+    $trans = $translations->firstWhere('locale', 'id')
+          ?? $translations->first();
+
+    $title     = $trans?->title ?? ('Case ' . $case->case_number);
+    $plainDesc = $trans ? strip_tags($trans->description ?? '') : null;
+
+    $exists = DB::table('case_geometries')
+        ->where('case_id', $this->case_id)
+        ->exists();
+
+    if ($exists) {
+        DB::statement(
+            'UPDATE case_geometries
+             SET geom             = ST_GeomFromText(?, 4326),
+                 title            = ?,
+                 category         = ?,
+                 case_description = ?,
+                 is_public        = 1,
+                 updated_at       = ?
+             WHERE case_id        = ?',
+            [
+                $wkt,
+                $title,
+                $case->category_name ?? null,
+                $plainDesc,
+                now(),
+                $this->case_id,
+            ]
+        );
+    } else {
+        DB::statement(
+            'INSERT INTO case_geometries
+             (case_id, geom, title, category, case_description, status, is_public, created_at, updated_at)
+             VALUES (?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?, ?)',
+            [
+                $this->case_id,
+                $wkt,
+                $title,
+                $case->category_name ?? null,
+                $plainDesc,
+                'published',
+                1,
+                now(),
+                now(),
+            ]
+        );
+    }
+}
+
+    // unpublish case (for admins only, does NOT delete geometry)
+    protected function unpublishCase()
+    {
+        if (! auth()->user()->can('case.publish')) {
+            session()->flash('error', 'You do not have permission to unpublish cases.');
+            return;
+        }
+
+        DB::beginTransaction();
+
+        try {
+            DB::table('cases')
+                ->where('id', $this->case_id)
+                ->update([
+                    'is_public'  => 0,
+                    'updated_at' => now(),
+                ]);
+
+            // Sembunyikan geometry dari peta (tidak dihapus)
+            DB::table('case_geometries')
+                ->where('case_id', $this->case_id)
+                ->update([
+                    'is_public'  => 0,
+                    'updated_at' => now(),
+                ]);
+
+            DB::table('case_timelines')->insert([
+                'case_id'    => $this->case_id,
+                'actor_id'   => auth()->id(),
+                'notes'      => 'Case unpublished (removed from public view) by ' . auth()->user()->name . '.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+
+            $this->loadCase();
+            $this->dispatch('refresh-case-detail');
+            session()->flash('success', 'Case unpublished successfully.');
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Unpublish case error {$this->case_id}: " . $th->getMessage());
+            session()->flash('error', $th->getMessage());
+        }
+    }
+
 
     /**
      * Execute an action on the case (action-based workflow).

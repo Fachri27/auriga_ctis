@@ -91,18 +91,17 @@ auth()->user()->can('case.update')
 
         <!-- Small Label -->
         <div class="text-sm tracking-[0.3em] text-white/60 uppercase mb-6">
-            Public Transparency
+            {{ __('messages.public_transparency') }}
         </div>
 
         <!-- Title -->
         <h2 class="text-4xl md:text-5xl font-semibold leading-tight">
-            Transparency & <span class="text-teal-300">Case Statistics</span>
+            {{ __('messages.transparency') }} <span class="text-teal-300">{{ __('messages.case_statistics') }}</span>
         </h2>
 
         <!-- Description -->
         <p class="mt-8 text-lg text-white/80 max-w-3xl mx-auto leading-relaxed">
-            Explore verified public reports and monitor environmental case progress 
-            across Indonesia in real time.
+            {{ __('messages.explore') }}
         </p>
 
         <!-- Decorative Divider -->
@@ -122,14 +121,14 @@ auth()->user()->can('case.update')
 
             <div class="bg-gray-50 rounded-xl shadow-sm p-6">
                 <h3 class="text-lg font-semibold mb-6">
-                    Cases per Category
+                    {{ __('messages.case_category') }}
                 </h3>
                 <div id="categoryChart" style="height: 400px;"></div>
             </div>
 
             <div class="bg-gray-50 rounded-xl shadow-sm p-6">
                 <h3 class="text-lg font-semibold mb-6">
-                    Cases per Status
+                    {{ __('messages.case_status') }}
                 </h3>
                 <div id="statusChart" style="height: 400px;"></div>
             </div>
@@ -138,7 +137,7 @@ auth()->user()->can('case.update')
 
         <div class="bg-gray-50 rounded-xl shadow-sm p-6 mt-10">
             <h3 class="text-lg font-semibold mb-6">
-                Case Development Over Time
+                {{ __('messages.case_trend') }}
             </h3>
             <div id="monthlyChart" style="height: 400px;"></div>
         </div>
@@ -150,15 +149,15 @@ auth()->user()->can('case.update')
 <div class="bg-[#00323C] py-20 text-center border-b border-t border-white">
     <div class="max-w-3xl mx-auto px-4">
         <h2 class="text-3xl font-bold mb-6 text-white">
-            Submit a Public Report
+            {{ __('messages.submit_report_text') }}
         </h2>
         <p class="text-white/80 mb-8">
-            Help us maintain transparency and accountability by reporting issues.
+            {{ __('messages.help') }}
         </p>
 
         <a href="{{ route('report.form', app()->getLocale()) }}"
             class="bg-white text-[#00323C] px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-            Submit Report
+            {{ __('messages.submit_report') }}
         </a>
     </div>
 </div>

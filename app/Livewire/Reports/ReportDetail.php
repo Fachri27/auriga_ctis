@@ -99,7 +99,8 @@ class ReportDetail extends Component
         session()->flash('success', 'Report rejected.');
 
         // Dispatch browser event for immediate feedback
-        $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Report rejected.']);
+        // $this->dispatchBrowserEvent('notify', ['type' => 'success', 'message' => 'Report rejected.']);
+        $this->dispatch('notify', ['type' => 'success', 'message' => 'Report rejected.']);
 
         // Refresh component state
         $this->dispatch('refresh-report-detail');
@@ -140,86 +141,88 @@ class ReportDetail extends Component
     }
 
     public function convertToCase()
-    {
-        DB::beginTransaction();
+{
+    DB::beginTransaction();
 
-        try {
-            $report = DB::table('reports')->where('id', $this->report->id)->first();
+    try {
+        $report = DB::table('reports')->where('id', $this->report->id)->first();
 
+        // Ambil SEMUA translations dari report
+        $translations = DB::table('report_translations')
+            ->where('report_id', $report->id)
+            ->get();
 
-            $translation = DB::table('report_translations')
-                ->where('report_id', $report->id)
-                ->where('locale', 'id')
-                ->first();
+        // Fallback untuk generate title/summary — pakai id dulu, kalau ga ada pakai yang pertama
+        $primaryTrans = $translations->firstWhere('locale', 'id')
+                     ?? $translations->first();
 
-            $categoryId = $report->category_ids;
+        $categoryId = $report->category_ids;
+        $caseNumber = 'CASE-' . strtoupper(Str::random(5));
 
-            $caseNumber = 'CASE-'.strtoupper(Str::random(5));
+        $title   = Str::of($primaryTrans->description ?? "Laporan Publik #{$report->report_code}")->words(8, '...');
+        $summary = Str::of($primaryTrans->description ?? '')->words(20, '...');
 
-            $title = Str::of($translation->description ?? "Laporan Publik #{$report->report_code}")
-                ->words(8, '...');
+        $investigationStatusId = DB::table('statuses')->where('key', 'investigation')->value('id');
 
-            $summary = Str::of($translation->description ?? '')
-                ->words(20, '...');
-
-            // Get initial investigation status ID
-            $investigationStatusId = DB::table('statuses')->where('key', 'investigation')->value('id');
-
-            if (! $investigationStatusId) {
-                throw new \Exception('Investigation status not found in database.');
-            }
-
-            // 1️⃣ CREATE CASE with initial investigation status
-            $caseId = DB::table('cases')->insertGetId([
-                'case_number' => $caseNumber,
-                'report_id' => $report->id,
-                'category_ids' => $categoryId,
-                'status_id' => $investigationStatusId,
-                'latitude' => $report->lat,
-                'longitude' => $report->lng,
-                'verified_by' => auth()->id(),
-                'event_date' => now(),
-                'created_by' => auth()->id(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // 2️⃣ CASE TRANSLATION
-            DB::table('case_translations')->insert([
-                'case_id' => $caseId,
-                'locale' => 'id',
-                'title' => $title,
-                'summary' => $summary,
-                'description' => $translation->description ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // 3️⃣ TIMELINE ENTRY (Action-Based Logging)
-            // Log the "Convert to Case" action in the case timeline
-            DB::table('case_timelines')->insert([
-                'case_id' => $caseId,
-                'actor_id' => auth()->id(),
-                'notes' => 'Action: Convert to Case - Case created from report #'.$report->report_code.' by '.auth()->user()->name.'.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // 4️⃣ UPDATE REPORT STATUS
-            DB::table('reports')->where('id', $report->id)->update([
-                'status_id' => DB::table('statuses')->where('key', 'converted')->value('id'),
-                'updated_at' => now(),
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('case.detail', $caseId);
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw $e;
+        if (! $investigationStatusId) {
+            throw new \Exception('Investigation status not found in database.');
         }
+
+        // 1️⃣ CREATE CASE
+        $caseId = DB::table('cases')->insertGetId([
+            'case_number'  => $caseNumber,
+            'report_id'    => $report->id,
+            'category_ids' => $categoryId,
+            'status_id'    => $investigationStatusId,
+            'latitude'     => $report->lat,
+            'longitude'    => $report->lng,
+            'bukti'        => is_array($report->evidence)
+                                ? json_encode($report->evidence)
+                                : $report->evidence,
+            'verified_by'  => auth()->id(),
+            'event_date'   => now(),
+            'created_by'   => auth()->id(),
+            'created_at'   => now(),
+            'updated_at'   => now(),
+        ]);
+
+        // 2️⃣ INSERT SEMUA LOCALE dari report_translations
+        foreach ($translations as $trans) {
+            DB::table('case_translations')->insert([
+                'case_id'     => $caseId,
+                'locale'      => $trans->locale,
+                'title'       => Str::of($trans->description ?? "Laporan Publik #{$report->report_code}")->words(8, '...'),
+                'summary'     => Str::of($trans->description ?? '')->words(20, '...'),
+                'description' => $trans->description ?? null,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+        }
+
+        // 3️⃣ TIMELINE
+        DB::table('case_timelines')->insert([
+            'case_id'    => $caseId,
+            'actor_id'   => auth()->id(),
+            'notes'      => 'Action: Convert to Case - Case created from report #' . $report->report_code . ' by ' . auth()->user()->name . '.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 4️⃣ UPDATE REPORT STATUS
+        DB::table('reports')->where('id', $report->id)->update([
+            'status_id'  => DB::table('statuses')->where('key', 'converted')->value('id'),
+            'updated_at' => now(),
+        ]);
+
+        DB::commit();
+
+        return redirect()->route('case.detail', $caseId);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        throw $e;
     }
+}
 
     /**
      * @deprecated Auto task generator (complex workflow)

@@ -33,12 +33,14 @@
                     <option value="rejected">Rejected Case</option>
                 </select>
 
+                @can('case.create')
                 <a href="{{ route('case.create') }}">
                     <button class="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800">
                         <span class="text-lg">＋</span>
                         New Case
                     </button>
                 </a>
+                @endcan
             </div>
 
         </div>
@@ -62,9 +64,9 @@
                 <tbody class="divide-y">
                     @forelse($cases as $c)
                     @php
-                        $tr = $c->translations->firstWhere('locale', 'id');
-                        $title = $tr?->title ?? '-';
-                        $desc = $tr?->description ?? '-';
+                    $tr = $c->translations->firstWhere('locale', 'id') ?? $c->translations->first();
+                    $title = $tr?->title ?? '-';
+                    $desc = $tr?->description ?? '-';
                     @endphp
                     <tr class="hover:bg-gray-50 transition">
                         {{-- CASE --}}
@@ -109,13 +111,17 @@
                         <td class="p-4 text-right">
                             <div class="flex justify-end items-center gap-4 text-sm">
 
+                                @can('case.view')
                                 <a href="{{ route('case.detail', $c->id) }}" class="text-blue-600 hover:underline">
                                     Detail
                                 </a>
+                                @endcan
 
+                                @can('case.update')
                                 <a href="{{ route('case.edit', $c->id) }}" class="text-blue-600 hover:underline">
                                     Edit
                                 </a>
+                                @endcan
 
                                 <button wire:click="deleteCase({{ $c->id }})"
                                     onclick="confirm('Delete this case?') || event.stopImmediatePropagation()"

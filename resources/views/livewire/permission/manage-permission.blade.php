@@ -45,7 +45,7 @@
             @foreach ($permissions as $permission)
             <div class="flex items-center gap-3 p-4 rounded-xl border transition relative {{ in_array($permission->name, $selectedPermissions) ? 'bg-blue-50 border-blue-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100' }}"
                 wire:key="{{ $roleName }}-{{ $permission->id }}">
-                <input type="checkbox" value="{{ $permission->name }}" wire:model="selectedPermissions"
+                <input type="checkbox" value="{{ $permission->name }}" wire:model.live="selectedPermissions"
                     class="rounded text-blue-600 focus:ring-blue-500">
 
                 @if ($editPermissionId === $permission->id)

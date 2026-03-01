@@ -12,6 +12,7 @@ class Geometry extends Model
         'title',
         'category',
         'geom',
+        'case_description',
     ];
 
     public function case()

@@ -30,6 +30,7 @@
                             {{ $r->status->key === 'open' ? 'bg-yellow-100 text-yellow-700' : '' }}
                             {{ $r->status->key === 'verified' ? 'bg-blue-100 text-blue-700' : '' }}
                             {{ $r->status->key === 'converted' ? 'bg-green-100 text-green-700' : '' }}
+                            {{ $r->status->key === 'rejected' ? 'bg-red-100 text-red-700' : '' }}
                         ">
                             {{ ucfirst($r->status->name) }}
                         </span>
@@ -60,10 +61,12 @@
 
                 {{-- RIGHT ACTION --}}
                 <div class="flex gap-3 shrink-0">
+                    @can('report.view')
                     <a href="{{ route('reports.detail', $r->id) }}"
                         class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50">
                         View
                     </a>
+                    @endcan
 
                     {{-- OPTIONAL QUICK ACTION --}}
                     {{--

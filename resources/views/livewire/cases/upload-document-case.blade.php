@@ -63,9 +63,11 @@
 
                 {{-- delete --}}
                 @if($mode === 'edit')
+                @can('case.document.delete')
                 <button wire:click="delete" class="px-4 py-2 bg-red-600 text-white">
                     Delete
                 </button>
+                @endcan
                 @endif
 
                 <div class="flex gap-3">

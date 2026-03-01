@@ -218,7 +218,7 @@ class CaseForm extends Component
             $req = DB::connection('pgsql')->table('proteus.POLITICAL_LEVEL_6_dissolved')
                 ->select('NAME', 'latitude', 'longtitude')
                 ->where('NAME', 'ILIKE', ["%{$this->searchLocation}%"])
-                ->limit(10)
+                ->limit(20)
                 ->get();
 
             $this->results = $req->map(fn ($item) => [

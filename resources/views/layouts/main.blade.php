@@ -57,6 +57,8 @@
         href="https://unpkg.com/@raruto/leaflet-gesture-handling@latest/dist/leaflet-gesture-handling.min.css"
         type="text/css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    {{-- PruneCluster stylesheet --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/LeafletStyleSheet.css" />
 
 
     <style>
@@ -117,8 +119,12 @@
     </script>
     <script src="/js/tinymce/tinymce.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+
+    {{-- PruneCluster JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/dist/PruneCluster.js"></script>
     @stack('scripts')
-    
+
 
 
 </body>

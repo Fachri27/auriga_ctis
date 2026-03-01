@@ -138,7 +138,7 @@
                     <div class="space-y-3">
                         @if ($report->status?->key === 'open')
 
-                        @can('verify', $report)
+                        @can('report.verify', $report)
                         <button wire:click="verify"
                             title="Periksa bukti singkat dan klik untuk memberi tanda laporan terverifikasi"
                             class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
@@ -151,7 +151,7 @@
                         </button>
                         @endcan
 
-                        @can('reject', $report)
+                        @can('report.reject', $report)
                         <button wire:click="rejected" title="Tandai laporan sebagai ditolak (beri alasan di timeline)"
                             class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                             Tolak Laporan

@@ -27,7 +27,7 @@ $cases = $limit
         <!-- CARD 1 -->
         @foreach ($artikels as $c)
         @php
-            $translation = $c->translation->first();
+        $translation = $c->translation->first();
         @endphp
         <div class="bg-[#f2f2f3] border border-gray-300 shadow-sm">
             <div class="w-full aspect-[16/9] overflow-hidden">
@@ -38,9 +38,11 @@ $cases = $limit
 
                 <!-- Category -->
                 <div class="min-h-[140px] flex flex-col">
-                    <p class="text-xl tracking-wider uppercase font-semibold text-[#003974]">
-                        {!! $translation->title !!}
-                    </p>
+                    <a href="{{ route('public.artikel.detail', ['slug'=>$c->slug]) }}">
+                        <p class="text-xl tracking-wider uppercase font-semibold text-[#003974]">
+                            {!! $translation->title !!}
+                        </p>
+                    </a>
 
                     <!-- Title -->
                     <a href="{{ route('public.artikel.detail', ['slug'=>$c->slug]) }}">

@@ -1,3 +1,6 @@
+@php
+    app()->getLocale();
+@endphp
 <nav x-data="{ scrolled: false, open: false, navOpen: false }" x-init="
         window.addEventListener('scroll', () => {
             scrolled = window.scrollY > 10;
@@ -25,16 +28,15 @@
         <!-- MIDDLE MENU (DESKTOP) -->
         <div
             class="hidden lg:flex items-center gap-8 text-white text-xs uppercase tracking-wide ml-55 leading-1.5 cursor-pointer">
-            <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">About</a>
+            <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.about') }}</a>
 
             <!-- Public dashboard filters -->
             <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']) }}"
                 class="hover:text-gray-300 {{ request('filter') === 'active' ? 'font-semibold' : '' }}">Dashboard</a>
 
-            <a href="{{ route('report.form', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Report a
-                Case</a>
+            <a href="{{ route('report.form', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.report_case') }}</a>
             <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Artikel</a>
-            <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Verified Case</a>
+            <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.verified_cases') }}</a>
             {{-- <a href="#" class="hover:text-gray-300">Documentation</a> --}}
         </div>
 
@@ -104,8 +106,8 @@
                 </div>
 
                 @guest
-                <a href="{{ route('login') }}" class="hover:text-gray-300">Login</a>
-                <a href="{{ route('register') }}" class="hover:text-gray-300">Sign Up</a>
+                <a href="{{ route('login') }}" class="hover:text-gray-300">{{ __('messages.login') }}</a>
+                <a href="{{ route('register') }}" class="hover:text-gray-300">{{ __('messages.register') }}</a>
                 @else
                 <div x-data="{ userOpen:false }" class="relative">
                     <button @click="userOpen = !userOpen"

@@ -8,7 +8,7 @@
                 {{-- LEFT --}}
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
-                        {!! $case->title !!}
+                        {!! $case->title  !!}
                     </h1>
                     <p class="text-sm text-gray-500">
                         {{ $case->case_number }}
@@ -52,11 +52,14 @@
 
                 {{-- RIGHT ACTION --}}
                 <div class="flex items-center gap-3 flex-wrap">
+                    @can('case.publish')
                     <div>
                         <button wire:click="publishCases"
                             class="px-4 py-2 {{ $case->is_public ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded text-sm">
                             {{ $case->is_public ? 'Batalkan Publikasi' : 'Publikasikan' }}
                     </div>
+                    @endcan
+                    @can('case.change-status')
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open"
                             class="px-4 py-2 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600">
@@ -66,8 +69,8 @@
                         <div x-show="open" x-cloak @click.away="open = false"
                             class="absolute mt-2 w-48 bg-white border rounded shadow z-50">
 
-                            @foreach($availableStatuses as $key => $label)
-                            <button wire:click="changeStatus('{{ $key }}')" @click="open = false"
+                            @foreach($availableStatuses as $name => $label)
+                            <button wire:click="changeStatus('{{ $name }}')" @click="open = false"
                                 onclick="return confirm('Ubah status menjadi {{ $label }}?')"
                                 class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
                                 {{ $label }}
@@ -76,8 +79,7 @@
 
                         </div>
                     </div>
-
-
+                    @endcan
                 </div>
 
             </div>
@@ -108,12 +110,6 @@
                 class="relative py-4 text-sm font-medium
                         {{ $activeTab === $tab ? 'text-black border-b-2 border-black' : 'text-gray-500 hover:text-black' }}">
                 {{ $label }}
-
-                @if($tab === 'handling' && $tasks->count())
-                <span class="ml-2 text-xs bg-gray-200 px-2 py-0.5 rounded-full">
-                    {{ $tasks->count() }}
-                </span>
-                @endif
             </button>
 
             @endforeach
@@ -139,6 +135,55 @@
                             {!! $case->description !!}
                         </p>
                     </section>
+
+                    {{-- EVIDENCE --}}
+                    <div class="bg-white border rounded-xl p-4">
+                        <h2 class="font-semibold text-sm text-gray-500 uppercase tracking-wide mb-3">
+                            Bukti / Evidence
+                            @if ($case->bukti && count($case->bukti))
+                            <span class="ml-2 text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                                {{ count($case->bukti) }}
+                            </span>
+                            @endif
+                        </h2>
+
+                        @if ($case->bukti && count($case->bukti))
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($case->bukti as $i => $ev)
+                            @php
+                            $path = 'storage/' . $ev;
+                            $ext = strtolower(pathinfo($ev, PATHINFO_EXTENSION));
+                            $isImage = in_array($ext, ['jpg','jpeg','png','gif','webp']);
+                            $isPdf = $ext === 'pdf';
+                            $label = $isImage ? 'Gambar ' . ($i + 1) : strtoupper($ext) . ' File';
+                            $icon = $isImage ? '🖼️' : ($isPdf ? '📄' : '📎');
+                            @endphp
+
+                            @if ($isImage)
+                            {{-- Image: thumbnail kecil --}}
+                            <a href="{{ asset($path) }}" target="_blank"
+                                class="group relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0"
+                                title="{{ $label }}">
+                                <img src="{{ asset($path) }}"
+                                    class="w-full h-full object-cover group-hover:scale-110 transition duration-200">
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition"></div>
+                            </a>
+                            @else
+                            {{-- Non-image: pill/chip --}}
+                            <a href="{{ asset($path) }}" target="{{ $isPdf ? '_blank' : '_self' }}" {{ !$isPdf
+                                ? 'download' : '' }} class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200
+                              bg-gray-50 hover:bg-gray-100 transition text-sm text-gray-700 flex-shrink-0">
+                                <span>{{ $icon }}</span>
+                                <span>{{ $label }}</span>
+                            </a>
+                            @endif
+                            @endforeach
+                        </div>
+                        @else
+                        <p class="text-sm text-gray-400 italic">Tidak ada bukti yang dilampirkan.</p>
+                        @endif
+                    </div>
+
                 </div>
 
                 <div class="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
@@ -164,11 +209,13 @@
                         </ul>
                         @endif
 
+                        @can('case.actor.manage')
                         <div class="mt-2">
                             <button class="px-3 py-1 bg-black text-white rounded text-sm"
                                 x-on:click="$dispatch('open-actor-modal', { caseId: {{ $case->id }} })">Tambah
                                 Pelaku</button>
                         </div>
+                        @endcan
                     </div>
                 </div>
 
@@ -180,9 +227,11 @@
             <div class="space-y-6">
 
                 {{-- Tasks --}}
+                @can('case.task.create')
                 <section>
                     <livewire:cases.case-actions :case-id="$case->id" />
                 </section>
+                @endcan
 
 
                 {{-- Documents & Discussion side-by-side --}}
@@ -200,8 +249,10 @@
                                     <p class="text-sm text-gray-500">{{ $doc->mime }}</p>
 
                                     <div class="flex gap-4 mt-2">
+                                        @can('case.document.view')
                                         <a href="{{ asset('storage/'.$doc->file_path) }}" target="_blank"
                                             class="text-blue-600 underline text-sm" title="Buka file">Buka File</a>
+                                        @endcan
                                         <button class="text-sm text-gray-700 underline"
                                             wire:click="$dispatch('open-edit-document-modal', { docId: {{ $doc->id }} })"
                                             title="Ubah metadata dokumen">Sunting</button>
@@ -209,9 +260,11 @@
                                 </div>
                                 @endforeach
 
+                                @can('case.document.upload')
                                 <button class="px-4 py-2 bg-black text-white rounded mt-4"
                                     x-on:click="$dispatch('open-upload-document-modal', { caseId: {{ $case->id }} })">Unggah
                                     Dokumen</button>
+                                @endcan
                             </div>
                         </div>
 
@@ -239,9 +292,11 @@
                 </div>
                 @endforeach
 
+                @can('case.timeline.add')
                 <button class="px-4 py-2 bg-black text-white rounded mt-4"
                     x-on:click="$dispatch('open-upload-timeline-modal', { caseId: {{ $case->id }} })">Tambah
                     Timeline</button>
+                @endcan
             </div>
             @endif
 
@@ -253,7 +308,7 @@
     @livewire('cases.upload-document-case')
     @livewire('cases.actor-cases')
     @livewire('cases.case-timeline')
-    
+
 
     {{-- SUCCESS TOAST --}}
 

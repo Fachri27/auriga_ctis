@@ -2,64 +2,42 @@
 
 namespace App\Http\Controllers;
 
-// use App\Models\CaseModel;
 use Illuminate\Support\Facades\DB;
-use App\Models\{Artikel, ArtikelTranslation, CaseModel};
+use App\Models\{Artikel, CaseModel};
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index($locale)
+    public function index(Request $request)
     {
         // =========================================
         // CASE LIST (PUBLIC)
         // =========================================
-        $cases = DB::table('cases')
-            ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
-            ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
-            ->leftJoin('reports', 'reports.id', '=', 'cases.report_id')
+        $locale = $request->get('locale', app()->getLocale());
+
+        $cases = DB::table('case_geometries')
             ->leftJoin('case_translations', function ($q) use ($locale) {
-                $q->on('cases.id', '=', 'case_translations.case_id')
+                $q->on('case_translations.case_id', '=', 'case_geometries.case_id')
                     ->where('case_translations.locale', $locale);
             })
-            ->where('cases.is_public', true)
+            ->leftJoin('case_translations as ct_fallback', function ($q) {
+                $q->on('ct_fallback.case_id', '=', 'case_geometries.case_id')
+                    ->where('ct_fallback.locale', 'id');
+            })
+            ->where('case_geometries.is_public', 1)
             ->select(
-                'cases.id',
-                'cases.case_number',
-                'case_translations.title',
-                'case_translations.description',
-                'statuses.key as status_key',
-                'statuses.name as status_name',
-                'reports.evidence',
-                'categories.slug'
+                'case_geometries.*',
+                // Pakai locale aktif, fallback ke id
+                DB::raw('COALESCE(case_translations.title, ct_fallback.title, case_geometries.title) as title'),
+                DB::raw('COALESCE(case_translations.description, ct_fallback.description) as case_description'),
             )
-            ->latest('cases.created_at')
             ->get();
 
 
         // =========================================
-        // FEATURED CASE (FIRST)
+        // FEATURED CASE (FIRST PUBLIC)
         // =========================================
-        $case = DB::table('cases')
-            ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
-            ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
-            ->leftJoin('reports', 'reports.id', '=', 'cases.report_id')
-            ->leftJoin('case_translations', function ($q) use ($locale) {
-                $q->on('cases.id', '=', 'case_translations.case_id')
-                    ->where('case_translations.locale', $locale);
-            })
-            ->where('cases.is_public', true)
-            ->select(
-                'cases.id',
-                'cases.case_number',
-                'case_translations.title',
-                'case_translations.description',
-                'statuses.key as status_key',
-                'statuses.name as status_name',
-                'reports.evidence',
-                'categories.slug'
-            )
-            ->latest('cases.created_at')
-            ->first();
+        $case = $cases->first();
 
 
         // =========================================
@@ -85,12 +63,10 @@ class HomeController extends Controller
             )
             ->get()
             ->map(function ($item) {
-                $categoryName = $item->category_name ?? $item->slug ?? 'Uncategorized';
-
                 return [
-                    'category_id' => $item->category_id,
-                    'category_name' => $categoryName,
-                    'count' => $item->count,
+                    'category_id'   => $item->category_id,
+                    'category_name' => $item->category_name ?? $item->slug ?? 'Uncategorized',
+                    'count'         => $item->count,
                 ];
             });
 
@@ -100,7 +76,7 @@ class HomeController extends Controller
         // =========================================
         $status = DB::table('cases')
             ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
-            ->where('cases.is_public', 1) // 🔥 penting
+            ->where('cases.is_public', 1)
             ->select(
                 'cases.status_id',
                 'statuses.key as status_key',
@@ -115,10 +91,10 @@ class HomeController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'status_id' => $item->status_id,
-                    'status_key' => $item->status_key ?? 'unknown',
+                    'status_id'   => $item->status_id,
+                    'status_key'  => $item->status_key  ?? 'unknown',
                     'status_name' => $item->status_name ?? 'Unknown',
-                    'count' => $item->count,
+                    'count'       => $item->count,
                 ];
             });
 
@@ -126,16 +102,6 @@ class HomeController extends Controller
         // =========================================
         // CASE DEVELOPMENT PER MONTH (LINE CHART)
         // =========================================
-        // $casesPerMonth = DB::table('cases')
-        //     ->select(
-        //         DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
-        //         DB::raw('count(id) as total')
-        //     )
-        //     ->where('is_public', true)
-        //     ->groupBy('month')
-        //     ->orderBy('month')
-        //     ->get();
-
         $casesPerMonth = CaseModel::select(
             DB::raw('DATE(created_at) as date'),
             DB::raw('count(*) as count')
@@ -147,7 +113,7 @@ class HomeController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'date' => $item->date,
+                    'date'  => $item->date,
                     'count' => $item->count,
                 ];
             });
@@ -172,9 +138,6 @@ class HomeController extends Controller
             ->get();
 
 
-        // =========================================
-        // RETURN VIEW
-        // =========================================
         return view('front.dashboard-user', compact(
             'cases',
             'case',
@@ -189,46 +152,59 @@ class HomeController extends Controller
 
     public function getCases($caseNumber)
     {
-        // list for sidebar/cards
+        $locale = app()->getLocale();
+
         $cases = DB::table('cases')
             ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
             ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
             ->leftJoin('reports', 'reports.id', '=', 'cases.report_id')
-            ->leftJoin('case_translations', function ($q) {
+            ->leftJoin('case_translations', function ($q) use ($locale) {
                 $q->on('cases.id', '=', 'case_translations.case_id')
-                    ->where('case_translations.locale', 'id');
+                    ->where('case_translations.locale', $locale);
             })
             ->where('cases.is_public', true)
             ->select(
                 'cases.id',
                 'cases.case_number',
-                'case_translations.*',
-                'statuses.key',
-                'statuses.name',
+                'case_translations.title',
+                'case_translations.description',
+                'statuses.key as status_key',
+                'statuses.name as status_name',
                 'reports.evidence',
-                'categories.slug',
+                'categories.slug'
             )
-            ->get();
+            ->latest('cases.created_at')
+            ->get()
+            ->map(function ($item) use ($locale) {
+                $item->title       = $item->title ?? '<em>Judul tidak tersedia dalam ' . strtoupper($locale) . '</em>';
+                $item->description = $item->description ?? null;
 
-        // specific case to show (must be public)
+                if (is_string($item->evidence)) {
+                    $item->evidence = json_decode($item->evidence, true) ?? [];
+                }
+
+                return $item;
+            });
+
         $case = DB::table('cases')
             ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
             ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
             ->leftJoin('reports', 'reports.id', '=', 'cases.report_id')
-            ->leftJoin('case_translations', function ($q) {
+            ->leftJoin('case_translations', function ($q) use ($locale) {
                 $q->on('cases.id', '=', 'case_translations.case_id')
-                    ->where('case_translations.locale', 'id');
+                    ->where('case_translations.locale', $locale);
             })
             ->where('cases.is_public', true)
             ->where('cases.case_number', $caseNumber)
             ->select(
                 'cases.id',
                 'cases.case_number',
-                'case_translations.*',
-                'statuses.key',
-                'statuses.name',
+                'case_translations.title',
+                'case_translations.description',
+                'statuses.key as status_key',
+                'statuses.name as status_name',
                 'reports.evidence',
-                'categories.slug',
+                'categories.slug'
             )
             ->first();
 
@@ -236,25 +212,30 @@ class HomeController extends Controller
             abort(404, 'Case not found');
         }
 
+        $case->title = $case->title ?? '<em>Judul tidak tersedia dalam ' . strtoupper($locale) . '</em>';
+
+        if (is_string($case->evidence)) {
+            $case->evidence = json_decode($case->evidence, true) ?? [];
+        }
+
         return view('front.dashboard-user', compact('cases', 'case'));
     }
 
-    public function preview($locale, $slug) 
+    public function preview($locale, $slug)
     {
+        app()->setLocale($locale);
+
         $case = DB::table('artikels')
             ->join('artikel_translations', 'artikel_translations.artikel_id', '=', 'artikels.id')
             ->where('artikels.slug', $slug)
             ->where('artikel_translations.locale', $locale)
-            ->select('artikels.*', 'artikel_translations.title', 'artikel_translations.excerpt', 'artikel_translations.content')
+            ->select(
+                'artikels.*',
+                'artikel_translations.title',
+                'artikel_translations.excerpt',
+                'artikel_translations.content'
+            )
             ->first();
-
-            // \dd($case);
-
-        // $case = Artikel::with('translation')
-        //     ->where('slug', $slug)
-        //     ->first();
-
-        // \dd($case);
 
         return view('front.preview-artikel', compact('case'));
     }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Artikel;
-use App\Models\CaseModel;
+use App\Models\{Artikel, CaseModel, Category};
 use App\Services\ReverseGeocoder;
+use Illuminate\Support\Facades\Log;
 
 class PublicCaseController extends Controller
 {
@@ -12,21 +12,18 @@ class PublicCaseController extends Controller
     {
         app()->setLocale($locale);
 
-        // NOTE: Legacy eager-load included process translations for complex workflows.
-        // OLD: 'timelines.process.translations' // deprecated for public UI
         $case = CaseModel::with([
             'translations',
-            'category.translations',
             'status',
-            // Public UI only needs the simplified timeline (notes + date)
             'timelines',
         ])
             ->where('case_number', $caseNumber)
             ->where('is_public', true)
             ->firstOrFail();
 
-        // For the public view use the simplified timeline helper
-        // $case->simple_timeline is available and returns chronological notes (title optional).
+        $categories = Category::with('translations')
+            ->whereIn('id', $case->category_ids ?? [])
+            ->get();
 
         $location = null;
 
@@ -39,13 +36,13 @@ class PublicCaseController extends Controller
 
         $artikel = Artikel::with('translation')
             ->where('status', 'active')
-            ->when($case->category_id, function ($q) use ($case) {
-                $q->where('category_id', $case->category_id);
+            ->when($case->category_ids, function ($q) use ($case) {
+                $q->whereIn('category_id', $case->category_ids);  // ← pakai whereIn karena array
             })
             ->latest()
             ->limit(6)
             ->get();
 
-        return view('public.case-detail', compact('case', 'location', 'artikel'));
+        return view('public.case-detail', compact('case', 'location', 'artikel', 'categories'));  // ← tambah categories
     }
 }

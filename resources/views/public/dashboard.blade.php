@@ -5,9 +5,9 @@
 
     {{-- HEADER --}}
     <section class="bg-white border-b">
-        <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="max-w-7xl mx-auto px-6 py-12">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Public Case Dashboard</h1>
-            <p class="mt-2 text-gray-600">Track and view public case information</p>
+            <p class=" text-gray-600">Track and view public case information</p>
         </div>
     </section>
 
