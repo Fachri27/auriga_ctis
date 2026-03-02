@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('case_translations', function (Blueprint $table) {
-            $table->text('perkembangan')->change();
+            $table->text('perkembangan')->nullable()->change();
             $table->text('pembelajaran')->change();
         });
     }
