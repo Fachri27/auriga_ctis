@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('case_translations', function (Blueprint $table) {
             $table->text('perkembangan')->nullable()->change();
-            $table->text('pembelajaran')->change();
+            $table->text('pembelajaran')->nullable()->change();
         });
     }
 
