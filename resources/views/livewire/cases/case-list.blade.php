@@ -52,7 +52,7 @@
                 <thead class="bg-gray-50 text-gray-600">
                     <tr>
                         <th class="p-4 text-left font-medium">No Kasus</th>
-                        <th class="p-4 text-left font-medium">Judul Kasus</th>
+                        <th class="p-4 text-left font-medium">Perkembangan Kasus</th>
                         <th class="p-4 text-left font-medium">Deskripsi</th>
                         <th class="p-4 text-left font-medium">Event Date</th>
                         <th class="p-4 text-left font-medium">Visibility</th>
@@ -67,6 +67,7 @@
                     $tr = $c->translations->firstWhere('locale', 'id') ?? $c->translations->first();
                     $title = $tr?->title ?? '-';
                     $desc = $tr?->description ?? '-';
+                    $perkembangan = $tr?->perkembangan ?? '-';
                     @endphp
                     <tr class="hover:bg-gray-50 transition">
                         {{-- CASE --}}
@@ -75,7 +76,7 @@
                             <div class="text-xs text-gray-500">ID: {{ $c->id }}</div>
                         </td>
 
-                        <td class="p-4 text-gray-700">{!! $title !!}</td>
+                        <td class="p-4 text-gray-700">{!! Str::limit($perkembangan, 150) !!}</td>
                         <td class="p-4 text-gray-700">{!! Str::limit($desc, 50) !!}</td>
 
                         {{-- DATE --}}

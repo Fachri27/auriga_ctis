@@ -11,7 +11,9 @@ class CaseTranslation extends Model
         'locale',
         'title',
         'summary',
-        'description'
+        'description',
+        'perkembangan',
+        'pembelajaran',
     ];
 
     public function case()

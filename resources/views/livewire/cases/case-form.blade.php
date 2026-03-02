@@ -127,12 +127,12 @@
             <!-- Lat/Lng -->
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                    <label class="font-medium">Latitude</label>
-                    <input type="text" wire:model="lat" class="w-full border  p-2 mt-1 bg-gray-50">
+                    <label class="font-medium">Identitas Pelapor</label>
+                    <input type="text" wire:model="pelapor" class="w-full border  p-2 mt-1 bg-gray-50">
                 </div>
                 <div>
-                    <label class="font-medium">Longitude</label>
-                    <input type="text" wire:model="lng" class="w-full border  p-2 mt-1 bg-gray-50">
+                    <label class="font-medium">Identitas Terlapor</label>
+                    <input type="text" wire:model="terlapor" class="w-full border  p-2 mt-1 bg-gray-50">
                 </div>
             </div>
 
@@ -205,7 +205,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-10">
+        {{-- <div class="grid grid-cols-2 gap-4 mb-10">
             <div>
                 <label for="" class="font-medium">Korban</label>
                 <input type="text" wire:model="korban" class="w-full border  p-2 mt-1 bg-gray-50">
@@ -257,7 +257,7 @@
                 <label class="font-medium">Summary (EN)</label>
                 <input type="text" wire:model="summary_en" class="w-full border  p-2 mt-1 bg-gray-50">
             </div>
-        </div>
+        </div> --}}
 
         <!-- ========================= -->
         <!-- DESKRIPSI -->
@@ -287,6 +287,59 @@
             <p class="text-red-600 text-sm">{{ $message }}</p>
             @enderror
         </div>
+
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span x-show="lang === 'id'">Pembelajaran</span>
+                <span x-show="lang === 'en'">Learning</span>
+            </h2>
+
+            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
+            <div class="bg-white border rounded-xl p-4">
+                <h3 class="font-semibold mb-3">Content</h3>
+
+                <div x-show="lang === 'id'">
+                    {{-- editor_id --}}
+                    @includeWhen(true, 'front.components.tinymce-pembelajaran-id')
+                </div>
+
+                <div x-show="lang === 'en'">
+                    {{-- editor_en --}}
+                    @includeWhen(true, 'front.components.tinymce-pembelajaran-en')
+                </div>
+            </div>
+
+            @error('pembelajaran_en')
+            <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span x-show="lang === 'id'">Perkembangan Kasus</span>
+                <span x-show="lang === 'en'">Case Development</span>
+            </h2>
+
+            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
+            <div class="bg-white border rounded-xl p-4">
+                <h3 class="font-semibold mb-3">Content</h3>
+
+                <div x-show="lang === 'id'">
+                    {{-- editor_id --}}
+                    @includeWhen(true, 'front.components.tinymce-perkembangan-id')
+                </div>
+
+                <div x-show="lang === 'en'">
+                    {{-- editor_en --}}
+                    @includeWhen(true, 'front.components.tinymce-perkembangan-en')
+                </div>
+            </div>
+
+            @error('perkembangan_en')
+            <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
 
         <div class="bg-white p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">Bukti Foto / Video</h2>

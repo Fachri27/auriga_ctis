@@ -29,6 +29,8 @@ class CaseModel extends Model
         'jumlah_korban',
         'konflik',
         'category_ids',
+        'pelapor',
+        'terlapor',
 
     ];
 

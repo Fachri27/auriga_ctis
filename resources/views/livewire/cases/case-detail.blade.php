@@ -8,7 +8,7 @@
                 {{-- LEFT --}}
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
-                        {!! $case->title  !!}
+                        {!! $case->title !!}
                     </h1>
                     <p class="text-sm text-gray-500">
                         {{ $case->case_number }}
@@ -124,15 +124,22 @@
             <div class="grid grid-cols-3 gap-6">
 
                 <div class="col-span-2 space-y-4">
-                    <section>
-                        <h2 class="font-semibold text-lg mb-1">Summary</h2>
-                        <p class="text-gray-700">{!! $case->summary !!}</p>
-                    </section>
-
-                    <section>
-                        <h2 class="font-semibold text-lg mb-1">Description</h2>
+                    <section class="bg-white border rounded-xl p-4">
+                        <h2 class="font-bold text-lg mb-1">Description</h2>
                         <p class="whitespace-pre-line text-gray-700">
                             {!! $case->description !!}
+                        </p>
+                    </section>
+                    <section class="bg-white border rounded-xl p-4">
+                        <h2 class="font-bold text-lg mb-1">Perkembangan</h2>
+                        <p class="whitespace-pre-line text-gray-700">
+                            {!! $case->perkembangan !!}
+                        </p>
+                    </section>
+                    <section class="bg-white border rounded-xl p-4">
+                        <h2 class="font-bold text-lg mb-1">Pembelajaran</h2>
+                        <p class="whitespace-pre-line text-gray-700">
+                            {!! $case->pembelajaran !!}
                         </p>
                     </section>
 
@@ -193,11 +200,30 @@
                     </div>
                     <div>
                         <p class="text-gray-500">Location</p>
-                        <p>Lat {{ $case->latitude }}, Lng {{ $case->longitude }}</p>
+                        @if($location['village'] || $location['district'] || $location['province'])
+                        <p class="text-sm leading-snug">
+                            {{ implode(', ', array_filter([
+                            $location['village'],
+                            $location['district'],
+                            $location['province'],
+                            ])) }}
+                        </p>
+                        @else
+                        <p class="text-sm text-gray-400 italic">Lokasi tidak ditemukan</p>
+                        @endif
                     </div>
 
                     <div>
-                        <p class="text-gray-500">Pelaku</p>
+                        <div class="mt-2">
+                            <p class="text-gray-500">Pelapor</p>
+                            <p>{{ $case->pelapor }}</p>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-gray-500">Terlapor</p>
+                            <p>{{ $case->terlapor }}</p>
+                        </div>
+
+                        <p class="text-gray-500 mt-2">Pelaku</p>
 
                         @if($actors->isEmpty())
                         <p class="text-sm text-gray-500">Belum ada pelaku</p>

@@ -32,13 +32,13 @@ class CaseForm extends Component
     // Localization
     public $title_id;
 
-    public $summary_id;
+    public $summary_id = null;
 
     public $desc_id;
 
     public $title_en;
 
-    public $summary_en;
+    public $summary_en = null;
 
     public $desc_en;
 
@@ -65,11 +65,17 @@ class CaseForm extends Component
     public $category_ids = [];
     public $existingBukti = [];
 
+    public $perkembangan_id;
+    public $perkembangan_en;
+    public $pembelajaran_id;
+    public $pembelajaran_en;
+    public $pelapor;
+    public $terlapor;
+
     protected $rules = [
         // 'category_id' => 'required',
         'status_id' => 'required',
         'event_date' => 'required|date',
-        'title_id' => 'required|string|max:255',
         'category_ids' => 'required|array|min:1',
         'category_ids.*' => 'integer|exists:categories,id',
     ];
@@ -100,6 +106,12 @@ class CaseForm extends Component
                 'jenis_kelamin' => $this->case->jenis_kelamin,
                 'jumlah_korban' => $this->case->jumlah_korban,
                 'konflik' => $this->case->konflik,
+                'perkembangan_id' => $idTranslation->perkembangan ?? '',
+                'perkembangan_en' => $enTranslation->perkembangan ?? '',
+                'pembelajaran_id' => $idTranslation->pembelajaran ?? '',
+                'pembelajaran_en' => $enTranslation->pembelajaran ?? '',
+                'pelapor' => $this->case->pelapor,
+                'terlapor' => $this->case->terlapor,
             ]);
 
             // dd($this->case);
@@ -329,6 +341,8 @@ class CaseForm extends Component
             'jenis_kelamin' => $this->jenis_kelamin,
             'jumlah_korban' => $this->jumlah_korban,
             'konflik' => $this->konflik,
+            'pelapor' => $this->pelapor,
+            'terlapor' => $this->terlapor,
         ];
 
         $case->fill($data)->save();
@@ -338,9 +352,11 @@ class CaseForm extends Component
             CaseTranslation::updateOrCreate(
                 ['case_id' => $case->id, 'locale' => $locale],
                 [
-                    'title' => $locale === 'id' ? $this->title_id : $this->title_en ?? '',
-                    'summary' => $locale === 'id' ? $this->summary_id : $this->summary_en ?? '',
+                    'title' => Str::of($locale === 'id' ? $this->desc_id : $this->desc_en ?? '')->words(8, '...'),
+                    'summary' => Str::of($locale === 'id' ? $this->desc_id : $this->desc_en ?? '')->words(20, '...'),
                     'description' => $locale === 'id' ? $this->desc_id : $this->desc_en ?? '',
+                    'perkembangan' => $locale === 'id' ? $this->perkembangan_id : $this->perkembangan_en ?? '',
+                    'pembelajaran' => $locale === 'id' ? $this->pembelajaran_id : $this->pembelajaran_en ?? '',
                 ]
             );
         }
@@ -348,9 +364,9 @@ class CaseForm extends Component
         // \dd($case);
 
         logger()->info('CATEGORY IDS', [
-    'raw' => $case->category_ids,
-    'type' => gettype($case->category_ids),
-]);
+            'raw' => $case->category_ids,
+            'type' => gettype($case->category_ids),
+        ]);
 
 
         // 3.1️⃣ Auto-generate tasks for this category (if templates exist)
@@ -388,6 +404,8 @@ class CaseForm extends Component
 
         // dd($case);
         // dd($data);
+
+
 
         session()->flash('success', 'Kasus berhasil disimpan.');
 

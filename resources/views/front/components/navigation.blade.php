@@ -33,8 +33,6 @@
             <!-- Public dashboard filters -->
             <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']) }}"
                 class="hover:text-gray-300 {{ request('filter') === 'active' ? 'font-semibold' : '' }}">Dashboard</a>
-
-            <a href="{{ route('report.form', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.report_case') }}</a>
             <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Artikel</a>
             <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.verified_cases') }}</a>
             {{-- <a href="#" class="hover:text-gray-300">Documentation</a> --}}
@@ -154,13 +152,11 @@
         style="display: none !important;">
         <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="block">About</a>
         <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']) }}"
-            class="block">Under Investigation</a>
-        <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'published']) }}"
-            class="block">Published Cases</a>
-        <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'closed']) }}"
-            class="block">Closed Cases</a>
-        <a href="{{ route('report.form', ['locale' => app()->getLocale()]) }}" class="block">Report a Case</a>
-        <a href="#" class="block">Verified Case</a>
+            class="block">Dashboard</a>
+        <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}"
+            class="block">{{ __('messages.verified_cases') }}</a>
+        <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}"
+            class="block">Artikel</a>
         {{-- <a href="#" class="block">Documentation</a> --}}
 
         <div class="pt-3 border-t border-white/10">

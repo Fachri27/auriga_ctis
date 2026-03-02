@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class PublicCaseController extends Controller
 {
+    
     public function show(string $locale, string $caseNumber, ReverseGeocoder $geo)
     {
         app()->setLocale($locale);

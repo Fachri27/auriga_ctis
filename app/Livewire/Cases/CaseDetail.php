@@ -4,8 +4,9 @@ namespace App\Livewire\Cases;
 
 use Illuminate\Support\Facades\{DB, Log};
 use App\Models\{CaseModel, Status};
-use App\Services\{CaseActionService, CaseStatusService};
+use App\Services\{CaseActionService, CaseStatusService, ReverseGeocoder};
 use Livewire\{Component, WithFileUploads};
+
 
 class CaseDetail extends Component
 {
@@ -36,6 +37,8 @@ class CaseDetail extends Component
 
     public array $availableStatuses = [];
 
+    public array $location = ['province' => null, 'district' => null, 'village' => null];
+
     protected $listeners = [
         'refresh-case-detail' => '$refresh',
     ];
@@ -57,6 +60,11 @@ class CaseDetail extends Component
         }
 
         $this->availableStatuses = Status::pluck('name','key')->toArray();
+
+        if ($this->case->latitude && $this->case->longitude) {
+            $this->location = app(ReverseGeocoder::class)
+                ->getLocation($this->case->latitude, $this->case->longitude);
+        }
     }
 
     private function loadCase()
@@ -85,6 +93,8 @@ class CaseDetail extends Component
                 'case_translations.title',
                 'case_translations.summary',
                 'case_translations.description',
+                'case_translations.perkembangan',
+                'case_translations.pembelajaran',
                 'categories.slug as category_name',
                 'statuses.name as status_name',
                 'statuses.key as status_key'
