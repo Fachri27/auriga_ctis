@@ -20,5 +20,7 @@ return [
     'submit_report_text' => 'Submit a Public Report',
     'help' => 'Help us maintain transparency and accountability by reporting issues.',
     'submit_report' => 'Submit Report',
-    'footer' => 'Auriga Nusantara Foundation is a non-governmental organization engaged in efforts to preserve natural resources and the environment to improve the quality of human life. To achieve our goals, we continue to conduct investigative research, encourage policy changes to better manage natural resources and the environment.'
+    'footer' => 'Auriga Nusantara Foundation is a non-governmental organization engaged in efforts to preserve natural resources and the environment to improve the quality of human life. To achieve our goals, we continue to conduct investigative research, encourage policy changes to better manage natural resources and the environment.',
+    'artikel' => 'Articles',
+    'kasus' => 'Cases',
 ];

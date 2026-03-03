@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
-use App\Models\{Artikel, CaseModel};
 use Illuminate\Http\Request;
+use App\Models\{Artikel, CaseModel, Category};
 
 class HomeController extends Controller
 {
@@ -137,6 +137,24 @@ class HomeController extends Controller
             ->latest()
             ->get();
 
+        $kasus = CaseModel::with(['category', 'status'])
+            ->whereNotNull('published_at')
+            ->where('is_public', true)
+            ->orderByDesc('event_date')
+            ->get();
+
+        
+        $caseCat = CaseModel::with([
+                'translations',
+                'status',
+                'timelines',
+            ])
+                ->where('is_public', true)
+                ->firstOrFail();
+        // pecah category_ids untuk kasus yang punya banyak kategori
+         $categories = Category::with('translations')
+            ->whereIn('id', $caseCat->category_ids ?? [])
+            ->get();
 
         return view('front.dashboard-user', compact(
             'cases',
@@ -145,7 +163,9 @@ class HomeController extends Controller
             'status',
             'casesPerMonth',
             'totalCases',
-            'artikels'
+            'artikels',
+            'kasus',
+            'categories',
         ));
     }
 

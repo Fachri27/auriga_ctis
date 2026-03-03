@@ -20,5 +20,7 @@ return [
     'submit_report_text' => 'Kirim Laporan Publik',
     'help' => 'Bantu kami menjaga transparansi dan akuntabilitas dengan melaporkan masalah.',
     'submit_report' => 'Kirim Laporan',
-    'footer' => 'Yayasan Auriga Nusantara adalah organisasi non-pemerintah yang bergerak dalam upaya pelestarian sumber daya alam dan lingkungan untuk meningkatkan kualitas hidup manusia. Untuk mencapai tujuan kami, kami terus melakukan riset investigatif, mendorong perubahan kebijakan untuk pengelolaan sumber daya alam dan lingkungan yang lebih baik.'
+    'footer' => 'Yayasan Auriga Nusantara adalah organisasi non-pemerintah yang bergerak dalam upaya pelestarian sumber daya alam dan lingkungan untuk meningkatkan kualitas hidup manusia. Untuk mencapai tujuan kami, kami terus melakukan riset investigatif, mendorong perubahan kebijakan untuk pengelolaan sumber daya alam dan lingkungan yang lebih baik.',
+    'artikel' => 'Artikel',
+    'kasus' => 'Kasus',
 ];
