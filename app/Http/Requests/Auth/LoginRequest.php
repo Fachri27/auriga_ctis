@@ -49,6 +49,18 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // additional check: ensure the user has verified their email
+        $user = Auth::user();
+        if ($user && ! $user->hasVerifiedEmail()) {
+            // log the user out immediately
+            Auth::logout();
+            RateLimiter::clear($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Please verify your email address first.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

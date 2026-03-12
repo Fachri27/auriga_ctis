@@ -145,17 +145,19 @@ class HomeController extends Controller
 
         
         $caseCat = CaseModel::with([
-                'translations',
-                'status',
-                'timelines',
-            ])
-                ->where('is_public', true)
-                ->firstOrFail();
-        // pecah category_ids untuk kasus yang punya banyak kategori
-         $categories = Category::with('translations')
-            ->whereIn('id', $caseCat->category_ids ?? [])
-            ->get();
+        'translations',
+        'status',
+        'timelines',
+        ])
+        ->where('is_public', true)
+        ->first(); // ← tidak throw 404
 
+        $categories = $caseCat
+            ? Category::with('translations')
+                ->whereIn('id', $caseCat->category_ids ?? [])
+                ->get()
+            : collect(); // ← return empty collection kalau tidak ada case publik
+        
         return view('front.dashboard-user', compact(
             'cases',
             'case',

@@ -12,9 +12,10 @@ class ArtikelController extends Controller
     {
         $artikels = DB::table('artikels')
             ->join('artikel_translations', 'artikel_translations.artikel_id', '=', 'artikels.id')
+            ->join('categories', 'categories.id', '=', 'artikels.category_id')
             ->where('artikels.status', 'active')
             ->where('artikel_translations.locale', $locale)
-            ->select('artikels.*', 'artikel_translations.title', 'artikel_translations.excerpt', 'artikel_translations.content')
+            ->select('artikels.*', 'artikel_translations.title', 'artikel_translations.excerpt', 'artikel_translations.content', 'categories.slug as category_name')
             ->get();
 
         return view('front.artikels', compact('artikels', 'locale'));

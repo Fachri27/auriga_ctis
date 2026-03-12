@@ -69,16 +69,15 @@ class CaseDetail extends Component
 
     private function loadCase()
     {
-        $locale = app()->getLocale();
 
         // Ambil semua translations untuk case ini
         $translations = DB::table('case_translations')
             ->where('case_id', $this->case_id)
             ->get();
 
-        // Pilih translation: locale aktif → 'id' → apapun yang ada
-        $trans = $translations->firstWhere('locale', $locale)
-            ?? $translations->firstWhere('locale', 'id')
+        // Pilih translation: id → en → apapun yang ada
+        $trans = $translations->firstWhere('locale', 'id')
+            ?? $translations->firstWhere('locale', 'en')
             ?? $translations->first();
 
         $this->case = DB::table('cases')
@@ -257,10 +256,6 @@ class CaseDetail extends Component
 
     public function publishCases()
     {
-        // Log::critical('PUBLISH CLICKED', [
-        //     'case_id' => $this->case_id,
-        //     'user_id' => auth()->id(),
-        // ]);
         if (! auth()->user()->can('case.publish')) {
             session()->flash('error', 'You do not have permission to publish cases.');
 
@@ -275,7 +270,6 @@ class CaseDetail extends Component
         DB::beginTransaction();
 
         try {
-            // 🔒 Ambil data fresh + lock
             $case = DB::table('cases')
                 ->leftJoin('case_translations', function ($q) {
                     $q->on('case_translations.case_id', '=', 'cases.id')
@@ -283,7 +277,7 @@ class CaseDetail extends Component
                 })
                 ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
                 ->where('cases.id', $this->case_id)
-                ->select('cases.*', 'case_translations.title', 'categories.slug as category_name')
+                ->select('cases.*', 'case_translations.title', 'case_translations.description', 'categories.slug as category_name')
                 ->lockForUpdate()
                 ->first();
 
@@ -293,24 +287,38 @@ class CaseDetail extends Component
 
             $firstPublish = is_null($case->published_at);
 
-            // ✅ UPDATE VISIBILITY (PASTI JALAN)
             DB::table('cases')
                 ->where('id', $this->case_id)
                 ->update([
-                    'is_public' => true,
+                    'is_public'    => true,
                     'published_at' => $case->published_at ?? now(),
-                    'updated_at' => now(),
+                    'updated_at'   => now(),
                 ]);
 
-            // 📝 Timeline hanya sekali
-            if ($firstPublish) {
-                DB::table('case_timelines')->insert([
-                    'case_id' => $this->case_id,
-                    'actor_id' => auth()->id(),
-                    'notes' => 'Case published (made public) by '.auth()->user()->name.'.',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            // 📝 Timeline hanya dicatat saat pertama kali publish
+            // if ($firstPublish) {
+            //     DB::table('case_timelines')->insert([
+            //         'case_id'    => $this->case_id,
+            //         'actor_id'   => auth()->id(),
+            //         'notes'      => 'Case published (made public) by ' . auth()->user()->name . '.',
+            //         'created_at' => now(),
+            //         'updated_at' => now(),
+            //     ]);
+            // }
+
+            // ✉️ Kirim notifikasi ke semua user SETIAP publish
+            $users = \App\Models\User::whereNotNull('email')
+                ->where('email', '!=', '')
+                ->get();
+
+            foreach ($users as $user) {
+                \Mail::to($user->email)->queue(new \App\Mail\NewCaseMail((object)[
+                    'id'          => $this->case_id,
+                    'case_number' => $case->case_number,
+                    'title'       => $case->title,
+                    'description' => $case->description,
+                    'locale'     => app()->getLocale(),
+                ]));
             }
 
             // 🔄 Ambil ulang case SETELAH update
@@ -324,13 +332,10 @@ class CaseDetail extends Component
                 ->select('cases.*', 'case_translations.title', 'categories.slug as category_name')
                 ->first();
 
-            // 🌍 SYNC GEOMETRY (IDEMPOTENT & AMAN)
             $this->syncGeometry($case);
-            
 
             DB::commit();
 
-            // 🔁 Reload Livewire state
             $this->loadCase();
             $this->dispatch('refresh-case-detail');
 
@@ -338,7 +343,7 @@ class CaseDetail extends Component
 
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::error("Publish case error {$this->case_id}: ".$th->getMessage());
+            Log::error("Publish case error {$this->case_id}: " . $th->getMessage());
             session()->flash('error', $th->getMessage());
         }
     }

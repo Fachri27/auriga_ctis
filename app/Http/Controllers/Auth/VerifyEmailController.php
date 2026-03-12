@@ -2,26 +2,44 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\{RedirectResponse, Request};
+use App\Http\Controllers\Controller;
+use App\Models\User;
 
 class VerifyEmailController extends Controller
 {
     /**
      * Mark the authenticated user's email address as verified.
      */
-    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    public function __invoke(Request $request): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
-        }
+        try {
+            $user = User::findOrFail($request->route('id'));
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
-        }
+            // Verify the hash matches
+            if (! hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+                return redirect()->route('login')->with('error', 'Invalid or expired verification link.');
+            }
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+            if ($user->hasVerifiedEmail()) {
+                return redirect()->route('login')->with('status', 'Email already verified. You can now log in.');
+            }
+
+            if ($user->markEmailAsVerified()) {
+                event(new Verified($user));
+            }
+
+            // Check if current user is authenticated - if yes, logout so they can login again
+            if (auth()->check()) {
+                auth()->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            return redirect()->route('login')->with('status', 'Email verified successfully! You can now log in with your credentials.');
+        } catch (\Exception $e) {
+            return redirect()->route('login')->with('error', 'Verification failed. Please try again.');
+        }
     }
 }

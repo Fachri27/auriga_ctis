@@ -88,7 +88,7 @@ $cases = $limit
                 {{-- Footer --}}
                 <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                     <a href="{{ route('public.verify.case', $case->case_number) }}"
-                        class="text-xs font-bold uppercase tracking-widest bg-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
                         Lihat Detail
                     </a>
                 </div>

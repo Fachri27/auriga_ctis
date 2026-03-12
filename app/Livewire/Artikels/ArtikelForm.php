@@ -4,7 +4,7 @@ namespace App\Livewire\Artikels;
 
 use Illuminate\Support\Facades\Storage;
 use App\Models\{Artikel, ArtikelTranslation};
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use DB;
 use Str;
 use Livewire\{Component, WithFileUploads};

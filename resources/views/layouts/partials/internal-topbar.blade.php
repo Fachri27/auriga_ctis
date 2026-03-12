@@ -30,10 +30,10 @@
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('case.index') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             All Cases
         </a>
-        <a href="{{ route('reports.index') }}"
+        {{-- <a href="{{ route('reports.index') }}"
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('reports.index') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             Laporan Masuk
-        </a>
+        </a> --}}
         <a href="{{ route('categoris.index') }}"
             class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('categoris.*') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
             Categories

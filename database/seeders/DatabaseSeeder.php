@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             CaseSeeder::class,     // dijalankan
             RealisticCasesSeeder::class, // development helper: insert 10 realistic cases
             RealisticCaseSeeder::class,  // development helper: insert 1 realistic case with full workflow
+            UserDuaSeeder::class, // untuk insert
             UpdateStatusNamesSeeder::class,
         ]);
     }

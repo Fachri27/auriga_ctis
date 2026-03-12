@@ -38,6 +38,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@ctis.id',
             'password' => bcrypt('123456'),
+            'verified_at' => now(), // Mark as verified for testing
         ]);
         $admin->assignRole('admin');
 
