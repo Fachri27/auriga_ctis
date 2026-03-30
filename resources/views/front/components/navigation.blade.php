@@ -20,7 +20,7 @@
             <!-- LOGO -->
             <div class="flex items-center space-x-2">
                 <a href="{{ route('dashboard-user') }}">
-                    <img src="/img/image.png" class="h-20" alt="Logo">
+                    <img src="/img/image.png" class="h-12 sm:h-14 lg:h-16 w-auto object-contain" alt="Logo">
                 </a>
             </div>
         </div>
