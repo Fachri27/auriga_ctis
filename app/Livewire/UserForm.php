@@ -60,6 +60,7 @@ class UserForm extends Component
             $user->update([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
+                'email_verified_at' => now(),
             ]);
 
             if (!empty($this->password)) {
@@ -72,6 +73,7 @@ class UserForm extends Component
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'email_verified_at' => now(),
             ]);
         }
 

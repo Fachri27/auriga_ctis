@@ -400,6 +400,22 @@ class CaseForm extends Component
             'bukti' => $existing,
         ]);
 
+        // ✉️ Kirim notifikasi ke semua admin ketika case baru dibuat
+        if (!$this->caseId) { // Hanya untuk case baru, bukan edit
+            try {
+                $admins = \App\Models\User::role('admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new \App\Notifications\NewCaseNotification((object)[
+                        'id' => $case->id,
+                        'title' => $case->title ?? 'Case ' . $case->case_number,
+                        'description' => $this->desc_id ?? '',
+                    ]));
+                }
+            } catch (\Throwable $e) {
+                \Log::error('Failed to send case creation notification: ' . $e->getMessage());
+            }
+        }
+
         // dd($data);
 
         // dd($case);

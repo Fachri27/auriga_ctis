@@ -98,11 +98,7 @@
             @endforeach
         </div>
 
-        <div class="mt-10 text-center">
-            <a href="#" class="inline-flex items-center gap-2 text-sm text-teal-300 hover:text-white transition-colors font-medium">
-                Pelajari lebih lanjut tentang proses hukum →
-            </a>
-        </div>
+        
     </div>
 </div>
 
