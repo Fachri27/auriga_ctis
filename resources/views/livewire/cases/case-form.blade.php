@@ -338,7 +338,7 @@
             @enderror
         </div>
 
-        
+
         <div class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
                 <span x-show="lang === 'id'">Deskripsi Kasus</span>

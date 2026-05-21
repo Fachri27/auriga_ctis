@@ -73,7 +73,7 @@ class CaseForm extends Component
     public $pelapor;
     public $terlapor;
     public $sumber_id;
-    public $status_narasi;
+    public $status;
     public $instansi;
 
     protected $rules = [
@@ -118,7 +118,7 @@ class CaseForm extends Component
                 'terlapor' => $this->case->terlapor,
                 'sumber_id' => $this->case->sumber,
                 'instansi' => $this->case->instansi,
-                'status' => $this->case->status,
+                'status' => $this->case->status_narasi,
 
             ]);
 
@@ -352,7 +352,7 @@ class CaseForm extends Component
             'pelapor' => $this->pelapor,
             'terlapor' => $this->terlapor,
             'sumber' => $this->sumber_id,
-            'status' => $this->status_narasi,
+            'status_narasi' => $this->status,
             'instansi' => $this->instansi,
         ];
 
