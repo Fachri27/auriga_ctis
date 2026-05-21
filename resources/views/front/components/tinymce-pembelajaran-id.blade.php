@@ -163,7 +163,6 @@
                         });
                     }
                 }" x-init="initEditor" wire:ignore>
-    <label class="block font-medium mb-1">Pembelajaran (ID)</label>
     <textarea x-ref="pembelajaran_editor_id" id="pembelajaran_editor_id"></textarea>
 </div>
 

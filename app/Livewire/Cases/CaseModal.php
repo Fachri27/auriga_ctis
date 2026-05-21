@@ -2,12 +2,11 @@
 
 namespace App\Livewire\Cases;
 
-use App\Models\Category;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use App\Services\CaseTaskGenerator;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\{DB, Log};
 use Illuminate\Support\Str;
+
+use App\Services\CaseTaskGenerator;
+use App\Models\{Category, User};
 use Livewire\Component;
 
 class CaseModal extends Component
@@ -422,14 +421,16 @@ class CaseModal extends Component
                 'created_at' => now(),
             ]);
 
-            // ✉️ Kirim notifikasi ke semua admin KETIKA case dibuat (bukan hanya saat publish)
-            $admins = User::role('admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new NewCaseNotification((object)[
-                    'id' => $caseId,
-                    'title' => $this->title_id,
-                    'description' => $this->desc_id,
-                ]));
+            // Kirim notifikasi ke semua admin HANYA jika case sudah publish
+            if ($this->is_public) {
+                $admins = User::role('admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new NewCaseNotification((object)[
+                        'id' => $caseId,
+                        'title' => $this->title_id,
+                        'description' => $this->desc_id,
+                    ]));
+                }
             }
 
             DB::commit();

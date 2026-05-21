@@ -1,10 +1,10 @@
-<div x-show="lang === 'en'" x-data="{
-                    pembelajaran_en: @entangle('pembelajaran_en'),
+<div x-show="lang === 'id'" x-data="{
+                    sumber_id: @entangle('sumber_id'),
                     initEditor() {
                         let self = this;
-                        if (tinymce.get('pembelajaran_editor_en')) tinymce.get('pembelajaran_editor_en').remove();
+                        if (tinymce.get('sumber_editor_id')) tinymce.get('sumber_editor_id').remove();
                         tinymce.init({
-                            target: this.$refs.pembelajaran_editor_en,
+                            target: this.$refs.sumber_editor_id,
                             plugins: 'advlist anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount code fullscreen insertdatetime help preview',
                             toolbar: 'undo redo | styles | addImage | addVideo | addBorderMerah | addSlider | bold italic underline strikethrough forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | code removeformat | fullscreen preview',
                             extended_valid_elements: 'iframe[src|width|height|frameborder|allowfullscreen|style|class|loading|referrerpolicy]',
@@ -20,6 +20,7 @@
                             paste_as_text: false,
 
                             content_style: 'iframe { width:100%; height:400px; }',
+
                             font_size_formats: '8pt 10pt 12pt 14pt 16pt 18pt 24pt 36pt 48pt',
                             menubar: 'file edit view insert format tools table',
                             skin: true,
@@ -43,11 +44,25 @@
                             entity_encoding: 'raw',
                             setup(editor) {
                                 editor.on('init', () => {
-                                    editor.setContent(self.pembelajaran_en || '');
+                                    editor.setContent(self.sumber_id || '');
                                 });
                                 editor.on('change keyup', () => {
-                                    self.pembelajaran_en = editor.getContent();
+                                    self.sumber_id = editor.getContent();
                                 });
+
+                                {{-- editor.ui.registry.addButton('addImage', {
+                                    text: '+ Tambah Image',
+                                    onAction: function () {
+                                        editor.insertContent(`
+                                        <section class='add-vidio'
+                                            <div class='caption-foto' style='line-height: 80% !important;'><span style='color:#000000;'>
+                                                <video autoplay='' controls='' loop='' muted='' style='max-width: 1000px; display: block; margin: 0 auto;' width='100%'><source src='https://placehold.co/800x450' type='video/mp4'></video>
+                                                <small style='font-size: 12px !important;''>Deforestasi di wilayah konsesi PT Industrial Forest Plantation, 2021–25 © Auriga / Earthsight. Sumber gambar: Sentinel-2 melalui Google Earth Engine</small></span></div>
+                                                
+                                        </section>
+                                        `);
+                                    }
+                                }); --}}
 
                                 editor.ui.registry.addButton('addVideo', {
                                     text: '+ Tambah Video',
@@ -128,6 +143,7 @@
                                             `);
                                         }
                                 });
+
                             },
                             file_picker_callback(callback, value, meta) {
                                 let cmsURL = '/laravel-filemanager?editor=' + meta.fieldname;
@@ -147,5 +163,6 @@
                         });
                     }
                 }" x-init="initEditor" wire:ignore>
-    <textarea x-ref="pembelajaran_editor_en" id="pembelajaran_editor_en"></textarea>
+    <textarea x-ref="sumber_editor_id" id="sumber_editor_id"></textarea>
 </div>
+

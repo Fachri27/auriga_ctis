@@ -6,10 +6,10 @@
             <span x-show="lang === 'en'">Submit Cases</span>
         </h1>
 
-        @if(session('success'))
-        <div class="p-4 mb-5 text-green-700 bg-green-100 rounded">
-            {{ session('success') }}
-        </div>
+        @if (session('success'))
+            <div class="p-4 mb-5 text-green-700 bg-green-100 rounded">
+                {{ session('success') }}
+            </div>
         @endif
 
         {{-- Language --}}
@@ -36,58 +36,94 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             <!-- Category -->
             <div x-data="{
-        ts: null,
-        init() {
-            this.ts = new TomSelect(this.$refs.select, {
-                plugins: ['remove_button'],
-                closeAfterSelect: false,
-                hideSelected: true,
-                onChange: (values) => {
-                    const parsed = values.map(v => Number(v))
-
-                    //PAKSA SET KE LIVEWIRE
-                    @this.set('category_ids', parsed)
+                ts: null,
+                init() {
+                    this.ts = new TomSelect(this.$refs.select, {
+                        plugins: ['remove_button'],
+                        closeAfterSelect: false,
+                        hideSelected: true,
+                        onChange: (values) => {
+                            const parsed = values.map(v => Number(v))
+            
+                            //PAKSA SET KE LIVEWIRE
+                            @this.set('category_ids', parsed)
+                        }
+                    })
+            
+                    //SET VALUE SAAT COMPONENT LOAD
+                    this.$nextTick(() => {
+                        if (@this.get('category_ids')?.length) {
+                            this.ts.setValue(@this.get('category_ids').map(v => String(v)))
+                        }
+                    })
                 }
-            })
-
-            //SET VALUE SAAT COMPONENT LOAD
-            this.$nextTick(() => {
-                if (@this.get('category_ids')?.length) {
-                    this.ts.setValue(@this.get('category_ids').map(v => String(v)))
-                }
-            })
-        }
-    }" wire:ignore class="mb-6">
+            }" wire:ignore class="mb-6">
                 <label class="text-sm font-medium">Category</label>
 
                 <select x-ref="select" multiple class="w-full border p-1 mt-1 bg-gray-50">
-                    @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}">
-                        {{ $cat->name ?? $cat->slug }}
-                    </option>
+                    @foreach ($categories as $cat)
+                        <option value="{{ $cat->id }}">
+                            {{ $cat->name ?? $cat->slug }}
+                        </option>
                     @endforeach
                 </select>
             </div>
+
+
+
 
             <!-- Status -->
             <div>
                 <label class="text-sm">Status</label>
                 <select wire:model="status_id" class="w-full border  p-2 mt-1 bg-gray-50">
                     <option value="">Select status…</option>
-                    @foreach($statuses as $st)
-                    <option value="{{ $st->id }}">{{ $st->name }}</option>
+                    @foreach ($statuses as $st)
+                        <option value="{{ $st->id }}">{{ $st->name }}</option>
                     @endforeach
                 </select>
-                @error('status_id') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+                @error('status_id')
+                    <p class="text-red-600 text-sm">{{ $message }}</p>
+                @enderror
             </div>
 
 
         </div>
+
+        {{-- Title & Slug ID --}}
+        <div x-show="lang === 'id'" x-data="{
+            title: @js(old('title_id', $title_id ?? '')),
+            slug: @js(old('slugId', $slugId ?? '')),
+            makeSlug(text) {
+                return text.toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+        }" x-init="if (title && !slug) { slug = makeSlug(title) }">
+
+            <label class="font-medium">Judul Kasus (ID)</label>
+            <input type="text" wire:model="title_id" x-model="title" @input="slug = makeSlug(title)"
+                class="w-full border px-3 py-2 mt-1">
+        </div>
+
+        {{-- Title EN --}}
+        <div x-show="lang === 'en'" x-data="{
+            slug: @js(old('slugEn', $slugEn ?? '')),
+            makeSlug(text) {
+                return text.toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+        }" x-init="if (title && !slug) { slug = makeSlug(title) }">
+            <label class="font-medium">Title Case (EN)</label>
+            <input type="text" wire:model="title_en" class="w-full border px-3 py-2 mt-1">
+        </div>
         <!-- Event Date -->
-        <div>
+        <div class="mt-8">
             <label class="text-sm">Event Date</label>
             <input type="date" wire:model="event_date" class="w-full border  p-2 mt-1 bg-gray-50">
-            @error('event_date') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
+            @error('event_date')
+                <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
         </div>
 
         <!-- ========================= -->
@@ -99,7 +135,7 @@
             {{-- <label class="block font-medium mb-1">Provinsi</label>
             <select wire:model.live="province_id" class="w-full border rounded-xl p-2 bg-gray-50 mb-4">
                 <option value="">Pilih provinsi...</option>
-                @foreach($provinces as $p)
+                @foreach ($provinces as $p)
                 <option value="{{ $p['id'] }}">{{ $p['name'] }}</option>
                 @endforeach
             </select> --}}
@@ -108,7 +144,7 @@
             {{-- <label class="block font-medium mb-1">Kota / Kabupaten</label>
             <select wire:model.live="city_id" class="w-full border rounded-xl p-2 bg-gray-50 mb-4">
                 <option value="">Pilih kota...</option>
-                @foreach($cities as $c)
+                @foreach ($cities as $c)
                 <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
                 @endforeach
             </select> --}}
@@ -117,7 +153,7 @@
             {{-- <label class="block font-medium mb-1">Kecamatan</label>
             <select wire:model.live="district_id" class="w-full border rounded-xl p-2 bg-gray-50 mb-6">
                 <option value="">Pilih kecamatan...</option>
-                @foreach($districts as $d)
+                @foreach ($districts as $d)
                 <option value="{{ $d['id'] }}">{{ $d['name'] }}</option>
                 @endforeach
             </select> --}}
@@ -173,22 +209,23 @@
                         class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-black focus:border-black" />
 
                     {{-- DROPDOWN --}}
-                    @if(count($results) > 0)
-                    <div x-show="open" x-transition x-cloak @click.away="open = false" class="absolute left-0 right-0 z-[9999] mt-1
+                    @if (count($results) > 0)
+                        <div x-show="open" x-transition x-cloak @click.away="open = false"
+                            class="absolute left-0 right-0 z-[9999] mt-1
                                bg-white border border-gray-300
                                rounded-lg shadow-lg max-h-60 overflow-auto">
-                        @foreach($results as $item)
-                        <div wire:click="select(
+                            @foreach ($results as $item)
+                                <div wire:click="select(
                                                 '{{ $item['id'] }}',
                                                 '{{ $item['text'] }}',
                                                 '{{ $item['lat'] }}',
                                                 '{{ $item['long'] }}'
-                                            )" @click="open = false"
-                            class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
-                            {{ $item['text'] }}
+                                            )"
+                                    @click="open = false" class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                    {{ $item['text'] }}
+                                </div>
+                            @endforeach
                         </div>
-                        @endforeach
-                    </div>
                     @endif
 
                 </div>
@@ -262,6 +299,46 @@
         <!-- ========================= -->
         <!-- DESKRIPSI -->
         <!-- ========================= -->
+
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span>Instansi</span>
+            </h2>
+
+            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
+            <div class="bg-white border rounded-xl p-4">
+
+                <div>
+                    {{-- editor_id --}}
+                    @includeWhen(true, 'front.components.instansi')
+                </div>
+            </div>
+
+            @error('instansi')
+                <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span>Narasi Status</span>
+            </h2>
+
+            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
+            <div class="bg-white border rounded-xl p-4">
+
+                <div>
+                    {{-- editor_id --}}
+                    @includeWhen(true, 'front.components.status')
+                </div>
+            </div>
+
+            @error('status')
+                <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
+        
         <div class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
                 <span x-show="lang === 'id'">Deskripsi Kasus</span>
@@ -284,14 +361,14 @@
             </div>
 
             @error('description')
-            <p class="text-red-600 text-sm">{{ $message }}</p>
+                <p class="text-red-600 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
         <div class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
-                <span x-show="lang === 'id'">Pembelajaran</span>
-                <span x-show="lang === 'en'">Learning</span>
+                <span x-show="lang === 'id'">Dugaan Permasalahan</span>
+                <span x-show="lang === 'en'">Potential Issues</span>
             </h2>
 
             {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
@@ -310,7 +387,7 @@
             </div>
 
             @error('pembelajaran_en')
-            <p class="text-red-600 text-sm">{{ $message }}</p>
+                <p class="text-red-600 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -336,7 +413,26 @@
             </div>
 
             @error('perkembangan_en')
-            <p class="text-red-600 text-sm">{{ $message }}</p>
+                <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span>Sumber</span>
+            </h2>
+
+            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
+            <div class="bg-white border rounded-xl p-4">
+
+                <div>
+                    {{-- editor_id --}}
+                    @includeWhen(true, 'front.components.sumber')
+                </div>
+            </div>
+
+            @error('sumber')
+                <p class="text-red-600 text-sm">{{ $message }}</p>
             @enderror
         </div>
 
@@ -347,13 +443,13 @@
             <input type="file" wire:model="bukti" multiple>
 
             @if ($existingBukti)
-            <div class="grid grid-cols-4 gap-3 mt-3">
-                @foreach ($existingBukti as $file)
-                <div class="p-2 rounded bg-white border text-xs text-center">
-                    {{ basename($file) }}
+                <div class="grid grid-cols-4 gap-3 mt-3">
+                    @foreach ($existingBukti as $file)
+                        <div class="p-2 rounded bg-white border text-xs text-center">
+                            {{ basename($file) }}
+                        </div>
+                    @endforeach
                 </div>
-                @endforeach
-            </div>
             @endif
         </div>
 
@@ -367,46 +463,44 @@
 </div>
 <script>
     function mapComponent(lat, lng) {
-    return {
-        map: null,
-        marker: null,
-        lat,
-        lng,
+        return {
+            map: null,
+            marker: null,
+            lat,
+            lng,
 
-        initMap() {
-            console.log('MAP INIT', this.lat, this.lng);
+            initMap() {
+                console.log('MAP INIT', this.lat, this.lng);
 
-            this.map = L.map('map').setView(
-                this.lat && this.lng
-                    ? [this.lat, this.lng]
-                    : [-2.5489, 118.0149],
-                this.lat && this.lng ? 14 : 5
-            );
+                this.map = L.map('map').setView(
+                    this.lat && this.lng ? [this.lat, this.lng] : [-2.5489, 118.0149],
+                    this.lat && this.lng ? 14 : 5
+                );
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            }).addTo(this.map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19
+                }).addTo(this.map);
 
-            if (this.lat && this.lng) {
-                this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
+                if (this.lat && this.lng) {
+                    this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
+                }
+
+                // 🔥 ini kuncinya
+                this.$watch('lat', () => this.updateMarker());
+                this.$watch('lng', () => this.updateMarker());
+            },
+
+            updateMarker() {
+                if (!this.lat || !this.lng || !this.map) return;
+
+                if (this.marker) {
+                    this.marker.setLatLng([this.lat, this.lng]);
+                } else {
+                    this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
+                }
+
+                this.map.setView([this.lat, this.lng], 14);
             }
-
-            // 🔥 ini kuncinya
-            this.$watch('lat', () => this.updateMarker());
-            this.$watch('lng', () => this.updateMarker());
-        },
-
-        updateMarker() {
-            if (!this.lat || !this.lng || !this.map) return;
-
-            if (this.marker) {
-                this.marker.setLatLng([this.lat, this.lng]);
-            } else {
-                this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
-            }
-
-            this.map.setView([this.lat, this.lng], 14);
         }
     }
-}
 </script>

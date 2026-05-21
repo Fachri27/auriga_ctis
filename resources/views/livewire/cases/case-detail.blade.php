@@ -5,7 +5,7 @@
         $completeness = [
         'Deskripsi' => !empty($case->description),
         'Perkembangan' => !empty($case->perkembangan),
-        'Pembelajaran' => !empty($case->pembelajaran),
+        'Dugaan Permasalahan' => !empty($case->pembelajaran),
         'Bukti' => !empty($case->bukti) && count($case->bukti) > 0,
         'Pelapor' => !empty($case->pelapor),
         'Pelaku' => $actors->isNotEmpty(),
@@ -308,7 +308,7 @@
                 {{-- Pembelajaran --}}
                 <section class="bg-white border rounded-xl p-4">
                     <div class="flex items-center justify-between mb-2">
-                        <h2 class="font-bold text-base">Pembelajaran</h2>
+                        <h2 class="font-bold text-base">Dugaan Permasalahan</h2>
                         {{-- @can('case.edit')
                         <a href="{{ route('admin.cases.edit', $case->id) }}#pembelajaran"
                             class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>

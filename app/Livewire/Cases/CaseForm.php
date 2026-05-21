@@ -4,6 +4,7 @@ namespace App\Livewire\Cases;
 
 use Illuminate\Support\Facades\{DB, Log};
 use Illuminate\Support\Str;
+
 use App\Models\{CaseModel, CaseTranslation, Category};
 use App\Services\CaseTaskGenerator;
 use Livewire\{Component, WithFileUploads};
@@ -71,6 +72,9 @@ class CaseForm extends Component
     public $pembelajaran_en;
     public $pelapor;
     public $terlapor;
+    public $sumber_id;
+    public $status_narasi;
+    public $instansi;
 
     protected $rules = [
         // 'category_id' => 'required',
@@ -112,6 +116,10 @@ class CaseForm extends Component
                 'pembelajaran_en' => $enTranslation->pembelajaran ?? '',
                 'pelapor' => $this->case->pelapor,
                 'terlapor' => $this->case->terlapor,
+                'sumber_id' => $this->case->sumber,
+                'instansi' => $this->case->instansi,
+                'status' => $this->case->status,
+
             ]);
 
             // dd($this->case);
@@ -343,6 +351,9 @@ class CaseForm extends Component
             'konflik' => $this->konflik,
             'pelapor' => $this->pelapor,
             'terlapor' => $this->terlapor,
+            'sumber' => $this->sumber_id,
+            'status' => $this->status_narasi,
+            'instansi' => $this->instansi,
         ];
 
         $case->fill($data)->save();
@@ -352,7 +363,7 @@ class CaseForm extends Component
             CaseTranslation::updateOrCreate(
                 ['case_id' => $case->id, 'locale' => $locale],
                 [
-                    'title' => Str::of($locale === 'id' ? $this->desc_id : $this->desc_en ?? '')->words(8, '...'),
+                    'title' => $locale === 'id' ? $this->title_id : $this->title_en ?? '',
                     'summary' => Str::of($locale === 'id' ? $this->desc_id : $this->desc_en ?? '')->words(20, '...'),
                     'description' => $locale === 'id' ? $this->desc_id : $this->desc_en ?? '',
                     'perkembangan' => $locale === 'id' ? $this->perkembangan_id : $this->perkembangan_en ?? '',

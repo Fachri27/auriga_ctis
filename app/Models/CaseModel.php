@@ -31,6 +31,9 @@ class CaseModel extends Model
         'category_ids',
         'pelapor',
         'terlapor',
+        'instansi',
+        'sumber',
+        'status_narasi',
 
     ];
 
