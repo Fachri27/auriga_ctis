@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Cases;
 
-use Illuminate\Support\Facades\{DB, Http, Log};
+use Illuminate\Support\Facades\{Auth, DB, Http, Log};
 use Illuminate\Support\Str;
 
 use App\Models\{CaseModel, CaseTranslation, Category};
@@ -339,9 +339,9 @@ class CaseForm extends Component
 
     public function save()
     {
-        try {
-            $this->validate();
+        $this->validate();
 
+        try {
             $case = $this->case ?? new CaseModel();
             $caseNumber = "CASE-" . strtoupper(Str::random(5));
 
@@ -351,7 +351,7 @@ class CaseForm extends Component
                 "report_id" => $this->report_id,
                 "status_id" => $this->status_id,
                 "event_date" => $this->event_date,
-                "verified_by" => auth()->id(),
+                "verified_by" => Auth::id(),
                 "latitude" => $this->lat,
                 "longitude" => $this->lng,
                 "is_public" => $this->is_public,
@@ -477,7 +477,7 @@ class CaseForm extends Component
             session()->flash("success", "Kasus berhasil disimpan.");
 
             return redirect()->route("case.index");
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error("Error saving case: " . $e->getMessage(), [
                 "trace" => $e->getTraceAsString(),
             ]);

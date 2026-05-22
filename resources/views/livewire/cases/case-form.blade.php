@@ -12,6 +12,12 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="p-4 mb-5 text-red-700 bg-red-100 rounded">
+                {{ session('error') }}
+            </div>
+        @endif
+
         {{-- Language --}}
         <div class="flex flex-col mb-10">
             <label class="font-medium mb-2">🌐 Bahasa</label>
@@ -44,12 +50,12 @@
                         hideSelected: true,
                         onChange: (values) => {
                             const parsed = values.map(v => Number(v))
-            
+
                             //PAKSA SET KE LIVEWIRE
                             @this.set('category_ids', parsed)
                         }
                     })
-            
+
                     //SET VALUE SAAT COMPONENT LOAD
                     this.$nextTick(() => {
                         if (@this.get('category_ids')?.length) {
@@ -67,6 +73,9 @@
                         </option>
                     @endforeach
                 </select>
+                @error('category_ids')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
 
@@ -453,8 +462,10 @@
             @endif
         </div>
 
-        <button wire:click="save" class="px-6 py-3 bg-black text-white rounded-xl">
-            Kirim Laporan
+        <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save"
+            class="px-6 py-3 bg-black text-white rounded-xl disabled:opacity-50">
+            <span wire:loading.remove wire:target="save">Kirim Laporan</span>
+            <span wire:loading wire:target="save">Menyimpan...</span>
         </button>
 
     </div>
