@@ -339,6 +339,17 @@ class CaseForm extends Component
 
     public function save()
     {
+        $this->dispatch(
+            "case-save-debug",
+            step: "save_called",
+            payload: [
+                "status_id" => $this->status_id,
+                "event_date" => $this->event_date,
+                "category_ids" => $this->category_ids,
+                "title_id" => $this->title_id,
+            ],
+        );
+
         $this->validate();
 
         try {
@@ -474,10 +485,27 @@ class CaseForm extends Component
             // dd($case);
             // dd($data);
 
+            $this->dispatch(
+                "case-save-debug",
+                step: "save_success",
+                payload: [
+                    "case_id" => $case->id,
+                    "case_number" => $case->case_number,
+                ],
+            );
+
             session()->flash("success", "Kasus berhasil disimpan.");
 
             return redirect()->route("case.index");
         } catch (\Throwable $e) {
+            $this->dispatch(
+                "case-save-debug",
+                step: "save_error",
+                payload: [
+                    "message" => $e->getMessage(),
+                ],
+            );
+
             Log::error("Error saving case: " . $e->getMessage(), [
                 "trace" => $e->getTraceAsString(),
             ]);

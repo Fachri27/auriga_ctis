@@ -463,6 +463,7 @@
         </div>
 
         <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save"
+            onclick="console.log('[CaseForm] save button clicked')"
             class="px-6 py-3 bg-black text-white rounded-xl disabled:opacity-50">
             <span wire:loading.remove wire:target="save">Kirim Laporan</span>
             <span wire:loading wire:target="save">Menyimpan...</span>
@@ -473,6 +474,12 @@
 
 </div>
 <script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('case-save-debug', (event) => {
+            console.log('[CaseForm]', event.step, event.payload)
+        })
+    })
+
     function mapComponent(lat, lng) {
         return {
             map: null,
