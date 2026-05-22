@@ -2,15 +2,12 @@
 
 namespace App\Livewire\Cases;
 
-use Illuminate\Support\Facades\{DB, Log};
+use Illuminate\Support\Facades\{DB, Http, Log};
 use Illuminate\Support\Str;
 
 use App\Models\{CaseModel, CaseTranslation, Category};
 use App\Services\CaseTaskGenerator;
 use Livewire\{Component, WithFileUploads};
-
-
-
 
 class CaseForm extends Component
 {
@@ -27,7 +24,6 @@ class CaseForm extends Component
 
     public $event_date;
 
-
     public $is_public = false;
 
     // Localization
@@ -43,7 +39,7 @@ class CaseForm extends Component
 
     public $desc_en;
 
-    public $searchLocation = '';
+    public $searchLocation = "";
 
     public $results = [];
 
@@ -78,58 +74,62 @@ class CaseForm extends Component
 
     protected $rules = [
         // 'category_id' => 'required',
-        'status_id' => 'required',
-        'event_date' => 'required|date',
-        'category_ids' => 'required|array|min:1',
-        'category_ids.*' => 'integer|exists:categories,id',
+        "status_id" => "required",
+        "event_date" => "required|date",
+        "category_ids" => "required|array|min:1",
+        "category_ids.*" => "integer|exists:categories,id",
     ];
 
-    public function mount($caseId = null) 
+    public function mount($caseId = null)
     {
-        if($caseId) {
-            $this->case = CaseModel::with('translations')->findOrfail($caseId);
-            $idTranslation = $this->case->translations->firstWhere('locale', 'id');
-            $enTranslation = $this->case->translations->firstWhere('locale', 'en');
+        if ($caseId) {
+            $this->case = CaseModel::with("translations")->findOrFail($caseId);
+            $idTranslation = $this->case->translations->firstWhere(
+                "locale",
+                "id",
+            );
+            $enTranslation = $this->case->translations->firstWhere(
+                "locale",
+                "en",
+            );
 
             $this->fill([
-                'title_id' => $idTranslation->title ?? '',
-                'title_en' => $enTranslation->title ??'',
-                'summary_id' => $idTranslation->summary ?? '',
-                'summary_en' => $enTranslation->summary ??'',
-                'desc_id' => $idTranslation->description ??'',
-                'desc_en' => $enTranslation->description ?? '',
-                'category_ids' => $this->case->category_ids,
-                'status_id' => $this->case->status_id,
-                'event_date' => $this->case->event_date,
-                'lat' => $this->case->latitude,
-                'lng' => $this->case->longitude,
-                'is_public' => $this->case->is_public,
+                "title_id" => $idTranslation->title ?? "",
+                "title_en" => $enTranslation->title ?? "",
+                "summary_id" => $idTranslation->summary ?? "",
+                "summary_en" => $enTranslation->summary ?? "",
+                "desc_id" => $idTranslation->description ?? "",
+                "desc_en" => $enTranslation->description ?? "",
+                "category_ids" => $this->case->category_ids,
+                "status_id" => $this->case->status_id,
+                "event_date" => $this->case->event_date,
+                "lat" => $this->case->latitude,
+                "lng" => $this->case->longitude,
+                "is_public" => $this->case->is_public,
                 // 'bukti' => $this->case->bukti,
-                'korban' => $this->case->korban,
-                'pekerjaan' => $this->case->pekerjaan,
-                'jenis_kelamin' => $this->case->jenis_kelamin,
-                'jumlah_korban' => $this->case->jumlah_korban,
-                'konflik' => $this->case->konflik,
-                'perkembangan_id' => $idTranslation->perkembangan ?? '',
-                'perkembangan_en' => $enTranslation->perkembangan ?? '',
-                'pembelajaran_id' => $idTranslation->pembelajaran ?? '',
-                'pembelajaran_en' => $enTranslation->pembelajaran ?? '',
-                'pelapor' => $this->case->pelapor,
-                'terlapor' => $this->case->terlapor,
-                'sumber_id' => $this->case->sumber,
-                'instansi' => $this->case->instansi,
-                'status' => $this->case->status_narasi,
-
+                "korban" => $this->case->korban,
+                "pekerjaan" => $this->case->pekerjaan,
+                "jenis_kelamin" => $this->case->jenis_kelamin,
+                "jumlah_korban" => $this->case->jumlah_korban,
+                "konflik" => $this->case->konflik,
+                "perkembangan_id" => $idTranslation->perkembangan ?? "",
+                "perkembangan_en" => $enTranslation->perkembangan ?? "",
+                "pembelajaran_id" => $idTranslation->pembelajaran ?? "",
+                "pembelajaran_en" => $enTranslation->pembelajaran ?? "",
+                "pelapor" => $this->case->pelapor,
+                "terlapor" => $this->case->terlapor,
+                "sumber_id" => $this->case->sumber,
+                "instansi" => $this->case->instansi,
+                "status" => $this->case->status_narasi,
             ]);
 
             // dd($this->case);
 
             $this->existingBukti = $this->case->bukti ?? [];
             $this->bukti = [];
-
         }
     }
-    
+
     // location
     public function updatedSearchLocation($value)
     {
@@ -235,20 +235,27 @@ class CaseForm extends Component
 
         // AMBIL LANGSUNG DARI DATABASE
         try {
-            $req = DB::connection('pgsql')->table('proteus.POLITICAL_LEVEL_6_dissolved')
-                ->select('NAME', 'latitude', 'longtitude')
-                ->where('NAME', 'ILIKE', ["%{$this->searchLocation}%"])
+            $req = DB::connection("pgsql")
+                ->table("proteus.POLITICAL_LEVEL_6_dissolved")
+                ->select("NAME", "latitude", "longtitude")
+                ->where("NAME", "ILIKE", ["%{$this->searchLocation}%"])
                 ->limit(20)
                 ->get();
 
-            $this->results = $req->map(fn ($item) => [
-                'id' => $item->NAME,
-                'text' => $this->formatName($item->NAME),
-                'lat' => $item->latitude,
-                'long' => $item->longtitude,
-            ])->toArray();
+            $this->results = $req
+                ->map(
+                    fn($item) => [
+                        "id" => $item->NAME,
+                        "text" => $this->formatName($item->NAME),
+                        "lat" => $item->latitude,
+                        "long" => $item->longtitude,
+                    ],
+                )
+                ->toArray();
         } catch (\Exception $e) {
-            logger()->error('Error fetching districts', ['error' => $e->getMessage()]);
+            logger()->error("Error fetching districts", [
+                "error" => $e->getMessage(),
+            ]);
             $this->results = [];
         }
 
@@ -268,46 +275,50 @@ class CaseForm extends Component
 
         $geometry = $this->loadGeometry($id);
 
-        $this->dispatch('location-updated', lat: $this->lat, lng: $this->lng, geometry: $geometry);
+        $this->dispatch(
+            "location-updated",
+            lat: $this->lat,
+            lng: $this->lng,
+            geometry: $geometry,
+        );
     }
 
     private function formatName($name)
     {
         if (is_array($name)) {
-            $name = $name[0] ?? '';
+            $name = $name[0] ?? "";
         }
 
-        $raw = trim($name, '[]');
-        $parts = explode('][', $raw);
+        $raw = trim($name, "[]");
+        $parts = explode("][", $raw);
 
         if (is_numeric(end($parts))) {
             array_pop($parts);
         }
 
-        return collect($parts)->take(3)->implode(' - ');
+        return collect($parts)->take(3)->implode(" - ");
     }
 
     private function loadGeometry($name)
     {
         try {
             $req = Http::timeout(10)->get(
-                'https://aws.simontini.id/geoserver/proteus/wfs',
+                "https://aws.simontini.id/geoserver/proteus/wfs",
                 [
-                    'service' => 'WFS',
-                    'version' => '2.0.0',
-                    'request' => 'GetFeature',
-                    'typeName' => 'proteus:POLITICAL_LEVEL_6_dissolved',
+                    "service" => "WFS",
+                    "version" => "2.0.0",
+                    "request" => "GetFeature",
+                    "typeName" => "proteus:POLITICAL_LEVEL_6_dissolved",
 
                     // 🎯 EXACT MATCH = CEPAT
-                    'cql_filter' => "NAME = '{$name}'",
-                    'outputFormat' => 'application/json',
-                ]
+                    "cql_filter" => "NAME = '{$name}'",
+                    "outputFormat" => "application/json",
+                ],
             );
 
-            return $req->json()['features'][0]['geometry'] ?? null;
-
+            return $req->json()["features"][0]["geometry"] ?? null;
         } catch (\Throwable $e) {
-            logger()->error('GEO POLYGON ERROR', ['e' => $e->getMessage()]);
+            logger()->error("GEO POLYGON ERROR", ["e" => $e->getMessage()]);
 
             return null;
         }
@@ -323,129 +334,158 @@ class CaseForm extends Component
         $this->open = false;
 
         // 🔥 event KHUSUS reset
-        $this->dispatch('location-reset');
+        $this->dispatch("location-reset");
     }
 
     public function save()
     {
-        try{
-
+        try {
             $this->validate();
 
-        $case = $this->case ?? new CaseModel;
-        $caseNumber = 'CASE-'.strtoupper(Str::random(5));
+            $case = $this->case ?? new CaseModel();
+            $caseNumber = "CASE-" . strtoupper(Str::random(5));
 
-        $data = [
-            'case_number' => $caseNumber,
-            'category_ids' => $this->category_ids,
-            'report_id' => $this->report_id,
-            'status_id' => $this->status_id,
-            'event_date' => $this->event_date,
-            'verified_by' => auth()->id(),
-            'latitude' => $this->lat,
-            'longitude' => $this->lng,
-            'is_public' => $this->is_public,
-            'bukti' => null,
-            'korban' => $this->korban,
-            'pekerjaan' => $this->pekerjaan,
-            'jenis_kelamin' => $this->jenis_kelamin,
-            'jumlah_korban' => $this->jumlah_korban,
-            'konflik' => $this->konflik,
-            'pelapor' => $this->pelapor,
-            'terlapor' => $this->terlapor,
-            'sumber' => $this->sumber_id,
-            'status_narasi' => $this->status,
-            'instansi' => $this->instansi,
-        ];
+            $data = [
+                "case_number" => $caseNumber,
+                "category_ids" => $this->category_ids,
+                "report_id" => $this->report_id,
+                "status_id" => $this->status_id,
+                "event_date" => $this->event_date,
+                "verified_by" => auth()->id(),
+                "latitude" => $this->lat,
+                "longitude" => $this->lng,
+                "is_public" => $this->is_public,
+                "bukti" => null,
+                "korban" => $this->korban,
+                "pekerjaan" => $this->pekerjaan,
+                "jenis_kelamin" => $this->jenis_kelamin,
+                "jumlah_korban" => $this->jumlah_korban,
+                "konflik" => $this->konflik,
+                "pelapor" => $this->pelapor,
+                "terlapor" => $this->terlapor,
+                "sumber" => $this->sumber_id,
+                "status_narasi" => $this->status,
+                "instansi" => $this->instansi,
+            ];
 
-        $case->fill($data)->save();
-        $case->refresh();
+            $case->fill($data)->save();
+            $case->refresh();
 
-        foreach (['id', 'en'] as $locale) {
-            CaseTranslation::updateOrCreate(
-                ['case_id' => $case->id, 'locale' => $locale],
-                [
-                    'title' => $locale === 'id' ? $this->title_id : $this->title_en ?? '',
-                    'summary' => Str::of($locale === 'id' ? $this->desc_id : $this->desc_en ?? '')->words(20, '...'),
-                    'description' => $locale === 'id' ? $this->desc_id : $this->desc_en ?? '',
-                    'perkembangan' => $locale === 'id' ? $this->perkembangan_id : $this->perkembangan_en ?? '',
-                    'pembelajaran' => $locale === 'id' ? $this->pembelajaran_id : $this->pembelajaran_en ?? '',
-                ]
-            );
-        }
-
-        // \dd($case);
-
-        logger()->info('CATEGORY IDS', [
-            'raw' => $case->category_ids,
-            'type' => gettype($case->category_ids),
-        ]);
-
-
-        // 3.1️⃣ Auto-generate tasks for this category (if templates exist)
-        $generated = 0;
-        try {
-            $generated = CaseTaskGenerator::generate($case->id, $case->category_ids);
-        } catch (\Throwable $e) {
-            // don't block case creation; log and continue
-            \Log::error('Case task generation failed: '.$e->getMessage());
-            
-        }
-
-        $paths = [];
-
-        foreach ($this->bukti ?? [] as $file) {
-            if ($file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-                $paths[] = $file->store('cases/', 'public');
+            foreach (["id", "en"] as $locale) {
+                CaseTranslation::query()->updateOrCreate(
+                    ["case_id" => $case->id, "locale" => $locale],
+                    [
+                        "title" =>
+                            $locale === "id"
+                                ? $this->title_id
+                                : $this->title_en ?? "",
+                        "summary" => Str::of(
+                            $locale === "id"
+                                ? $this->desc_id
+                                : $this->desc_en ?? "",
+                        )->words(20, "..."),
+                        "description" =>
+                            $locale === "id"
+                                ? $this->desc_id
+                                : $this->desc_en ?? "",
+                        "perkembangan" =>
+                            $locale === "id"
+                                ? $this->perkembangan_id
+                                : $this->perkembangan_en ?? "",
+                        "pembelajaran" =>
+                            $locale === "id"
+                                ? $this->pembelajaran_id
+                                : $this->pembelajaran_en ?? "",
+                    ],
+                );
             }
-        }
 
-        // Ambil bukti lama
-        $existing = $this->existingBukti ?? [];
+            // \dd($case);
 
-        // Gabungkan kalau ada file baru
-        if (!empty($paths)) {
-            $existing = array_merge($existing, $paths);
-        }
-
-        // Update
-        $case->update([
-            'bukti' => $existing,
-        ]);
-
-        // ✉️ Kirim notifikasi ke semua admin ketika case baru dibuat
-        if (!$this->caseId) { // Hanya untuk case baru, bukan edit
-            try {
-                $admins = \App\Models\User::role('admin')->get();
-                foreach ($admins as $admin) {
-                    $admin->notify(new \App\Notifications\NewCaseNotification((object)[
-                        'id' => $case->id,
-                        'title' => $case->title ?? 'Case ' . $case->case_number,
-                        'description' => $this->desc_id ?? '',
-                    ]));
-                }
-            } catch (\Throwable $e) {
-                \Log::error('Failed to send case creation notification: ' . $e->getMessage());
-            }
-        }
-
-        // dd($data);
-
-        // dd($case);
-        // dd($data);
-
-
-
-        session()->flash('success', 'Kasus berhasil disimpan.');
-
-        return redirect()->route('case.index');
-
-        } catch(\Exception $e) {
-            Log::error('Error saving case: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+            logger()->info("CATEGORY IDS", [
+                "raw" => $case->category_ids,
+                "type" => gettype($case->category_ids),
             ]);
-            
-            session()->flash('error', 'Gagal menyimpan kasus: ' . $e->getMessage());
+
+            // 3.1️⃣ Auto-generate tasks for this category (if templates exist)
+            $generated = 0;
+            try {
+                $generated = CaseTaskGenerator::generate(
+                    $case->id,
+                    $case->category_ids,
+                );
+            } catch (\Throwable $e) {
+                // don't block case creation; log and continue
+                Log::error("Case task generation failed: " . $e->getMessage());
+            }
+
+            $paths = [];
+
+            foreach ($this->bukti ?? [] as $file) {
+                if (
+                    $file instanceof
+                    \Livewire\Features\SupportFileUploads\TemporaryUploadedFile
+                ) {
+                    $paths[] = $file->store("cases/", "public");
+                }
+            }
+
+            // Ambil bukti lama
+            $existing = $this->existingBukti ?? [];
+
+            // Gabungkan kalau ada file baru
+            if (!empty($paths)) {
+                $existing = array_merge($existing, $paths);
+            }
+
+            // Update
+            $case->update([
+                "bukti" => $existing,
+            ]);
+
+            // ✉️ Kirim notifikasi ke semua admin ketika case baru dibuat
+            if (!$this->caseId) {
+                // Hanya untuk case baru, bukan edit
+                try {
+                    $admins = \App\Models\User::role("admin")->get();
+                    foreach ($admins as $admin) {
+                        $admin->notify(
+                            new \App\Notifications\NewCaseNotification(
+                                (object) [
+                                    "id" => $case->id,
+                                    "title" =>
+                                        $case->title ??
+                                        "Case " . $case->case_number,
+                                    "description" => $this->desc_id ?? "",
+                                ],
+                            ),
+                        );
+                    }
+                } catch (\Throwable $e) {
+                    Log::error(
+                        "Failed to send case creation notification: " .
+                            $e->getMessage(),
+                    );
+                }
+            }
+
+            // dd($data);
+
+            // dd($case);
+            // dd($data);
+
+            session()->flash("success", "Kasus berhasil disimpan.");
+
+            return redirect()->route("case.index");
+        } catch (\Exception $e) {
+            Log::error("Error saving case: " . $e->getMessage(), [
+                "trace" => $e->getTraceAsString(),
+            ]);
+
+            session()->flash(
+                "error",
+                "Gagal menyimpan kasus: " . $e->getMessage(),
+            );
         }
     }
 
@@ -454,25 +494,24 @@ class CaseForm extends Component
      * ============================================================*/
     private function saveTranslations($caseId)
     {
-        DB::table('case_translations')->updateOrInsert(
-            ['case_id' => $caseId, 'locale' => 'id'],
+        DB::table("case_translations")->updateOrInsert(
+            ["case_id" => $caseId, "locale" => "id"],
             [
-                'title' => $this->title_id,
-                'summary' => $this->summary_id,
-                'description' => $this->desc_id,
-            ]
+                "title" => $this->title_id,
+                "summary" => $this->summary_id,
+                "description" => $this->desc_id,
+            ],
         );
 
-        DB::table('case_translations')->updateOrInsert(
-            ['case_id' => $caseId, 'locale' => 'en'],
+        DB::table("case_translations")->updateOrInsert(
+            ["case_id" => $caseId, "locale" => "en"],
             [
-                'title' => $this->title_en,
-                'summary' => $this->summary_en,
-                'description' => $this->desc_en,
-            ]
+                "title" => $this->title_en,
+                "summary" => $this->summary_en,
+                "description" => $this->desc_en,
+            ],
         );
     }
-
 
     /* ============================================================
      * RESET FORM
@@ -482,28 +521,27 @@ class CaseForm extends Component
         $this->resetValidation();
 
         $this->reset([
-            'caseId',
-            'category_id',
-            'status_id',
-            'event_date',
-            'latitude',
-            'longitude',
-            'is_public',
-            'title_id',
-            'summary_id',
-            'desc_id',
-            'title_en',
-            'summary_en',
-            'desc_en',
+            "caseId",
+            "category_id",
+            "status_id",
+            "event_date",
+            "latitude",
+            "longitude",
+            "is_public",
+            "title_id",
+            "summary_id",
+            "desc_id",
+            "title_en",
+            "summary_en",
+            "desc_en",
         ]);
     }
 
-
     public function render()
     {
-        return view('livewire.cases.case-form', [
-            'categories' => Category::with('translations')->get(),
-            'statuses' => DB::table('statuses')->get(),
-        ])->layout('layouts.internal');
+        return view("livewire.cases.case-form", [
+            "categories" => Category::with("translations")->get(),
+            "statuses" => DB::table("statuses")->get(),
+        ])->layout("layouts.internal");
     }
 }
