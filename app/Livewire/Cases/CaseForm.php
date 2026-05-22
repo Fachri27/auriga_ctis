@@ -328,7 +328,9 @@ class CaseForm extends Component
 
     public function save()
     {
-        $this->validate();
+        try{
+
+            $this->validate();
 
         $case = $this->case ?? new CaseModel;
         $caseNumber = 'CASE-'.strtoupper(Str::random(5));
@@ -437,6 +439,14 @@ class CaseForm extends Component
         session()->flash('success', 'Kasus berhasil disimpan.');
 
         return redirect()->route('case.index');
+
+        } catch(\Exception $e) {
+            Log::error('Error saving case: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            session()->flash('error', 'Gagal menyimpan kasus: ' . $e->getMessage());
+        }
     }
 
     /* ============================================================
