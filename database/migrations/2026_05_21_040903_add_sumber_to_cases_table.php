@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('cases', function (Blueprint $table) {
+            $table->longText('status_narasi')->nullable();
             $table->longText('sumber')->nullable()->after('terlapor');
 
         });
