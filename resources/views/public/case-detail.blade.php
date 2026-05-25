@@ -383,189 +383,185 @@
 
         {{-- ===================== MAIN CONTENT ===================== --}}
         <section class="max-w-7xl mx-auto px-6 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {{-- Tab Switcher --}}
+            <div class="max-w-4xl mx-auto">
 
-                {{-- KIRI: Tab Switcher --}}
-                <div class="md:border-r md:pr-8">
+                {{-- Tab Buttons --}}
+                <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
+                    <button onclick="switchTab('kronologi')" id="tab-kronologi"
+                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-800 shadow-sm">
+                        📋 Kronologi
+                    </button>
+                    <button onclick="switchTab('perkembangan')" id="tab-perkembangan"
+                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                        🔄 Perkembangan
+                    </button>
+                    <button onclick="switchTab('pembelajaran')" id="tab-pembelajaran"
+                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                        💡 Permasalahan
+                    </button>
+                </div>
 
-                    {{-- Tab Buttons --}}
-                    <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
-                        <button onclick="switchTab('kronologi')" id="tab-kronologi"
-                            class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-800 shadow-sm">
-                            📋 Kronologi
-                        </button>
-                        <button onclick="switchTab('perkembangan')" id="tab-perkembangan"
-                            class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                            🔄 Perkembangan
-                        </button>
-                        <button onclick="switchTab('pembelajaran')" id="tab-pembelajaran"
-                            class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                            💡 Permasalahan
-                        </button>
-                    </div>
+                {{-- Panel: Kronologi --}}
+                <div id="panel-kronologi" class="tab-panel">
+                    @if ($trans?->description)
+                        <div class="prose prose-gray max-w-none">{!! $trans->description !!}</div>
+                    @else
+                        <p class="text-gray-400 italic">Kronologi belum tersedia.</p>
+                    @endif
+                </div>
 
-                    {{-- Panel: Kronologi --}}
-                    <div id="panel-kronologi" class="tab-panel">
-                        @if ($trans?->description)
-                            <div class="prose prose-gray max-w-none">{!! $trans->description !!}</div>
-                        @else
-                            <p class="text-gray-400 italic">Kronologi belum tersedia.</p>
-                        @endif
-                    </div>
-
-                    {{-- Panel: Perkembangan --}}
-                    <div id="panel-perkembangan" class="tab-panel hidden">
-                        @php
-                            $perkembangan = $trans->perkembangan ?? null;
-                            $perkembanganArr = null;
-                            if (is_string($perkembangan)) {
-                                $json = json_decode($perkembangan, true);
-                                if (is_array($json)) {
-                                    $perkembanganArr = $json;
-                                }
+                {{-- Panel: Perkembangan --}}
+                <div id="panel-perkembangan" class="tab-panel hidden">
+                    @php
+                        $perkembangan = $trans->perkembangan ?? null;
+                        $perkembanganArr = null;
+                        if (is_string($perkembangan)) {
+                            $json = json_decode($perkembangan, true);
+                            if (is_array($json)) {
+                                $perkembanganArr = $json;
                             }
-                        @endphp
-                        @if ($perkembanganArr)
-                            <div class="space-y-6 border-l-2 border-green-600 pl-6">
-                                @forelse ($perkembanganArr as $entry)
-                                    <div class="relative">
-                                        <span class="absolute -left-[11px] top-1 w-4 h-4 bg-green-600 rounded-full"></span>
-                                        <div class="ml-5">
-                                            <h3 class="font-semibold text-gray-800">
-                                                {{ $entry['title'] ?? 'Perkembangan Kasus' }}</h3>
-                                            <p class="text-sm text-gray-600 mt-1">{{ $entry['notes'] ?? '' }}</p>
-                                            @if (!empty($entry['created_at']))
-                                                <p class="text-xs text-gray-400 mt-2">
-                                                    {{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y H:i') }}
-                                                </p>
-                                            @endif
-                                        </div>
+                        }
+                    @endphp
+                    @if ($perkembanganArr)
+                        <div class="space-y-6 border-l-2 border-green-600 pl-6">
+                            @forelse ($perkembanganArr as $entry)
+                                <div class="relative">
+                                    <span class="absolute -left-[11px] top-1 w-4 h-4 bg-green-600 rounded-full"></span>
+                                    <div class="ml-5">
+                                        <h3 class="font-semibold text-gray-800">
+                                            {{ $entry['title'] ?? 'Perkembangan Kasus' }}</h3>
+                                        <p class="text-sm text-gray-600 mt-1">{{ $entry['notes'] ?? '' }}</p>
+                                        @if (!empty($entry['created_at']))
+                                            <p class="text-xs text-gray-400 mt-2">
+                                                {{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y H:i') }}
+                                            </p>
+                                        @endif
                                     </div>
-                                @empty
-                                    <p class="text-gray-500 italic">Belum ada perkembangan.</p>
-                                @endforelse
-                            </div>
-                        @elseif(!empty($perkembangan))
-                            <div class="prose prose-gray max-w-none">{!! $perkembangan !!}</div>
-                        @else
-                            <p class="text-gray-500 italic">Belum ada perkembangan.</p>
-                        @endif
-                    </div>
-
-                    {{-- Panel: Pembelajaran --}}
-                    <div id="panel-pembelajaran" class="tab-panel hidden">
-                        @if ($trans?->pembelajaran)
-                            <div class="prose-content text-gray-700 leading-relaxed">
-                                {!! $trans->pembelajaran !!}
-                            </div>
-                        @else
-                            <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- KANAN: Artikel Terkait --}}
-                <div>
-                    <h2 class="text-2xl font-bold mb-4">Artikel Terkait</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                        @foreach ($artikel as $c)
-                            <div
-                                class="group bg-white flex flex-col overflow-hidden shadow-sm hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-900/10 transition-all duration-300">
-
-                                <div class="relative w-full aspect-video overflow-hidden">
-                                    <img src="{{ asset('storage/' . $c->image) }}" alt="{{ strip_tags($c->title) }}"
-                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <div
-                                        class="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    </div>
-                                    <span
-                                        class="absolute top-3 left-3 bg-[#003974] text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1">
-                                        Artikel
-                                    </span>
-                                    {{-- kategori badge --}}
-                                    @if ($c->category_name)
-                                        <span
-                                            class="absolute top-3 right-3 bg-[#003974] text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1">
-                                            {{ $c->category_name }}
-                                        </span>
-                                    @endif
                                 </div>
-
-                                <div class="relative flex flex-col flex-1 p-5 border-t-[3px] border-[#003974]">
-                                    <a href="{{ $c->type === 'internal' ? route('public.artikel.detail', ['slug' => $c->slug]) : $c->link }}"
-                                        class="text-[#003974] font-bold text-lg leading-snug tracking-wide uppercase hover:text-blue-700 transition-colors duration-200"
-                                        @if ($c->type !== 'internal') target="_blank" rel="noopener" @endif>
-                                        {!! $c->title !!}
-                                    </a>
-                                    <p class="mt-2.5 text-sm text-slate-500 leading-relaxed font-light flex-1">
-                                        {!! Str::limit(strip_tags($c->excerpt), 160) !!}
-                                    </p>
-                                    <div class="mt-4 pt-3.5 border-t border-slate-100">
-                                        <a href="{{ $c->type === 'internal' ? route('public.artikel.detail', ['slug' => $c->slug]) : $c->link }}"
-                                            class="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.15em] uppercase text-[#003974] hover:[&>svg]:translate-x-1 [&>svg]:transition-transform [&>svg]:duration-200"
-                                            @if ($c->type !== 'internal')
-                                            target="_blank" rel="noopener"
-                        @endif>
-                        Baca Selengkapnya
-                        <svg class="w-3 h-3 stroke-current fill-none stroke-2" viewBox="0 0 24 24" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                        </a>
-
-                    </div>
-                    <div
-                        class="absolute bottom-0 right-0 w-0 h-0 border-b-[26px] border-l-[26px] border-l-transparent border-b-[#003974] group-hover:border-b-[32px] group-hover:border-l-[32px] transition-all duration-300">
-                    </div>
+                            @empty
+                                <p class="text-gray-500 italic">Belum ada perkembangan.</p>
+                            @endforelse
+                        </div>
+                    @elseif(!empty($perkembangan))
+                        <div class="prose prose-gray max-w-none">{!! $perkembangan !!}</div>
+                    @else
+                        <p class="text-gray-500 italic">Belum ada perkembangan.</p>
+                    @endif
                 </div>
-            </div>
-            @endforeach
 
-    </div>
-    </div>
-
-    </div>
-    </section>
-
-    {{-- ===================== KASUS TERKAIT ===================== --}}
-    @if (isset($relatedCases) && $relatedCases->count())
-        <section class="max-w-7xl mx-auto px-6 pb-16">
-            <div class="border-t pt-10">
-                <h2 class="text-2xl font-bold mb-6">Kasus Terkait</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    @foreach ($relatedCases as $related)
-                        @php
-                            $relatedTrans =
-                                $related->translations->firstWhere('locale', app()->getLocale()) ??
-                                $related->translations->first();
-                        @endphp
-                        <a href="{{ route('public.case.detail', ['slug' => $related->slug]) }}"
-                            class="group bg-white rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-1 transition-all duration-200 border border-gray-100">
-                            <div class="flex items-center justify-between mb-3">
-                                <span
-                                    class="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full
-                            {{ $related->status?->key === 'investigation' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700' }}">
-                                    {{ $related->status->name ?? '-' }}
-                                </span>
-                                <span class="text-xs text-gray-400">{{ $related->case_number }}</span>
-                            </div>
-                            <h3
-                                class="font-bold text-gray-800 text-sm leading-snug group-hover:text-green-700 transition-colors line-clamp-2">
-                                {{ $relatedTrans?->title ?? 'Tanpa judul' }}
-                            </h3>
-                            <p class="mt-2 text-xs text-gray-500 line-clamp-2">
-                                {{ Str::limit(strip_tags($relatedTrans?->summary ?? ''), 100) }}
-                            </p>
-                            <p class="mt-3 text-[10px] text-gray-400">📍 {{ $related->location['province'] ?? '-' }}
-                            </p>
-                        </a>
-                    @endforeach
+                {{-- Panel: Pembelajaran --}}
+                <div id="panel-pembelajaran" class="tab-panel hidden">
+                    @if ($trans?->pembelajaran)
+                        <div class="prose-content text-gray-700 leading-relaxed">
+                            {!! $trans->pembelajaran !!}
+                        </div>
+                    @else
+                        <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>
+                    @endif
                 </div>
             </div>
         </section>
-    @endif
+
+        {{-- ===================== ARTIKEL TERKAIT ===================== --}}
+        <section class="max-w-7xl mx-auto px-6 pb-12">
+            <h2 class="text-2xl font-bold mb-6">Artikel Terkait</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                @foreach ($artikels as $c)
+                    <div
+                        class="group bg-white border border-gray-200 border-t-4 border-t-gray-900 rounded-sm flex flex-col hover:shadow-[4px_4px_0_#111] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200">
+
+                        {{-- Image --}}
+                        <div class="relative w-full aspect-video overflow-hidden">
+                            <img src="{{ asset('storage/' . $c->image) }}" alt="{{ strip_tags($c->title) }}"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+                            {{-- Badge Artikel --}}
+                            <span
+                                class="absolute top-3 left-3 px-2 py-0.5 text-xs font-bold tracking-widest uppercase bg-gray-900 text-white">
+                                📰 Artikel
+                            </span>
+
+                            {{-- Category Badge --}}
+                            @if ($c->category_name)
+                                <span
+                                    class="absolute top-3 right-3 px-2 py-0.5 text-xs font-bold tracking-widest uppercase border border-white text-white bg-black/30 backdrop-blur-sm">
+                                    {{ $c->category_name }}
+                                </span>
+                            @endif
+                        </div>
+
+                        {{-- Content --}}
+                        <div class="p-5 flex flex-col flex-1">
+                            {{-- Title --}}
+                            <h3 class="text-lg font-black text-gray-900 leading-tight mb-3 tracking-tight line-clamp-2">
+                                {!! Str::limit(strip_tags($c->title), 80) !!}
+                            </h3>
+
+                            {{-- Excerpt --}}
+                            <p class="text-sm text-gray-500 leading-relaxed italic flex-1 mb-4 line-clamp-3">
+                                {!! Str::limit(strip_tags($c->excerpt), 120) !!}
+                            </p>
+
+                            {{-- Footer --}}
+                            <div class="pt-3 border-t border-gray-100">
+                                @if ($c->type === 'internal')
+                                    <a href="{{ route('public.artikel.detail', ['slug' => $c->slug]) }}"
+                                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                                        Baca Selengkapnya
+                                    </a>
+                                @else
+                                    <a href="{{ $c->link }}" target="_blank" rel="noopener"
+                                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                                        Baca Selengkapnya
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        {{-- ===================== KASUS TERKAIT ===================== --}}
+        @if (isset($relatedCases) && $relatedCases->count())
+            <section class="max-w-7xl mx-auto px-6 pb-16">
+                <div class="border-t pt-10">
+                    <h2 class="text-2xl font-bold mb-6">Kasus Terkait</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        @foreach ($relatedCases as $related)
+                            @php
+                                $relatedTrans =
+                                    $related->translations->firstWhere('locale', app()->getLocale()) ??
+                                    $related->translations->first();
+                            @endphp
+                            <a href="{{ route('public.case.detail', ['slug' => $related->slug]) }}"
+                                class="group bg-white rounded-xl shadow-sm p-5 hover:shadow-md hover:-translate-y-1 transition-all duration-200 border border-gray-100">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span
+                                        class="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full
+                            {{ $related->status?->key === 'investigation' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700' }}">
+                                        {{ $related->status->name ?? '-' }}
+                                    </span>
+                                    <span class="text-xs text-gray-400">{{ $related->case_number }}</span>
+                                </div>
+                                <h3
+                                    class="font-bold text-gray-800 text-sm leading-snug group-hover:text-green-700 transition-colors line-clamp-2">
+                                    {{ $relatedTrans?->title ?? 'Tanpa judul' }}
+                                </h3>
+                                <p class="mt-2 text-xs text-gray-500 line-clamp-2">
+                                    {{ Str::limit(strip_tags($relatedTrans?->summary ?? ''), 100) }}
+                                </p>
+                                <p class="mt-3 text-[10px] text-gray-400">📍 {{ $related->location['province'] ?? '-' }}
+                                </p>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endif
 
     </div>
 @endsection

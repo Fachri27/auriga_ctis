@@ -458,6 +458,9 @@ class CaseForm extends Component
             if (!$this->caseId) {
                 // Hanya untuk case baru, bukan edit
                 try {
+                    // Temporary disabled - causing 500 error in production
+                    // TODO: Fix email view caching issue and restart queue worker
+                    /*
                     $admins = \App\Models\User::role("admin")->get();
                     foreach ($admins as $admin) {
                         $admin->notify(
@@ -472,6 +475,7 @@ class CaseForm extends Component
                             ),
                         );
                     }
+                    */
                 } catch (\Throwable $e) {
                     Log::error(
                         "Failed to send case creation notification: " .

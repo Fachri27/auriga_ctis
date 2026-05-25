@@ -31,6 +31,8 @@ class HomeController extends Controller
                 DB::raw('COALESCE(case_translations.title, ct_fallback.title, case_geometries.title) as title'),
                 DB::raw('COALESCE(case_translations.description, ct_fallback.description) as case_description'),
             )
+            ->take(3)
+            ->orderByDesc('case_geometries.created_at')
             ->get();
 
 
@@ -143,20 +145,16 @@ class HomeController extends Controller
             ->orderByDesc('event_date')
             ->get();
 
-        
-        $caseCat = CaseModel::with([
-        'translations',
-        'status',
-        'timelines',
-        ])
-        ->where('is_public', true)
-        ->first(); // ← tidak throw 404
+        // Get all categories used by all public cases
+        $allCategoryIds = $kasus->pluck('category_ids')
+            ->flatten()
+            ->unique()
+            ->filter()
+            ->toArray();
 
-        $categories = $caseCat
-            ? Category::with('translations')
-                ->whereIn('id', $caseCat->category_ids ?? [])
-                ->get()
-            : collect(); // ← return empty collection kalau tidak ada case publik
+        $categories = Category::with('translations')
+            ->whereIn('id', $allCategoryIds)
+            ->get();
         
         return view('front.dashboard-user', compact(
             'cases',
