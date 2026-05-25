@@ -14,6 +14,7 @@ class CaseTranslation extends Model
         'description',
         'perkembangan',
         'pembelajaran',
+        'dugaan_permasalahan'
     ];
 
     public function case()

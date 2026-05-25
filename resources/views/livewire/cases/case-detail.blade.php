@@ -5,7 +5,8 @@
             $completeness = [
                 'Deskripsi' => !empty($case->description),
                 'Perkembangan' => !empty($case->perkembangan),
-                'Dugaan Permasalahan' => !empty($case->pembelajaran),
+                'Dugaan Permasalahan' => !empty($case->dugaan_permasalahan),
+                'Lesson Learning' => !empty($case->pembelajaran),
                 'Status' => !empty($case->status_narasi),
                 'Bukti' => !empty($case->bukti) && count($case->bukti) > 0,
                 'Pelapor' => !empty($case->pelapor),
@@ -121,7 +122,7 @@
                                 class="text-gray-600">{{ optional($case->created_at)->format('d M Y, H:i') }}</strong></span>
                         <span>✏️ Diperbarui: <strong
                                 class="text-gray-600">{{ optional($case->updated_at)->format('d M Y,
-                                                                                                                                                            H:i') }}</strong></span>
+                                                                                                                                                                                                                                                                                            H:i') }}</strong></span>
                         @if ($case->updatedBy ?? false)
                             <span>👤 Oleh: <strong class="text-gray-600">{{ $case->updatedBy->name }}</strong></span>
                         @endif
@@ -324,7 +325,7 @@
                         {{-- Pembelajaran --}}
                         <section class="bg-white border rounded-xl p-4">
                             <div class="flex items-center justify-between mb-2">
-                                <h2 class="font-bold text-base">Dugaan Permasalahan</h2>
+                                <h2 class="font-bold text-base">Lesson Learning</h2>
                                 {{-- @can('case.edit')
                         <a href="{{ route('admin.cases.edit', $case->id) }}#pembelajaran"
                             class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>
@@ -342,6 +343,30 @@
                             @endphp
                             @if ($pembelajaran)
                                 <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $pembelajaran !!}
+                                </div>
+                            @endif
+                        </section>
+
+                        <section class="bg-white border rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h2 class="font-bold text-base">Dugaan Permasalahan</h2>
+                                {{-- @can('case.edit')
+                        <a href="{{ route('admin.cases.edit', $case->id) }}#pembelajaran"
+                            class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>
+                        @endcan --}}
+                            </div>
+                            @php
+                                if (method_exists($case, 'getTranslation')) {
+                                    $dugaan = $case->getTranslation('dugaan_permasalahan', 'id', false);
+                                    if (!$dugaan) {
+                                        $dugaan = $case->getTranslation('dugaan_permasalahan', 'en', false);
+                                    }
+                                } else {
+                                    $dugaan = $case->dugaan_permasalahan;
+                                }
+                            @endphp
+                            @if ($dugaan)
+                                <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $dugaan !!}
                                 </div>
                             @endif
                         </section>
@@ -597,7 +622,7 @@
                                         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mt-2">
                                         <p class="text-xs text-gray-400">
                                             {{ \Carbon\Carbon::parse($log->created_at)->format('d M Y,
-                                                                                                                                                                                                                H:i') }}
+                                                                                                                                                                                                                                                                                                                                                                                                H:i') }}
                                         </p>
                                         <button
                                             class="text-xs text-gray-400 hover:text-gray-700 hover:underline transition-colors self-start sm:self-auto"

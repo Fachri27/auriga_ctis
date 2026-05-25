@@ -50,12 +50,12 @@
                         hideSelected: true,
                         onChange: (values) => {
                             const parsed = values.map(v => Number(v))
-
+            
                             //PAKSA SET KE LIVEWIRE
                             @this.set('category_ids', parsed)
                         }
                     })
-
+            
                     //SET VALUE SAAT COMPONENT LOAD
                     this.$nextTick(() => {
                         if (@this.get('category_ids')?.length) {
@@ -376,8 +376,8 @@
 
         <div class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
-                <span x-show="lang === 'id'">Dugaan Permasalahan</span>
-                <span x-show="lang === 'en'">Potential Issues</span>
+                <span x-show="lang === 'id'">Pembelajaran</span>
+                <span x-show="lang === 'en'">Lesson Learning</span>
             </h2>
 
             {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
@@ -396,6 +396,30 @@
             </div>
 
             @error('pembelajaran_en')
+                <p class="text-red-600 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
+        {{-- Dugaan Permasalahan --}}
+        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <span x-show="lang === 'id'">Dugaan Permasalahan</span>
+                <span x-show="lang === 'en'">Alleged Issues</span>
+            </h2>
+
+            <div class="bg-white border rounded-xl p-4">
+                <h3 class="font-semibold mb-3">Content</h3>
+
+                <div x-show="lang === 'id'">
+                    @includeWhen(true, 'front.components.tinymce-dugaan-permasalahan-id')
+                </div>
+
+                <div x-show="lang === 'en'">
+                    @includeWhen(true, 'front.components.tinymce-dugaan-permasalahan-en')
+                </div>
+            </div>
+
+            @error('dugaan_permasalahan_en')
                 <p class="text-red-600 text-sm">{{ $message }}</p>
             @enderror
         </div>

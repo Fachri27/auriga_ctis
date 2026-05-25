@@ -94,6 +94,7 @@ class CaseDetail extends Component
                 'case_translations.description',
                 'case_translations.perkembangan',
                 'case_translations.pembelajaran',
+                'case_translations.dugaan_permasalahan',
                 'categories.slug as category_name',
                 'statuses.name as status_name',
                 'statuses.key as status_key'

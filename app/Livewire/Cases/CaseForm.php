@@ -66,6 +66,8 @@ class CaseForm extends Component
     public $perkembangan_en;
     public $pembelajaran_id;
     public $pembelajaran_en;
+    public $dugaan_permasalahan_id;
+    public $dugaan_permasalahan_en;
     public $pelapor;
     public $terlapor;
     public $sumber_id;
@@ -116,6 +118,8 @@ class CaseForm extends Component
                 "perkembangan_en" => $enTranslation->perkembangan ?? "",
                 "pembelajaran_id" => $idTranslation->pembelajaran ?? "",
                 "pembelajaran_en" => $enTranslation->pembelajaran ?? "",
+                "dugaan_permasalahan_id" => $idTranslation->dugaan_permasalahan ?? "",
+                "dugaan_permasalahan_en" => $enTranslation->dugaan_permasalahan ?? "",
                 "pelapor" => $this->case->pelapor,
                 "terlapor" => $this->case->terlapor,
                 "sumber_id" => $this->case->sumber,
@@ -407,6 +411,10 @@ class CaseForm extends Component
                             $locale === "id"
                                 ? $this->pembelajaran_id
                                 : $this->pembelajaran_en ?? "",
+                        "dugaan_permasalahan" =>
+                            $locale === "id"
+                                ? $this->dugaan_permasalahan_id
+                                : $this->dugaan_permasalahan_en ?? "",
                     ],
                 );
             }

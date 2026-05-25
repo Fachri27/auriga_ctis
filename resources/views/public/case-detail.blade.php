@@ -390,15 +390,23 @@
                 <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
                     <button onclick="switchTab('kronologi')" id="tab-kronologi"
                         class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-800 shadow-sm">
-                        📋 Kronologi
+                        Kronologi
                     </button>
                     <button onclick="switchTab('perkembangan')" id="tab-perkembangan"
                         class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                        🔄 Perkembangan
+                        Perkembangan
+                    </button>
+                    <button onclick="switchTab('permasalahan')" id="tab-permasalahan"
+                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                        Permasalahan
                     </button>
                     <button onclick="switchTab('pembelajaran')" id="tab-pembelajaran"
                         class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                        💡 Permasalahan
+                        Lesson Learn
+                    </button>
+                    <button onclick="switchTab('status')" id="tab-status"
+                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                        Status
                     </button>
                 </div>
 
@@ -450,11 +458,33 @@
                     @endif
                 </div>
 
+                {{-- Panel: permasalahan --}}
+                <div id="panel-permasalahan" class="tab-panel hidden">
+                    @if ($trans?->dugaan_permasalahan)
+                        <div class="prose-content text-gray-700 leading-relaxed">
+                            {!! $trans->dugaan_permasalahan !!}
+                        </div>
+                    @else
+                        <p class="text-gray-400 italic">Dugaan permasalahan belum tersedia.</p>
+                    @endif
+                </div>
+
                 {{-- Panel: Pembelajaran --}}
                 <div id="panel-pembelajaran" class="tab-panel hidden">
                     @if ($trans?->pembelajaran)
                         <div class="prose-content text-gray-700 leading-relaxed">
                             {!! $trans->pembelajaran !!}
+                        </div>
+                    @else
+                        <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>
+                    @endif
+                </div>
+
+                {{-- Panel: Status narasi --}}
+                <div id="panel-status" class="tab-panel hidden">
+                    @if ($case->status_narasi)
+                        <div class="prose-content text-gray-700 leading-relaxed">
+                            {!! $case->status_narasi !!}
                         </div>
                     @else
                         <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>

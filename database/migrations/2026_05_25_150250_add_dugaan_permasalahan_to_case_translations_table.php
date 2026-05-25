@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cases', function (Blueprint $table) {
-            $table->longText('instansi')->nullable()->after('status_narasi');
+        Schema::table('case_translations', function (Blueprint $table) {
+            $table->text('dugaan_permasalahan')->nullable()->after('pembelajaran');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('cases', function (Blueprint $table) {
-            $table->dropColumn('instansi');
+        Schema::table('case_translations', function (Blueprint $table) {
+            $table->dropColumn('dugaan_permasalahan');
         });
     }
 };
