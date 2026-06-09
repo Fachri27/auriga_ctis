@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('case_translations', function (Blueprint $table) {
-            $table->text('dugaan_permasalahan')->nullable()->after('pembelajaran');
-        });
+        // Add column only if missing. If 'pembelajaran' exists, place after it; otherwise add normally.
+        if (!Schema::hasColumn('case_translations', 'dugaan_permasalahan')) {
+            if (Schema::hasColumn('case_translations', 'pembelajaran')) {
+                Schema::table('case_translations', function (Blueprint $table) {
+                    $table->text('dugaan_permasalahan')->nullable()->after('pembelajaran');
+                });
+            } else {
+                Schema::table('case_translations', function (Blueprint $table) {
+                    $table->text('dugaan_permasalahan')->nullable();
+                });
+            }
+        }
     }
 
     /**
@@ -21,8 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('case_translations', function (Blueprint $table) {
-            $table->dropColumn('dugaan_permasalahan');
-        });
+        if (Schema::hasColumn('case_translations', 'dugaan_permasalahan')) {
+            Schema::table('case_translations', function (Blueprint $table) {
+                $table->dropColumn('dugaan_permasalahan');
+            });
+        }
     }
 };

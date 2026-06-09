@@ -22,9 +22,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('case_translations', function (Blueprint $table) {
-            $table->dropColumn('pembelajaran');
-            $table->dropColumn('perkembangan');
-        });
+        // Only drop the columns if they exist to avoid SQL errors when rolling back
+        if (Schema::hasColumn('case_translations', 'pembelajaran') || Schema::hasColumn('case_translations', 'perkembangan')) {
+            Schema::table('case_translations', function (Blueprint $table) {
+                if (Schema::hasColumn('case_translations', 'pembelajaran')) {
+                    $table->dropColumn('pembelajaran');
+                }
+                if (Schema::hasColumn('case_translations', 'perkembangan')) {
+                    $table->dropColumn('perkembangan');
+                }
+            });
+        }
     }
 };

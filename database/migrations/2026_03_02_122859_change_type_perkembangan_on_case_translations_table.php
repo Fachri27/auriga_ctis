@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('case_translations', function (Blueprint $table) {
-            $table->text('perkembangan')->nullable()->change();
-            $table->text('pembelajaran')->nullable()->change();
-        });
+        // Only attempt to change column types if the columns exist
+        if (Schema::hasColumn('case_translations', 'perkembangan') || Schema::hasColumn('case_translations', 'pembelajaran')) {
+            Schema::table('case_translations', function (Blueprint $table) {
+                if (Schema::hasColumn('case_translations', 'perkembangan')) {
+                    $table->text('perkembangan')->nullable()->change();
+                }
+                if (Schema::hasColumn('case_translations', 'pembelajaran')) {
+                    $table->text('pembelajaran')->nullable()->change();
+                }
+            });
+        }
     }
 
     /**
@@ -22,9 +29,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('case_translations', function (Blueprint $table) {
-            $table->dropColumn('perkembangan');
-            $table->dropColumn('pembelajaran');
-        });
+        // Only drop the columns if they exist to avoid SQL errors when rolling back
+        if (Schema::hasColumn('case_translations', 'perkembangan') || Schema::hasColumn('case_translations', 'pembelajaran')) {
+            Schema::table('case_translations', function (Blueprint $table) {
+                if (Schema::hasColumn('case_translations', 'perkembangan')) {
+                    $table->dropColumn('perkembangan');
+                }
+                if (Schema::hasColumn('case_translations', 'pembelajaran')) {
+                    $table->dropColumn('pembelajaran');
+                }
+            });
+        }
     }
 };

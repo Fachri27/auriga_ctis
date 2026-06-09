@@ -166,6 +166,12 @@
 
             $shareUrl = urlencode(request()->fullUrl());
             $shareTitle = urlencode(strip_tags($trans?->title ?? 'Detail Kasus'));
+
+            // Remove any <img> tags from the summary when showing the hero/lead
+            $summaryLead = null;
+            if (!empty($trans?->summary)) {
+                $summaryLead = preg_replace('/<img[^>]*>/i', '', $trans->summary);
+            }
         @endphp
 
         {{-- ===================== HERO ===================== --}}
@@ -187,7 +193,7 @@
                 </h1>
 
                 <p class="mt-4 text-gray-600 max-w-3xl">
-                    {!! $trans?->summary !!}
+                    {!! $summaryLead ?? $trans?->summary ?? '' !!}
                 </p>
 
                 {{-- Meta info --}}

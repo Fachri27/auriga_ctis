@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('cases', function (Blueprint $table) {
-            $table->longText('status_narasi')->nullable();
-            $table->longText('instansi')->nullable()->after('status_narasi');
-        });
+        // Only add columns if they do not already exist
+        if (!Schema::hasColumn('cases', 'status_narasi') || !Schema::hasColumn('cases', 'instansi')) {
+            Schema::table('cases', function (Blueprint $table) {
+                if (!Schema::hasColumn('cases', 'status_narasi')) {
+                    $table->longText('status_narasi')->nullable();
+                }
+                if (!Schema::hasColumn('cases', 'instansi')) {
+                    $table->longText('instansi')->nullable()->after('status_narasi');
+                }
+            });
+        }
     }
 
     /**
@@ -22,8 +29,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('cases', function (Blueprint $table) {
-            $table->dropColumn('instansi');
-        });
+        if (Schema::hasColumn('cases', 'instansi')) {
+            Schema::table('cases', function (Blueprint $table) {
+                $table->dropColumn('instansi');
+            });
+        }
     }
 };
