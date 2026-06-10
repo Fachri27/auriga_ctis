@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'google_sheets' => [
+        'spreadsheet_id' => env('GOOGLE_SPREADSHEET_ID'),
+        'range' => env('GOOGLE_SHEETS_RANGE', 'Sheet1!A1:Z'),
+        'credentials' => storage_path(env('GOOGLE_SERVICE_ACCOUNT_JSON', 'app/google-service-account.json')),
+    ],
+
 ];

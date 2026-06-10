@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Models\{Artikel, CaseModel, Category};
+use App\Models\{Artikel, CaseModel, Category, ChartDataset};
 
 class HomeController extends Controller
 {
@@ -156,6 +156,60 @@ class HomeController extends Controller
             ->whereIn('id', $allCategoryIds)
             ->get();
         
+        // =========================================
+        // CHART DATA FROM CSV (echarts)
+        // =========================================
+        $chartDatasets = ChartDataset::select('dataset')
+            ->groupBy('dataset')
+            ->pluck('dataset');
+
+        $publicCharts = [];
+        foreach ($chartDatasets as $ds) {
+            $isYearly = ChartDataset::where('dataset', $ds)->whereNotNull('year')->exists();
+
+            $query = ChartDataset::where('dataset', $ds);
+
+            if ($isYearly) {
+                $query = ChartDataset::where('dataset', $ds)
+                    ->whereNotNull('year')
+                    ->selectRaw('year as lbl, SUM(value) as total')
+                    ->groupBy('year')
+                    ->orderBy('year');
+            } else {
+                $limit = $ds === 'pengadilan' ? 200 : 30;
+                $query = ChartDataset::where('dataset', $ds)
+                    ->orderBy('value', 'desc')
+                    ->limit($limit);
+            }
+
+            $data = $query->get()->map(fn($item) => [
+                'label' => $item->lbl ?? $item->label,
+                'value' => (int) ($item->total ?? $item->value),
+            ])->toArray();
+
+            if (empty($data)) continue;
+
+            $labelMap = [
+                'klasifikasi_perkara' => 'Klasifikasi Perkara',
+                'hakim_perkara' => 'Hakim - Jumlah Perkara',
+                'hakim_terdakwa' => 'Hakim - Jumlah Terdakwa',
+                'jaksa_perkara' => 'Jaksa - Jumlah Perkara',
+                'pengadilan' => 'Pengadilan - Jumlah Perkara',
+                'kabupaten' => 'Kabupaten - Jumlah Perkara',
+                'terdakwa' => 'Terdakwa per Tahun',
+                'perkara' => 'Perkara per Tahun',
+            ];
+
+            $publicCharts[] = [
+                'id' => 'pub-' . str_replace('_', '-', $ds),
+                'title' => $labelMap[$ds] ?? ucfirst(str_replace('_', ' ', $ds)),
+                'data' => $data,
+            ];
+        }
+
+        $publicYears = ChartDataset::whereNotNull('year')
+            ->distinct()->orderBy('year')->pluck('year')->toArray();
+
         return view('front.dashboard-user', compact(
             'cases',
             'case',
@@ -166,6 +220,8 @@ class HomeController extends Controller
             'artikels',
             'kasus',
             'categories',
+            'publicCharts',
+            'publicYears',
         ));
     }
 

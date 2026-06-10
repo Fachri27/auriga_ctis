@@ -6,7 +6,7 @@
 
     {{-- ===================== HERO STATS ===================== --}}
     <div class="bg-white border-b border-gray-100 py-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="max-w-full mx-auto px-4 sm:px-6">
 
             <div class="text-center mb-8">
                 <p class="text-xs font-semibold tracking-[0.25em] uppercase text-gray-400 mb-1">Data Real-Time</p>
@@ -44,7 +44,7 @@
     </div>
 
     {{-- ===================== STATISTIK + PENJELASAN ===================== --}}
-    <div
+    <!--<div
         class="relative w-full bg-gradient-to-br from-[#002E36] via-[#003C45] to-[#002A31] py-20 sm:py-28 text-white overflow-hidden">
         <div class="absolute -top-32 -left-32 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none">
@@ -64,10 +64,10 @@
                 <div class="w-24 h-[2px] bg-gradient-to-r from-transparent via-teal-400 to-transparent"></div>
             </div>
         </div>
-    </div>
+    </div>-->
 
-    <div class="bg-white py-16 sm:py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <!--<div class="bg-white py-16 sm:py-20">
+        <div class="max-w-full mx-auto px-4 sm:px-6">
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
@@ -123,7 +123,63 @@
         </div> --}}
 
         </div>
+    </div>-->
+
+    {{-- ===================== CHART DATA (ECHARTS) ===================== --}}
+    @if (!empty($publicCharts))
+    <div class="bg-gray-50 py-16 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10">
+                <p class="text-xs font-semibold tracking-[0.25em] uppercase text-gray-400 mb-2">Statistik Perkara</p>
+                <h2 class="text-2xl font-bold text-gray-800">Indeksasi Putusan Perkara</h2>
+            </div>
+
+            @if (!empty($publicYears))
+            <div class="flex justify-center mb-8">
+                <div class="relative inline-block text-left" id="pubYearFilter">
+                    <button type="button" onclick="document.getElementById('pubYearDropdown').classList.toggle('hidden')"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Filter Tahun
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div id="pubYearDropdown" class="hidden absolute z-10 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+                        <div class="px-3 py-2 border-b border-gray-100">
+                            <button type="button" id="pubToggleAllYears" class="text-xs text-blue-600 hover:underline">Uncheck All</button>
+                        </div>
+                        <div class="p-2 space-y-1">
+                            @foreach ($publicYears as $year)
+                            <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer text-sm year-label" data-year="{{ $year }}">
+                                <input type="checkbox" value="{{ $year }}" checked class="year-checkbox rounded border-gray-300 text-teal-600 focus:ring-teal-500">
+                                {{ $year }}
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @foreach ($publicCharts as $i => $ch)
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow
+                        {{ $loop->last ? 'md:col-span-2' : '' }}">
+                        <div class="px-5 py-4 border-b border-gray-50">
+                            <h3 class="text-sm font-semibold text-gray-800">{{ $ch['title'] }}</h3>
+                        </div>
+                        <div class="p-4" wire:ignore>
+                            <div class="pub-echart" id="pub-{{ $ch['id'] }}"
+                                data-chart='{{ json_encode($ch['data']) }}'
+                                {{ str_contains($ch['id'], 'pengadilan') ? 'data-max-y=200' : '' }}
+                                style="height:400px;width:100%"></div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
     </div>
+    @endif
 
     {{-- ===================== FAQ AWAM ===================== --}}
     <div class="bg-gray-50 py-16 border-t border-gray-100">
@@ -191,6 +247,7 @@
 
 @push('scripts')
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -394,6 +451,112 @@
             });
 
         });
+
+        // ========================
+        // PUBLIC CHARTS FROM CSV (ECharts)
+        // ========================
+        (function() {
+            var pubChartInstances = {};
+            var pubAllChartData = {};
+
+            function pubInitChart(el) {
+                var id = el.id;
+                var raw = el.getAttribute('data-chart');
+                if (!raw) return;
+                var data = JSON.parse(raw);
+                pubAllChartData[id] = data;
+
+                if (pubChartInstances[id]) pubChartInstances[id].dispose();
+
+                var chart = echarts.init(el);
+                pubChartInstances[id] = chart;
+                pubUpdateChart(id);
+            }
+
+            function pubUpdateChart(id) {
+                var chart = pubChartInstances[id];
+                var data = pubAllChartData[id];
+                if (!chart || !data || data.length === 0) return;
+
+                var selected = {};
+                document.querySelectorAll('.year-checkbox').forEach(function(cb) {
+                    selected[cb.value] = cb.checked;
+                });
+
+                var filtered = data.filter(function(d) {
+                    if (selected[d.label] === undefined) return true;
+                    return selected[d.label] === true;
+                });
+
+                if (filtered.length === 0) { chart.clear(); return; }
+
+                var labels = filtered.map(function(d) { return d.label; });
+                var values = filtered.map(function(d) { return d.value; });
+                var long = labels.length > 15;
+
+                chart.setOption({
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+                        formatter: function(params) {
+                            var p = params[0];
+                            return '<b>' + p.name + '</b><br/>Jumlah: <b>' + p.value.toLocaleString() + '</b>';
+                        }
+                    },
+                    grid: { left: '3%', right: '4%', bottom: long ? '25%' : '12%', containLabel: true },
+                    xAxis: { type: 'category', data: labels, axisLabel: { interval: long ? Math.ceil(labels.length / 20) : 0, rotate: long ? 55 : 40, fontSize: long ? 8 : 10 } },
+                    yAxis: { type: 'value', minInterval: 1, max: chart.getDom().getAttribute('data-max-y') ? parseInt(chart.getDom().getAttribute('data-max-y')) : undefined },
+                    dataZoom: long ? [{ type: 'slider', show: true, start: 0, end: 30, height: 16, bottom: 5 }] : undefined,
+                    series: [{
+                        type: 'bar',
+                        data: values,
+                        itemStyle: {
+                            color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [{ offset: 0, color: '#0d9488' }, { offset: 1, color: '#0f766e' }]
+                            },
+                            borderRadius: [4,4,0,0]
+                        },
+                        emphasis: { itemStyle: { color: '#115e59' } },
+                        label: { show: !long, position: 'top', fontSize: 9, fontWeight: 'bold', color: '#374151' }
+                    }]
+                });
+            }
+
+            document.querySelectorAll('.pub-echart').forEach(pubInitChart);
+
+            document.querySelectorAll('.year-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    var label = this.closest('.year-label');
+                    if (label) {
+                        label.classList.toggle('text-gray-900', this.checked);
+                        label.classList.toggle('text-gray-400', !this.checked);
+                    }
+                    Object.keys(pubChartInstances).forEach(pubUpdateChart);
+                });
+            });
+
+            var toggleBtn = document.getElementById('pubToggleAllYears');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    var checked = this.textContent === 'Check All';
+                    document.querySelectorAll('.year-checkbox').forEach(function(cb) {
+                        cb.checked = checked;
+                        var label = cb.closest('.year-label');
+                        if (label) {
+                            label.classList.toggle('text-gray-900', checked);
+                            label.classList.toggle('text-gray-400', !checked);
+                        }
+                    });
+                    this.textContent = checked ? 'Uncheck All' : 'Check All';
+                    Object.keys(pubChartInstances).forEach(pubUpdateChart);
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                var dd = document.getElementById('pubYearDropdown');
+                if (dd && !document.getElementById('pubYearFilter').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+            });
+        })();
 
         // ========================
         // FAQ Accordion

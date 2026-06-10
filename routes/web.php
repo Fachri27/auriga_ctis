@@ -119,6 +119,10 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
 
     Route::get('cms/permissions/', ManagePermission::class)->name('permission');
     Route::get('cms/task/create/{case}', CaseDetail::class)->name('case.task.create');
+
+    // Chart data management
+    Route::get('/cms/charts/upload', \App\Livewire\Charts\CsvUpload::class)->name('charts.upload');
+    Route::get('/cms/charts', \App\Livewire\Charts\ChartsDashboard::class)->name('charts.dashboard');
     
 
 

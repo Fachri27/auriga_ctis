@@ -55,6 +55,11 @@
             Artikels
         </a>
 
+        <a href="{{ route('charts.dashboard') }}"
+            class="px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('artikel.*') ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
+            Charts
+        </a>
+
         <div x-data="{ open: false }" class="relative px-3 py-2 text-sm font-medium rounded-lg transition-colors">
             <button @click="open = !open" class="flex items-center hover:text-green-800 cursor-pointer text-nowrap">
                 Users

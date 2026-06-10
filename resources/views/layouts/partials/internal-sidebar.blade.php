@@ -10,8 +10,8 @@
             </svg>
         </div>
         <div>
-            <div class="font-semibold text-sm">CTIS</div>
-            <div class="text-xs text-slate-400">Internal System</div>
+            <div class="font-semibold text-sm">SYAHPUTRA</div>
+            <div class="text-xs text-slate-400">CLAN</div>
         </div>
     </div>
 
@@ -58,6 +58,16 @@
         <a href="{{ route('artikel.index') }}"
             class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('artikel.*') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }}">
             Artikels
+        </a>
+
+        {{-- CHARTS --}}
+        <a href="{{ route('charts.dashboard') }}"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('charts.dashboard') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }}">
+            Charts
+        </a>
+        <a href="{{ route('charts.upload') }}"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('charts.upload') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }}">
+            Upload CSV
         </a>
     </div>
 
