@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Models\{Artikel, CaseModel, Category, ChartDataset};
+use App\Models\{AboutPage, Artikel, CaseModel, Category, ChartDataset};
 
 class HomeController extends Controller
 {
@@ -314,5 +314,14 @@ class HomeController extends Controller
             ->first();
 
         return view('front.preview-artikel', compact('case'));
+    }
+
+    public function about($locale)
+    {
+        app()->setLocale($locale);
+
+        $about = AboutPage::with('translations')->first();
+
+        return view('front.about', compact('about'));
     }
 }

@@ -102,7 +102,7 @@
                         $title        = $tr?->title ?? '-';
                         $desc         = $tr?->description ?? '-';
                         $perkembangan = $tr?->perkembangan ?? '-';
-                        $statusKey    = $c->status_key ?? '';
+                        $statusKey    = $c->status?->key ?? '';
                         $statusColors = [
                             'open'          => 'bg-sky-100 text-sky-700',
                             'investigation' => 'bg-yellow-100 text-yellow-700',
@@ -118,6 +118,12 @@
                         ];
                         $statusClass = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-600';
                         $hasDesc     = $desc !== '-' && !empty(strip_tags($desc));
+                        if ($perkembangan !== '-' && preg_match('/^\[/', $perkembangan)) {
+                            $decoded = json_decode($perkembangan, true);
+                            if (is_array($decoded)) {
+                                $perkembangan = collect($decoded)->pluck('notes')->filter()->implode("\n");
+                            }
+                        }
                         $hasPerk     = $perkembangan !== '-' && !empty(strip_tags($perkembangan));
                         @endphp
                         <tr class="hover:bg-gray-50/70 transition-colors">
@@ -132,9 +138,9 @@
 
                             {{-- Status --}}
                             <td class="px-5 py-4">
-                                @if($c->status_name)
+                                @if($c->status?->name)
                                 <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-bold {{ $statusClass }}">
-                                    {{ $c->status_name }}
+                                    {{ $c->status->name }}
                                 </span>
                                 @else
                                 <span class="text-gray-300 text-xs italic">—</span>
@@ -145,7 +151,7 @@
                             <td class="px-5 py-4 max-w-[200px]">
                                 @if($hasPerk)
                                 <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                                    {!! Str::limit(strip_tags($perkembangan), 100) !!}
+                                    {{ Str::limit(strip_tags($perkembangan), 100) }}
                                 </p>
                                 @else
                                 <span class="inline-flex items-center gap-1 text-[10px] text-orange-500 font-medium">
@@ -161,7 +167,7 @@
                             <td class="px-5 py-4 max-w-[200px]">
                                 @if($hasDesc)
                                 <p class="text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                                    {!! Str::limit(strip_tags($desc), 100) !!}
+                                    {{ Str::limit(strip_tags($desc), 100) }}
                                 </p>
                                 @else
                                 <span class="text-gray-300 text-xs italic">Belum ada</span>
@@ -171,10 +177,10 @@
                             {{-- Tanggal --}}
                             <td class="px-5 py-4 whitespace-nowrap">
                                 <p class="text-xs text-gray-700 font-medium">
-                                    {{ \Carbon\Carbon::parse($c->event_date)->format('d M Y') }}
+                                    {{ $c->event_date ? \Carbon\Carbon::parse($c->event_date)->format('d M Y') : '-' }}
                                 </p>
                                 <p class="text-[10px] text-gray-400 mt-0.5">
-                                    {{ \Carbon\Carbon::parse($c->event_date)->diffForHumans() }}
+                                    {{ $c->event_date ? \Carbon\Carbon::parse($c->event_date)->diffForHumans() : '-' }}
                                 </p>
                             </td>
 
@@ -255,7 +261,7 @@
                 $title        = $tr?->title ?? '-';
                 $desc         = $tr?->description ?? '-';
                 $perkembangan = $tr?->perkembangan ?? '-';
-                $statusKey    = $c->status_key ?? '';
+                $statusKey    = $c->status?->key ?? '';
                 $statusColors = [
                     'open'          => 'bg-sky-100 text-sky-700',
                     'investigation' => 'bg-yellow-100 text-yellow-700',
@@ -271,6 +277,12 @@
                 ];
                 $statusClass = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-600';
                 $hasDesc     = $desc !== '-' && !empty(strip_tags($desc));
+                if ($perkembangan !== '-' && preg_match('/^\[/', $perkembangan)) {
+                    $decoded = json_decode($perkembangan, true);
+                    if (is_array($decoded)) {
+                        $perkembangan = collect($decoded)->pluck('notes')->filter()->implode("\n");
+                    }
+                }
                 $hasPerk     = $perkembangan !== '-' && !empty(strip_tags($perkembangan));
                 @endphp
                 <div class="p-4 space-y-2.5">
@@ -284,9 +296,9 @@
                             @endif
                         </div>
                         <div class="flex flex-wrap gap-1 justify-end flex-shrink-0">
-                            @if($c->status_name)
+                            @if($c->status?->name)
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $statusClass }}">
-                                {{ $c->status_name }}
+                                {{ $c->status?->name ?? '-' }}
                             </span>
                             @endif
                             @if($c->is_public)
@@ -302,7 +314,7 @@
                         <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Perkembangan</p>
                         @if($hasPerk)
                         <p class="text-xs text-gray-600 leading-relaxed line-clamp-2">
-                            {!! Str::limit(strip_tags($perkembangan), 120) !!}
+                            {{ Str::limit(strip_tags($perkembangan), 120) }}
                         </p>
                         @else
                         <p class="text-[10px] text-orange-500 font-medium">⚠ Belum diisi</p>
@@ -314,14 +326,14 @@
                     <div class="px-3 py-2 bg-gray-50 rounded-lg">
                         <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1">Deskripsi</p>
                         <p class="text-xs text-gray-600 leading-relaxed line-clamp-2">
-                            {!! Str::limit(strip_tags($desc), 120) !!}
+                            {{ Str::limit(strip_tags($desc), 120) }}
                         </p>
                     </div>
                     @endif
 
                     {{-- Meta row --}}
                     <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
-                        <span>📅 {{ \Carbon\Carbon::parse($c->event_date)->format('d M Y') }}</span>
+                        <span>📅 {{ $c->event_date ? \Carbon\Carbon::parse($c->event_date)->format('d M Y') : '-' }}</span>
                         @if($c->verified_by)
                         <span class="text-blue-500">✓ {{ $c->verifiedBy?->name ?? 'Terverifikasi' }}</span>
                         @else

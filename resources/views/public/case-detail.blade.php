@@ -1,6 +1,20 @@
 @extends('layouts.main')
 
 @section('content')
+
+<style>
+.case-summary img,
+.case-summary video,
+.case-summary iframe {
+    max-width: 100%;
+    height: auto;
+}
+.case-summary {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+</style>
+
     <div class="bg-gray-50 mt-20">
 
         @php
@@ -175,28 +189,39 @@
         @endphp
 
         {{-- ===================== HERO ===================== --}}
+        {{-- ===================== HERO ===================== --}}
         <section class="bg-white border-b">
             <div class="max-w-7xl mx-auto px-6 py-10">
 
-                <span
-                    class="inline-block mb-3 px-3 py-1 rounded-full text-xs font-semibold
-                {{ $case->status?->key === 'investigation' ||
-                $case->status?->key === 'penyelidikan' ||
-                $case->status?->key === 'penyidikan'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-green-100 text-green-800' }}">
-                    {{ $case->status->name ?? 'Status' }}
-                </span>
+                {{-- Baris atas: Kategori + Status sejajar --}}
+                <div class="flex items-center gap-2 mb-4 flex-wrap">
+                    @if ($categoryTrans?->name)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                            {{ $categoryTrans->name }}
+                        </span>
+                    @endif
+                    <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                        {{ $case->status?->key === 'investigation' ||
+                        $case->status?->key === 'penyelidikan' ||
+                        $case->status?->key === 'penyidikan'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-green-100 text-green-800' }}">
+                        {{ $case->status->name ?? 'Status' }}
+                    </span>
+                </div>
 
+                {{-- Judul --}}
                 <h1 class="text-3xl md:text-4xl font-bold leading-tight max-w-4xl">
                     {!! $trans?->title ?? $noTransMsg !!}
                 </h1>
 
-                <p class="mt-4 text-gray-600 max-w-3xl">
-                    {!! $summaryLead ?? $trans?->summary ?? '' !!}
+                {{-- Ringkasan singkat (dipotong agar benar-benar jadi "lead", bukan paragraf penuh) --}}
+                <p class="mt-4 text-gray-600 max-w-3xl leading-relaxed">
+                    {!! Str::limit(strip_tags($summaryLead ?? $trans?->summary ?? ''), 300) !!}
                 </p>
 
-                {{-- Meta info --}}
+                {{-- Meta info inti: hanya 3 hal paling penting untuk konteks cepat --}}
                 <div class="mt-6 flex flex-wrap gap-6 text-sm text-gray-700">
                     <div>
                         <span class="block text-gray-400 text-xs">Nomor Kasus</span>
@@ -207,31 +232,48 @@
                         <strong>{{ $case->event_date ?? '-' }}</strong>
                     </div>
                     <div>
-                        <span class="block text-gray-400 text-xs">Dipublikasikan</span>
-                        <strong>{{ optional($case->published_at)->format('d M Y') }}</strong>
-                    </div>
-                    <div>
-                        <span class="block text-gray-400 text-xs">Status</span>
-                        <strong>{{ $case->status->name ?? 'Status tidak diketahui' }}</strong>
-                    </div>
-                    <div>
-                        <span class="block text-gray-400 text-xs">Terakhir Diperbarui</span>
-                        <strong>{{ optional($case->updated_at)->format('d M Y, H:i') }} WIB</strong>
+                        <span class="block text-gray-400 text-xs">Lokasi</span>
+                        <strong>{{ $location['province'] ?? '-' }}{{ !empty($location['district']) ? ', ' . $location['district'] : '' }}</strong>
                     </div>
                 </div>
 
-                {{-- ===== STATUS EXPLAINER (bahasa awam) ===== --}}
-                @if ($explainer)
+                {{-- Metadata sekunder: kecil, tidak bersaing dengan info inti --}}
+                <p class="mt-3 text-xs text-gray-400">
+                    Dipublikasikan {{ optional($case->published_at)->format('d M Y') ?? '-' }}
+                    &middot;
+                    Diperbarui {{ optional($case->updated_at)->format('d M Y, H:i') }} WIB
+                </p>
+
+                {{-- ===== STATUS EXPLAINER (gabungan badge + narasi + durasi) ===== --}}
+                <!--@if ($explainer)
+                    @php
+                        $daysSinceUpdate = $case->updated_at ? $case->updated_at->diffInDays(now()) : null;
+                        $durationText = null;
+                        if (!is_null($daysSinceUpdate)) {
+                            if ($daysSinceUpdate < 1) {
+                                $durationText = 'Diperbarui hari ini.';
+                            } elseif ($daysSinceUpdate < 30) {
+                                $durationText = "Sudah {$daysSinceUpdate} hari berada di tahap ini.";
+                            } else {
+                                $months = intdiv($daysSinceUpdate, 30);
+                                $durationText = "Sudah sekitar {$months} bulan berada di tahap ini.";
+                            }
+                        }
+                    @endphp
                     <div
                         class="mt-6 flex items-start gap-3 px-4 py-3 rounded-xl border {{ $explainerColor[$explainer['color']] ?? 'bg-gray-50 border-gray-200 text-gray-700' }} max-w-3xl">
                         <span class="text-xl mt-0.5">{{ $explainer['icon'] }}</span>
                         <div>
-                            <p class="text-sm font-semibold mb-0.5">Apa artinya status "{{ $case->status->name ?? '' }}"?
+                            <p class="text-sm font-semibold mb-0.5">
+                                Apa artinya status "{{ $case->status->name ?? '' }}"?
                             </p>
                             <p class="text-sm leading-relaxed">{{ $explainer['text'] }}</p>
+                            @if ($durationText)
+                                <p class="text-xs mt-1.5 opacity-75 font-medium">⏱️ {{ $durationText }}</p>
+                            @endif
                         </div>
                     </div>
-                @endif
+                @endif-->
 
                 {{-- ===== SHARE BUTTONS ===== --}}
                 <div class="mt-6 flex items-center gap-3 flex-wrap">
@@ -282,10 +324,22 @@
         {{-- ===================== PROGRESS BAR ===================== --}}
         <section class="bg-white border-b">
             <div class="max-w-7xl mx-auto px-6 py-6">
-                <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center justify-between mb-1">
                     <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Tahapan Kasus</h2>
                     <span class="text-xs text-gray-400 italic">Hover tiap tahap untuk penjelasan</span>
                 </div>
+
+                {{-- Ringkasan progres singkat: posisi saat ini dari total tahap --}}
+                @php
+                    $totalSteps = 11; // step 1 - 11 sesuai $visibleSteps
+                    $currentLabel = $visibleSteps[$currentStep]['label'] ?? null;
+                @endphp
+                @if ($currentLabel)
+                    <p class="text-xs text-gray-500 mb-5">
+                        Kasus ini berada pada tahap <strong class="text-gray-700">{{ $currentLabel }}</strong>
+                        (tahap {{ $currentStep }} dari {{ $totalSteps }}).
+                    </p>
+                @endif
 
                 {{-- Mobile --}}
                 <div class="flex md:hidden flex-wrap gap-2">

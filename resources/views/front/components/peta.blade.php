@@ -16,7 +16,7 @@
         flex-direction: column;
         background: linear-gradient(160deg, #021E24, #032A36);
         border-right: 1px solid rgba(255, 255, 255, .10);
-        box-shadow: 6px 0 30px rgba(0, 0, 0, .45);
+        /*box-shadow: 6px 0 30px rgba(0, 0, 0, .45);*/
         z-index: 1000;
         transition: left .32s cubic-bezier(.4, 0, .2, 1);
     }

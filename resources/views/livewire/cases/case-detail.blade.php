@@ -307,13 +307,12 @@
                         @endcan --}}
                             </div>
                             @php
-                                if (method_exists($case, 'getTranslation')) {
-                                    $perkembangan = $case->getTranslation('perkembangan', 'id', false);
-                                    if (!$perkembangan) {
-                                        $perkembangan = $case->getTranslation('perkembangan', 'en', false);
+                                $perkembangan = $case->perkembangan ?? '';
+                                if ($perkembangan && preg_match('/^\[/', $perkembangan)) {
+                                    $decoded = json_decode($perkembangan, true);
+                                    if (is_array($decoded)) {
+                                        $perkembangan = collect($decoded)->pluck('notes')->filter()->implode("\n");
                                     }
-                                } else {
-                                    $perkembangan = $case->perkembangan;
                                 }
                             @endphp
                             @if ($perkembangan)

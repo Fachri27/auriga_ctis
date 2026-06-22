@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{AdminDashboardController, ArtikelController, CaseGeometryController, HomeController, ProfileController, PublicCaseController, PublicDashboardController};
+use App\Livewire\About\AboutForm;
 use App\Livewire\Artikels\{ArtikelForm, ArtikelTable};
 use App\Livewire\Cases\{CaseAction, CaseDetail, CaseForm, CaseList};
 use App\Livewire\Categories\{CategoriesForm, CategoriesTable};
@@ -33,9 +34,7 @@ Route::group([
     // Public verification page (locale-aware): /{locale}/verify-case/{case_number}
     Route::get('/verify-case/{case_number}', [\App\Http\Controllers\Public\CaseVerificationController::class, 'show'])->name('verify-case');
 
-    Route::get('/about', function () {
-        return view('front.about');
-    })->name('about-user');
+    Route::get('/about', [\App\Http\Controllers\HomeController::class, 'about'])->name('about-user');
 
     Route::get('/reports/create', ReportForm::class)->middleware('auth')->name('report.form');
 
@@ -107,6 +106,8 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('/verification/rejected', \App\Livewire\Verification\RejectedCases::class)
         ->middleware('auth')
         ->name('verification.rejected');
+
+    Route::get('/cms/about', AboutForm::class)->name('about.edit');
 
     Route::get('cms/artikels/create/', ArtikelForm::class)->name('artikel.create');
     Route::get('cms/artikels/', ArtikelTable::class)->name('artikel.index');
