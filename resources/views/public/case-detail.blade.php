@@ -654,9 +654,7 @@
         @endif
 
     </div>
-@endsection
 
-@push('styles')
     <style>
         /* Custom prose styling for TinyMCE content */
         .prose-content p {
@@ -719,7 +717,8 @@
             font-style: italic;
         }
     </style>
-@endpush
+
+@endsection
 
 @push('scripts')
     <script>

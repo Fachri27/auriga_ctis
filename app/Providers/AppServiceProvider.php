@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (!app()->runningInConsole()) {
+            $baseUrl = request()->getSchemeAndHttpHost();
+            config(['filesystems.disks.public.url' => $baseUrl . '/storage']);
+        }
     }
 }

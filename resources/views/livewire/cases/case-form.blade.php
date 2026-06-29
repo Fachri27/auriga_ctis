@@ -309,7 +309,7 @@
         <!-- DESKRIPSI -->
         <!-- ========================= -->
 
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+        <div x-show="lang === 'id'" class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
                 <span>Instansi</span>
             </h2>
@@ -328,7 +328,7 @@
             @enderror
         </div>
 
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+        <div x-show="lang === 'id'" class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
                 <span>Narasi Status</span>
             </h2>
@@ -450,7 +450,7 @@
             @enderror
         </div>
 
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
+        <div x-show="lang === 'id'" class="bg-gray-50 p-6 rounded-xl mb-6">
             <h2 class="text-xl font-semibold mb-4">
                 <span>Sumber</span>
             </h2>
