@@ -14,11 +14,11 @@ class UserDuaSeeder extends Seeder
     public function run(): void
     {
         $adminFachri = User::create([
-            'name' => 'Admin Fachri',
-            'email' => 'adminfachri@ctis.id',
-            'password' => bcrypt('123456'),
-            'email_verified_at' => now(), // Mark as verified for testing
+            "name" => "Admin Fachri",
+            "email" => "adminfachri@ctis.id",
+            "password" => bcrypt("123456"),
+            "email_verified_at" => now(), // Mark as verified for testing
         ]);
-        $adminFachri->assignRole('admin');  
+        $adminFachri->assignRole("admin");
     }
 }

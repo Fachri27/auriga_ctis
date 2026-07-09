@@ -18,6 +18,20 @@
             </div>
         @endif
 
+        @if ($errors->any())
+            <div class="p-4 mb-5 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center gap-2 text-red-700 font-semibold mb-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Form belum lengkap
+                </div>
+                <ul class="list-disc list-inside text-sm text-red-600">
+                    @foreach ($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         {{-- Language --}}
         <div class="flex flex-col mb-10">
             <label class="font-medium mb-2">🌐 Bahasa</label>
@@ -504,15 +518,27 @@
         })
     })
 
+    let mapController = null;
+
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('location-updated', (event) => {
+            if (mapController) mapController.drawPolygon(event.geometry);
+        });
+        Livewire.on('location-reset', () => {
+            if (mapController) mapController.clearPolygon();
+        });
+    });
+
     function mapComponent(lat, lng) {
         return {
             map: null,
             marker: null,
+            polygon: null,
             lat,
             lng,
 
             initMap() {
-                console.log('MAP INIT', this.lat, this.lng);
+                mapController = this;
 
                 this.map = L.map('map').setView(
                     this.lat && this.lng ? [this.lat, this.lng] : [-2.5489, 118.0149],
@@ -523,13 +549,24 @@
                     maxZoom: 19
                 }).addTo(this.map);
 
-                if (this.lat && this.lng) {
-                    this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
-                }
+                this.map.on('click', (e) => this.onMapClick(e));
 
-                // 🔥 ini kuncinya
+                this.addMarker();
+
                 this.$watch('lat', () => this.updateMarker());
                 this.$watch('lng', () => this.updateMarker());
+            },
+
+            addMarker() {
+                if (!this.lat || !this.lng || !this.map) return;
+                this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
+            },
+
+            onMapClick(e) {
+                this.lat = e.latlng.lat;
+                this.lng = e.latlng.lng;
+                @this.set('lat', e.latlng.lat);
+                @this.set('lng', e.latlng.lng);
             },
 
             updateMarker() {
@@ -538,10 +575,36 @@
                 if (this.marker) {
                     this.marker.setLatLng([this.lat, this.lng]);
                 } else {
-                    this.marker = L.marker([this.lat, this.lng]).addTo(this.map);
+                    this.addMarker();
                 }
 
                 this.map.setView([this.lat, this.lng], 14);
+            },
+
+            drawPolygon(geometry) {
+                this.clearPolygon();
+                if (!geometry) return;
+
+                try {
+                    this.polygon = L.geoJSON(geometry, {
+                        style: {
+                            color: '#2563eb',
+                            fillColor: '#3b82f6',
+                            fillOpacity: 0.15,
+                            weight: 2,
+                        },
+                    }).addTo(this.map);
+                    this.map.fitBounds(this.polygon.getBounds(), { padding: [30, 30] });
+                } catch (e) {
+                    console.warn('Failed to draw polygon', e);
+                }
+            },
+
+            clearPolygon() {
+                if (this.polygon) {
+                    this.map.removeLayer(this.polygon);
+                    this.polygon = null;
+                }
             }
         }
     }

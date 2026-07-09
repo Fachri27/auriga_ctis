@@ -11,7 +11,7 @@
 </head>
 <body class="font-sans antialiased">
 
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#032A36] via-[#034454] to-[#045E72] px-4">
+    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#264c16] via-[#1d3d11] to-[#132b0b] px-4">
         <div class="w-full max-w-md">
 
             {{-- Card --}}
@@ -56,7 +56,7 @@
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#032A36] focus:ring-2 focus:ring-[#032A36]/20 transition duration-200"
+                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#264c16] focus:ring-2 focus:ring-[#264c16]/20 transition duration-200"
                             placeholder="email@example.com">
                     </div>
 
@@ -64,7 +64,7 @@
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <input id="password" type="password" name="password" required
-                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#032A36] focus:ring-2 focus:ring-[#032A36]/20 transition duration-200"
+                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#264c16] focus:ring-2 focus:ring-[#264c16]/20 transition duration-200"
                             placeholder="••••••••">
                     </div>
 
@@ -72,12 +72,12 @@
                     <div class="flex items-center justify-between text-sm">
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" name="remember"
-                                class="rounded border-gray-300 text-[#032A36] focus:ring-[#032A36]">
+                                class="rounded border-gray-300 text-[#264c16] focus:ring-[#264c16]">
                             <span class="text-gray-600">Ingat saya</span>
                         </label>
                         @if (Route::has('password.request'))
                             <a href="{{ route('password.request') }}"
-                                class="text-[#032A36] hover:underline font-medium">
+                                class="text-[#264c16] hover:underline font-medium">
                                 Lupa password?
                             </a>
                         @endif
@@ -85,7 +85,7 @@
 
                     {{-- Button --}}
                     <button type="submit"
-                        class="w-full py-3 px-4 rounded-xl bg-[#032A36] text-white font-semibold hover:bg-[#034454] focus:ring-2 focus:ring-[#032A36]/30 transition duration-200 shadow-lg cursor-pointer">
+                        class="w-full py-3 px-4 rounded-xl bg-[#264c16] text-white font-semibold hover:bg-[#034454] focus:ring-2 focus:ring-[#264c16]/30 transition duration-200 shadow-lg cursor-pointer">
                         Masuk
                     </button>
                 </form>
@@ -93,7 +93,7 @@
                 {{-- Register --}}
                 <p class="text-center text-sm text-gray-500 mt-6">
                     Belum punya akun?
-                    <a href="{{ route('register') }}" class="text-[#032A36] font-medium hover:underline">
+                    <a href="{{ route('register') }}" class="text-[#264c16] font-medium hover:underline">
                         Daftar
                     </a>
                 </p>

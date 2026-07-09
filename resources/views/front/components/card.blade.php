@@ -41,9 +41,19 @@
                     </div>
 
                     {{-- Case Number --}}
-                    <div class="text-xl font-black text-gray-900 leading-tight mb-3 tracking-tight">
+                    <div class="text-lg font-bold text-gray-900 leading-tight mb-1 tracking-tight">
                         {{ $case->case_number ?? 'No. Kasus' }}
                     </div>
+
+                    {{-- Title --}}
+                    @php
+                        $_trans = $case->translations->where('locale', app()->getLocale())->first();
+                    @endphp
+                    @if ($_trans?->title)
+                    <p class="text-sm text-gray-600 mb-2 leading-snug line-clamp-2">
+                        {{ strip_tags($_trans->title) }}
+                    </p>
+                    @endif
 
                     {{-- Meta --}}
                     <div class="grid grid-cols-2 gap-x-4 gap-y-2 py-3 border-t border-b border-gray-100 mb-3">
@@ -76,7 +86,7 @@
                     </div>
 
                     {{-- Excerpt --}}
-                    <p class="text-sm text-gray-500 leading-relaxed italic flex-1">
+                    <p class="text-sm text-gray-500 leading-relaxed flex-1">
                         @php
                             $locale = app()->getLocale();
                             $trans = $case->translations->where('locale', $locale)->first();
@@ -87,14 +97,14 @@
                     {{-- Footer --}}
                     <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                         <a href="{{ route('public.verify.case', $case->case_number) }}"
-                            class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                            class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-[#264c16] transition-colors after:content-['_→']">
                             Lihat Detail
                         </a>
                     </div>
 
                 </div>
             @empty
-                <div class="col-span-3 text-center text-gray-400 italic py-16 text-base">
+                <div class="col-span-3 text-center text-gray-400 py-16 text-base">
                     Belum ada kasus terverifikasi &amp; dipublikasikan.
                 </div>
             @endforelse

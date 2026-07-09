@@ -61,6 +61,14 @@ Route::get('/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'internal.access'])
     ->name('dashboard');
 
+Route::get('/dashboard/export/csv', [AdminDashboardController::class, 'exportCsv'])
+    ->middleware(['auth', 'verified', 'internal.access'])
+    ->name('dashboard.export.csv');
+
+Route::get('/dashboard/export/excel', [AdminDashboardController::class, 'exportExcel'])
+    ->middleware(['auth', 'verified', 'internal.access'])
+    ->name('dashboard.export.excel');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -124,6 +132,10 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     // Chart data management
     Route::get('/cms/charts/upload', \App\Livewire\Charts\CsvUpload::class)->name('charts.upload');
     Route::get('/cms/charts', \App\Livewire\Charts\ChartsDashboard::class)->name('charts.dashboard');
+    Route::get('/cms/charts/sync', function () {
+        \Illuminate\Support\Facades\Artisan::call('chart:sync');
+        return redirect()->route('charts.dashboard')->with('success', 'Sync selesai! Data chart diperbarui.');
+    })->name('charts.sync');
     
 
 

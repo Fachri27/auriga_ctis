@@ -63,8 +63,10 @@
 
     <style>
         body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            line-height: 24px;
         }
+        [x-cloak] { display: none !important; }
     </style>
 
 
@@ -123,6 +125,7 @@
 
     {{-- PruneCluster JS --}}
     <script src="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/dist/PruneCluster.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     @stack('scripts')
 
 

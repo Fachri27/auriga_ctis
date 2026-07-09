@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\CaseModel;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AdminDashboardController extends Controller
 {
@@ -149,5 +151,83 @@ class AdminDashboardController extends Controller
             'latestCases',
             'casesWithLocation'
         ));
+    }
+
+    public function exportCsv()
+    {
+        $cases = CaseModel::with(['status', 'category.translations'])->orderBy('created_at', 'desc')->get();
+
+        $filename = 'cases-export-' . now()->format('Y-m-d-Hi') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $columns = ['No', 'Case Number', 'Category', 'Status', 'Event Date', 'Created At', 'Is Public'];
+
+        $callback = function () use ($cases, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($cases as $i => $c) {
+                $catName = $c->category?->translation('id')?->name ?? $c->category?->slug ?? 'Uncategorized';
+                fputcsv($file, [
+                    $i + 1,
+                    $c->case_number,
+                    $catName,
+                    $c->status?->name ?? 'Unknown',
+                    $c->event_date ?? 'N/A',
+                    $c->created_at?->format('Y-m-d H:i') ?? 'N/A',
+                    $c->is_public ? 'Yes' : 'No',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportExcel()
+    {
+        $cases = CaseModel::with(['status', 'category.translations'])->orderBy('created_at', 'desc')->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $headers = ['No', 'Case Number', 'Category', 'Status', 'Event Date', 'Created At', 'Is Public'];
+        foreach (range(0, count($headers) - 1) as $col) {
+            $sheet->setCellValueByColumnAndRow($col + 1, 1, $headers[$col]);
+        }
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+        foreach ($cases as $i => $c) {
+            $row = $i + 2;
+            $catName = $c->category?->translation('id')?->name ?? $c->category?->slug ?? 'Uncategorized';
+            $sheet->setCellValueByColumnAndRow(1, $row, $i + 1);
+            $sheet->setCellValueByColumnAndRow(2, $row, $c->case_number);
+            $sheet->setCellValueByColumnAndRow(3, $row, $catName);
+            $sheet->setCellValueByColumnAndRow(4, $row, $c->status?->name ?? 'Unknown');
+            $sheet->setCellValueByColumnAndRow(5, $row, $c->event_date ?? 'N/A');
+            $sheet->setCellValueByColumnAndRow(6, $row, $c->created_at?->format('Y-m-d H:i') ?? 'N/A');
+            $sheet->setCellValueByColumnAndRow(7, $row, $c->is_public ? 'Yes' : 'No');
+        }
+
+        foreach (range(1, 7) as $col) {
+            $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
+        }
+
+        $filename = 'cases-export-' . now()->format('Y-m-d-Hi') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+
+        return response($content, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ]);
     }
 }

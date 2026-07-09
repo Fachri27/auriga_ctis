@@ -13,6 +13,8 @@
     word-break: break-word;
     overflow-wrap: break-word;
 }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 
     <div class="bg-gray-50 mt-20">
@@ -216,24 +218,24 @@
                     {!! $trans?->title ?? $noTransMsg !!}
                 </h1>
 
-                {{-- Ringkasan singkat (dipotong agar benar-benar jadi "lead", bukan paragraf penuh) --}}
+                {{-- Ringkasan singkat --}}
                 <p class="mt-4 text-gray-600 max-w-3xl leading-relaxed">
-                    {!! Str::limit(strip_tags($summaryLead ?? $trans?->summary ?? ''), 300) !!}
+                    {!! strip_tags($summaryLead ?? $trans?->summary ?? '') !!}
                 </p>
 
                 {{-- Meta info inti: hanya 3 hal paling penting untuk konteks cepat --}}
                 <div class="mt-6 flex flex-wrap gap-6 text-sm text-gray-700">
                     <div>
-                        <span class="block text-gray-400 text-xs">Nomor Kasus</span>
-                        <strong>{{ $case->case_number }}</strong>
+                        <span class="block text-gray-500 text-xs">Nomor Kasus</span>
+                        <strong class="text-gray-900">{{ $case->case_number }}</strong>
                     </div>
                     <div>
-                        <span class="block text-gray-400 text-xs">Tanggal Kejadian</span>
-                        <strong>{{ $case->event_date ?? '-' }}</strong>
+                        <span class="block text-gray-500 text-xs">Tanggal Kejadian</span>
+                        <strong class="text-gray-900">{{ $case->event_date ?? '-' }}</strong>
                     </div>
                     <div>
-                        <span class="block text-gray-400 text-xs">Lokasi</span>
-                        <strong>{{ $location['province'] ?? '-' }}{{ !empty($location['district']) ? ', ' . $location['district'] : '' }}</strong>
+                        <span class="block text-gray-500 text-xs">Lokasi</span>
+                        <strong class="text-gray-900">{{ $location['province'] ?? '-' }}{{ !empty($location['district']) ? ', ' . $location['district'] : '' }}</strong>
                     </div>
                 </div>
 
@@ -447,27 +449,29 @@
             <div class="max-w-4xl mx-auto">
 
                 {{-- Tab Buttons --}}
-                <div class="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6">
-                    <button onclick="switchTab('kronologi')" id="tab-kronologi"
-                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-800 shadow-sm">
-                        Kronologi
-                    </button>
-                    <button onclick="switchTab('perkembangan')" id="tab-perkembangan"
-                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                        Perkembangan
-                    </button>
-                    <button onclick="switchTab('permasalahan')" id="tab-permasalahan"
-                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                        Permasalahan
-                    </button>
-                    <button onclick="switchTab('pembelajaran')" id="tab-pembelajaran"
-                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                        Lesson Learn
-                    </button>
-                    <button onclick="switchTab('status')" id="tab-status"
-                        class="tab-btn flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
-                        Status
-                    </button>
+                <div class="overflow-x-auto -mx-6 px-6 mb-6 scrollbar-hide">
+                    <div class="flex gap-1 bg-gray-100 rounded-xl p-1 min-w-max md:min-w-0">
+                        <button onclick="switchTab('kronologi')" id="tab-kronologi"
+                            class="tab-btn whitespace-nowrap flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-800 shadow-sm">
+                            Kronologi
+                        </button>
+                        <button onclick="switchTab('perkembangan')" id="tab-perkembangan"
+                            class="tab-btn whitespace-nowrap flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                            Perkembangan
+                        </button>
+                        <button onclick="switchTab('permasalahan')" id="tab-permasalahan"
+                            class="tab-btn whitespace-nowrap flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                            Permasalahan
+                        </button>
+                        <button onclick="switchTab('pembelajaran')" id="tab-pembelajaran"
+                            class="tab-btn whitespace-nowrap flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                            Lesson Learn
+                        </button>
+                        <button onclick="switchTab('status')" id="tab-status"
+                            class="tab-btn whitespace-nowrap flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 text-gray-500 hover:text-gray-700">
+                            Status
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Panel: Kronologi --}}
@@ -599,12 +603,12 @@
                             <div class="pt-3 border-t border-gray-100">
                                 @if ($c->type === 'internal')
                                     <a href="{{ route('public.artikel.detail', ['slug' => $c->slug]) }}"
-                                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-[#264c16] transition-colors after:content-['_→']">
                                         Baca Selengkapnya
                                     </a>
                                 @else
                                     <a href="{{ $c->link }}" target="_blank" rel="noopener"
-                                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                                        class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-[#264c16] transition-colors after:content-['_→']">
                                         Baca Selengkapnya
                                     </a>
                                 @endif

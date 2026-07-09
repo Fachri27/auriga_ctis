@@ -14,25 +14,25 @@
             </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="text-center bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <div class="text-center bg-gray-300 rounded-2xl p-5 border border-gray-100">
                     <p class="text-3xl sm:text-4xl font-bold text-gray-900">{{ $totalCases ?? '—' }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Total Kasus Terdaftar</p>
-                    <p class="text-xs text-gray-400 mt-1">Sejak sistem diluncurkan</p>
+                    <p class="text-[18px] text-gray-500 mt-1 font-bold">Total Kasus Terdaftar</p>
+                    <p class="text-sm text-gray-500 mt-1">Sejak sistem diluncurkan</p>
                 </div>
-                <div class="text-center bg-yellow-50 rounded-2xl p-5 border border-yellow-100">
+                <div class="text-center bg-yellow-300 rounded-2xl p-5 border border-yellow-100">
                     <p class="text-3xl sm:text-4xl font-bold text-yellow-600">{{ $activeCases ?? '—' }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Kasus Aktif</p>
-                    <p class="text-xs text-gray-400 mt-1">Sedang dalam proses hukum</p>
+                    <p class="text-[18px] text-gray-500 mt-1 font-bold">Kasus Aktif</p>
+                    <p class="text-sm text-gray-500 mt-1">Sedang dalam proses hukum</p>
                 </div>
-                <div class="text-center bg-green-50 rounded-2xl p-5 border border-green-100">
+                <div class="text-center bg-green-300 rounded-2xl p-5 border border-green-100">
                     <p class="text-3xl sm:text-4xl font-bold text-green-600">{{ $completedCases ?? '—' }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Kasus Selesai / Divonis</p>
-                    <p class="text-xs text-gray-400 mt-1">Proses hukum sudah final</p>
+                    <p class="text-[18px] text-gray-500 mt-1 font-bold">Kasus Selesai / Divonis</p>
+                    <p class="text-sm text-gray-500 mt-1">Proses hukum sudah final</p>
                 </div>
-                <div class="text-center bg-blue-50 rounded-2xl p-5 border border-blue-100">
+                <div class="text-center bg-blue-300 rounded-2xl p-5 border border-blue-100">
                     <p class="text-3xl sm:text-4xl font-bold text-blue-600">{{ $provinceCovered ?? '—' }}</p>
-                    <p class="text-sm text-gray-500 mt-1">Provinsi Terdampak</p>
-                    <p class="text-xs text-gray-400 mt-1">Di seluruh Indonesia</p>
+                    <p class="text-[18px] text-gray-500 mt-1 font-bold">Provinsi Terdampak</p>
+                    <p class="text-sm text-gray-500 mt-1">Di seluruh Indonesia</p>
                 </div>
             </div>
 
@@ -127,120 +127,182 @@
 
     {{-- ===================== CHART DATA (ECHARTS) ===================== --}}
     @if (!empty($publicCharts))
-    <div class="bg-gray-50 py-16 border-t border-gray-100">
+    <div x-data="{ view: 'chart', switchView(v) { this.view = v; if (v === 'chart') setTimeout(function() { pubResizeAll(); }, 100); } }" class="bg-[#E6F2DD] py-16 border-t border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-10">
                 <p class="text-xs font-semibold tracking-[0.25em] uppercase text-gray-400 mb-2">Statistik Perkara</p>
                 <h2 class="text-2xl font-bold text-gray-800">Indeksasi Putusan Perkara</h2>
+                <div class="flex flex-col sm:flex-row items-center justify-between mt-4 gap-3">
+                    <div class="inline-flex bg-gray-200 rounded-lg p-1">
+                        <button @click="switchView('chart')"
+                            class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
+                            :class="view === 'chart' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                            Chart
+                        </button>
+                        <button @click="switchView('table')"
+                            class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
+                            :class="view === 'table' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            Table
+                        </button>
+                    </div>
+                    @if (!empty($filterOptions))
+                    <form id="filter-form" method="GET" action="{{ url()->current() }}" class="flex flex-wrap items-end gap-2">
+                        <div>
+                            <select name="tahun" onchange="applyFilters()" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                                <option value="">Tahun</option>
+                                @foreach ($filterOptions['tahun'] as $t)
+                                <option value="{{ $t }}" {{ (string) $filterTahun === (string) $t ? 'selected' : '' }}>{{ $t }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <select name="klasifikasi" onchange="applyFilters()" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white max-w-[140px]">
+                                <option value="">Klasifikasi</option>
+                                @foreach ($filterOptions['klasifikasi'] as $k)
+                                <option value="{{ $k }}" {{ $filterKlasifikasi === $k ? 'selected' : '' }}>{{ $k }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <select name="pulau" onchange="applyFilters()" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                                <option value="">Pulau</option>
+                                @foreach ($filterOptions['pulau'] as $p)
+                                <option value="{{ $p }}" {{ $filterPulau === $p ? 'selected' : '' }}>{{ $p }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div id="reset-filter-container" @if (!($filterTahun || $filterKlasifikasi || $filterPulau)) style="display:none" @endif>
+                            <a href="#" onclick="resetFilters(); return false;" class="text-xs text-blue-600 hover:underline whitespace-nowrap">Reset</a>
+                        </div>
+                    </form>
+                    @endif
+                </div>
             </div>
 
-            @if (!empty($publicYears))
-            <div class="flex justify-center mb-8">
-                <div class="relative inline-block text-left" id="pubYearFilter">
-                    <button type="button" onclick="document.getElementById('pubYearDropdown').classList.toggle('hidden')"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Filter Tahun
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div id="pubYearDropdown" class="hidden absolute z-10 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
-                        <div class="px-3 py-2 border-b border-gray-100">
-                            <button type="button" id="pubToggleAllYears" class="text-xs text-blue-600 hover:underline">Uncheck All</button>
+            {{-- CHART VIEW --}}
+            <div x-show="view === 'chart'" class="max-w-7xl mx-auto space-y-6">
+
+            @php
+                $byTitle = fn($t) => collect($kpiData ?? [])->firstWhere('title', $t);
+            @endphp
+            <div id="kpi-container" class="max-w-7xl mx-auto px-4 sm:px-6 mb-4 space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    @foreach (['Perkara', 'Terdakwa', 'Pengadilan'] as $t)
+                    @php $k = $byTitle($t); @endphp
+                    @if ($k)
+                    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center hover:shadow-md transition-shadow">
+                        <div class="text-lg font-bold text-gray-900">{{ $k['display'] }}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">{{ $k['title'] }}</div>
+                    </div>
+                    @endif
+                    @endforeach
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 text-center">Subjek Hukum</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            @foreach (['Perorangan', 'Korporasi'] as $t)
+                            @php $k = $byTitle($t); @endphp
+                            @if ($k)
+                            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center hover:shadow-md transition-shadow">
+                                <div class="text-lg font-bold text-gray-900">{{ $k['display'] }}</div>
+                                <div class="text-xs text-gray-500 mt-0.5">{{ $k['title'] }}</div>
+                            </div>
+                            @endif
+                            @endforeach
                         </div>
-                        <div class="p-2 space-y-1">
-                            @foreach ($publicYears as $year)
-                            <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer text-sm year-label" data-year="{{ $year }}">
-                                <input type="checkbox" value="{{ $year }}" checked class="year-checkbox rounded border-gray-300 text-teal-600 focus:ring-teal-500">
-                                {{ $year }}
-                            </label>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2 text-center">Vonis Putusan</h4>
+                        <div class="grid grid-cols-3 gap-3">
+                            @foreach (['Bebas', 'Lepas', 'Bersalah'] as $t)
+                            @php $vn = $byTitle('Vonis ' . $t); @endphp
+                            @if ($vn)
+                            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center hover:shadow-md transition-shadow">
+                                <div class="text-lg font-bold text-gray-900">{{ $vn['display'] }}</div>
+                                <div class="text-xs text-gray-500 mt-0.5">{{ $vn['title'] }}</div>
+                            </div>
+                            @endif
                             @endforeach
                         </div>
                     </div>
                 </div>
             </div>
-            @endif
 
-            <div class="max-w-7xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach ($publicCharts as $i => $ch)
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow
-                        {{ $loop->last ? 'md:col-span-2' : '' }}">
+                <div id="charts-container">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" id="charts-row-1">
+                    @foreach (array_slice($publicCharts ?? [], 0, 2) as $ch)
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                         <div class="px-5 py-4 border-b border-gray-50">
                             <h3 class="text-sm font-semibold text-gray-800">{{ $ch['title'] }}</h3>
                         </div>
-                        <div class="p-4" wire:ignore>
+                        <div wire:ignore>
                             <div class="pub-echart" id="pub-{{ $ch['id'] }}"
                                 data-chart='{{ json_encode($ch['data']) }}'
-                                {{ str_contains($ch['id'], 'pengadilan') ? 'data-max-y=200' : '' }}
+                                data-type="{{ $ch['type'] }}"
                                 style="height:400px;width:100%"></div>
                         </div>
                     </div>
                     @endforeach
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="charts-row-2">
+                    @foreach (array_slice($publicCharts ?? [], 2) as $ch)
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="px-5 py-4 border-b border-gray-50">
+                            <h3 class="text-sm font-semibold text-gray-800">{{ $ch['title'] }}</h3>
+                        </div>
+                        <div wire:ignore>
+                            <div class="pub-echart" id="pub-{{ $ch['id'] }}"
+                                data-chart='{{ json_encode($ch['data']) }}'
+                                data-type="{{ $ch['type'] }}"
+                                style="height:350px;width:100%"></div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             </div>
+            </div>
+
+            {{-- TABLE VIEW --}}
+            <div x-show="view === 'table'" x-cloak class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6" id="tables-container">
+                @forelse ($tableData ?? [] as $td)
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-gray-800">{{ $td['title'] }}</h3>
+                        <span class="text-xs text-gray-400">{{ count($td['rows']) }} baris</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 border-b">
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase w-8">#</th>
+                                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Nama</th>
+                                    <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach ($td['rows'] as $i => $r)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-2 text-gray-400 text-xs">{{ $i + 1 }}</td>
+                                    <td class="px-4 py-2 text-gray-700 max-w-md truncate">{{ $r['label'] }}</td>
+                                    <td class="px-4 py-2 text-right font-medium text-gray-800">{{ number_format($r['value']) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-10 text-gray-400">Belum ada data.</div>
+                @endforelse
+            </div>
+
         </div>
     </div>
     @endif
-
-    {{-- ===================== FAQ AWAM ===================== --}}
-    <div class="bg-gray-50 py-16 border-t border-gray-100">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6">
-            <div class="text-center mb-10">
-                <p class="text-xs font-semibold tracking-[0.25em] uppercase text-gray-400 mb-2">Pertanyaan Umum</p>
-                <h2 class="text-2xl font-bold text-gray-800">Yang Sering Ditanyakan Masyarakat</h2>
-            </div>
-
-            <div class="space-y-3" id="faq-list">
-
-                @php
-                    $faqs = [
-                        [
-                            'q' => '❓ Apa itu CTIS dan siapa yang mengelolanya?',
-                            'a' =>
-                                'CTIS (Case Tracking & Information System) adalah platform publik untuk memantau perkembangan kasus hukum di Indonesia. Dikelola secara independen dengan data yang bersumber dari lembaga penegak hukum resmi.',
-                        ],
-                        [
-                            'q' => '🔍 Bagaimana cara mencari kasus di daerah saya?',
-                            'a' =>
-                                'Gunakan fitur filter di peta atau kolom pencarian — masukkan nama provinsi, kota, atau kata kunci. Semua kasus yang sudah dipublikasikan akan muncul di hasil pencarian.',
-                        ],
-                        [
-                            'q' => '⏳ Mengapa proses hukum bisa memakan waktu bertahun-tahun?',
-                            'a' =>
-                                'Setiap tahap hukum memiliki prosedur ketat. Kasus korupsi sering melibatkan dokumen ribuan lembar, banyak saksi, dan pihak-pihak yang menggunakan hak banding hingga kasasi. Ini yang membuat prosesnya panjang.',
-                        ],
-                        [
-                            'q' => '📢 Bagaimana cara melaporkan dugaan korupsi?',
-                            'a' =>
-                                'Anda bisa melapor melalui KPK (kpk.go.id), Kejaksaan, atau Kepolisian setempat. Identitas pelapor dilindungi oleh Undang-Undang Perlindungan Saksi dan Korban. Anda juga bisa menggunakan fitur laporan di platform ini.',
-                        ],
-                        [
-                            'q' => '📊 Apakah data di sini akurat dan terpercaya?',
-                            'a' =>
-                                'Data bersumber dari dokumen resmi lembaga penegak hukum dan putusan pengadilan yang telah berkekuatan hukum tetap. Kami memverifikasi setiap informasi sebelum dipublikasikan dan memperbarui secara berkala.',
-                        ],
-                    ];
-                @endphp
-
-                @foreach ($faqs as $faq)
-                    <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-                        <button onclick="toggleFaqHome(this)"
-                            class="w-full flex items-center justify-between px-5 py-4 text-left font-semibold text-gray-800 text-sm hover:bg-gray-50 transition-colors">
-                            <span>{{ $faq['q'] }}</span>
-                            <svg class="faq-icon w-4 h-4 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-3"
-                                fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div
-                            class="faq-body hidden px-5 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-50">
-                            <p class="pt-3">{{ $faq['a'] }}</p>
-                        </div>
-                    </div>
-                @endforeach
-
-            </div>
-        </div>
-    </div>
 
     {{-- ===================== CTA SECTION ===================== --}}
 @endsection
@@ -456,106 +518,252 @@
         // PUBLIC CHARTS FROM CSV (ECharts)
         // ========================
         (function() {
-            var pubChartInstances = {};
-            var pubAllChartData = {};
+            window.pubChartInstances = window.pubChartInstances || {};
+            window.pubAllChartData = window.pubAllChartData || {};
 
             function pubInitChart(el) {
                 var id = el.id;
                 var raw = el.getAttribute('data-chart');
                 if (!raw) return;
                 var data = JSON.parse(raw);
-                pubAllChartData[id] = data;
+                window.pubAllChartData[id] = data;
 
-                if (pubChartInstances[id]) pubChartInstances[id].dispose();
+                if (window.pubChartInstances[id]) window.pubChartInstances[id].dispose();
 
                 var chart = echarts.init(el);
-                pubChartInstances[id] = chart;
+                window.pubChartInstances[id] = chart;
                 pubUpdateChart(id);
             }
+            window.pubInitChart = pubInitChart;
 
             function pubUpdateChart(id) {
-                var chart = pubChartInstances[id];
-                var data = pubAllChartData[id];
+                var chart = window.pubChartInstances[id];
+                var data = window.pubAllChartData[id];
+                var el = document.getElementById(id);
                 if (!chart || !data || data.length === 0) return;
 
-                var selected = {};
-                document.querySelectorAll('.year-checkbox').forEach(function(cb) {
-                    selected[cb.value] = cb.checked;
-                });
+                var chartType = el.getAttribute('data-type') || 'bar';
 
-                var filtered = data.filter(function(d) {
-                    if (selected[d.label] === undefined) return true;
-                    return selected[d.label] === true;
-                });
-
-                if (filtered.length === 0) { chart.clear(); return; }
-
-                var labels = filtered.map(function(d) { return d.label; });
-                var values = filtered.map(function(d) { return d.value; });
+                var labels = data.map(function(d) { return d.label; });
+                var values = data.map(function(d) { return d.value; });
                 var long = labels.length > 15;
 
-                chart.setOption({
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
-                        formatter: function(params) {
-                            var p = params[0];
-                            return '<b>' + p.name + '</b><br/>Jumlah: <b>' + p.value.toLocaleString() + '</b>';
-                        }
-                    },
-                    grid: { left: '3%', right: '4%', bottom: long ? '25%' : '12%', containLabel: true },
-                    xAxis: { type: 'category', data: labels, axisLabel: { interval: long ? Math.ceil(labels.length / 20) : 0, rotate: long ? 55 : 40, fontSize: long ? 8 : 10 } },
-                    yAxis: { type: 'value', minInterval: 1, max: chart.getDom().getAttribute('data-max-y') ? parseInt(chart.getDom().getAttribute('data-max-y')) : undefined },
-                    dataZoom: long ? [{ type: 'slider', show: true, start: 0, end: 30, height: 16, bottom: 5 }] : undefined,
-                    series: [{
-                        type: 'bar',
-                        data: values,
-                        itemStyle: {
-                            color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                                colorStops: [{ offset: 0, color: '#0d9488' }, { offset: 1, color: '#0f766e' }]
-                            },
-                            borderRadius: [4,4,0,0]
+                if (chartType === 'pie') {
+                    var total = values.reduce(function(a, b) { return a + b; }, 0);
+                    var pieData = data.map(function(d) {
+                        return { name: d.label, value: d.value };
+                    });
+                    var colors = ['#0d9488','#0891b2','#2563eb','#7c3aed','#db2777','#dc2626','#ea580c','#d97706','#65a30d','#059669'];
+                    chart.setOption({
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: function(p) {
+                                return '<b>' + p.name + '</b><br/>' + p.value.toLocaleString() + ' (' + p.percent.toFixed(1) + '%)';
+                            }
                         },
-                        emphasis: { itemStyle: { color: '#115e59' } },
-                        label: { show: !long, position: 'top', fontSize: 9, fontWeight: 'bold', color: '#374151' }
-                    }]
-                });
+                        series: [{
+                            type: 'pie',
+                            radius: ['30%', '65%'],
+                            center: ['50%', '50%'],
+                            data: pieData,
+                            itemStyle: {
+                                color: function(p) { return colors[p.dataIndex % colors.length]; },
+                                borderRadius: 4,
+                                borderColor: '#fff',
+                                borderWidth: 2
+                            },
+                            label: {
+                                formatter: function(p) { return p.name + '\n' + p.value.toLocaleString(); },
+                                fontSize: 11,
+                                fontWeight: 'bold'
+                            },
+                            emphasis: {
+                                itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0,0,0,0.3)' }
+                            }
+                        }]
+                    });
+                } else if (chartType === 'line') {
+                    chart.setOption({
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: function(params) {
+                                var p = params[0];
+                                return '<b>' + p.name + '</b><br/>Jumlah: <b>' + p.value.toLocaleString() + '</b>';
+                            }
+                        },
+                        grid: { left: '3%', right: '4%', bottom: long ? '25%' : '12%', containLabel: true },
+                        xAxis: { type: 'category', data: labels, axisLabel: { interval: long ? Math.ceil(labels.length / 20) : 0, rotate: long ? 55 : 40, fontSize: long ? 8 : 10 } },
+                        yAxis: { type: 'value', minInterval: 1 },
+                        series: [{
+                            type: 'line',
+                            data: values,
+                            smooth: false,
+                            lineStyle: { width: 3, color: '#0d9488' },
+                            itemStyle: { color: '#0d9488' },
+                            areaStyle: {
+                                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                                    colorStops: [{ offset: 0, color: 'rgba(13,148,136,0.3)' }, { offset: 1, color: 'rgba(13,148,136,0.02)' }]
+                                }
+                            },
+                            symbol: 'circle',
+                            symbolSize: 8,
+                            label: { show: true, position: 'top', fontSize: 10, fontWeight: 'bold', color: '#374151' }
+                        }]
+                    });
+                } else if (chartType === 'hbar') {
+                    chart.setOption({
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+                            formatter: function(params) {
+                                var p = params[0];
+                                return '<b>' + p.name + '</b><br/>Jumlah: <b>' + p.value.toLocaleString() + '</b>';
+                            }
+                        },
+                        grid: { left: '20%', right: '5%', bottom: '5%', top: '5%', containLabel: true },
+                        xAxis: { type: 'value', minInterval: 1 },
+                        yAxis: { type: 'category', data: labels.slice().reverse(), axisLabel: { fontSize: 9, width: 120, overflow: 'truncate' } },
+                        series: [{
+                            type: 'bar',
+                            data: values.slice().reverse(),
+                            itemStyle: {
+                                color: { type: 'linear', x: 0, y: 0, x2: 1, y2: 0,
+                                    colorStops: [{ offset: 0, color: '#0d9488' }, { offset: 1, color: '#0f766e' }]
+                                },
+                                borderRadius: [0,4,4,0]
+                            },
+                            emphasis: { itemStyle: { color: '#115e59' } },
+                            label: { show: true, position: 'right', fontSize: 9, fontWeight: 'bold', color: '#374151' }
+                        }]
+                    });
+                } else {
+                    chart.setOption({
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+                            formatter: function(params) {
+                                var p = params[0];
+                                return '<b>' + p.name + '</b><br/>Jumlah: <b>' + p.value.toLocaleString() + '</b>';
+                            }
+                        },
+                        grid: { left: '3%', right: '4%', bottom: long ? '25%' : '12%', containLabel: true },
+                        xAxis: { type: 'category', data: labels, axisLabel: { interval: long ? Math.ceil(labels.length / 20) : 0, rotate: long ? 55 : 40, fontSize: long ? 8 : 10 } },
+                        yAxis: { type: 'value', minInterval: 1, max: chart.getDom().getAttribute('data-max-y') ? parseInt(chart.getDom().getAttribute('data-max-y')) : undefined },
+                        dataZoom: long ? [{ type: 'slider', show: true, start: 0, end: 30, height: 16, bottom: 5 }] : undefined,
+                        series: [{
+                            type: 'bar',
+                            data: values,
+                            itemStyle: {
+                                color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                                    colorStops: [{ offset: 0, color: '#0d9488' }, { offset: 1, color: '#0f766e' }]
+                                },
+                                borderRadius: [4,4,0,0]
+                            },
+                            emphasis: { itemStyle: { color: '#115e59' } },
+                            label: { show: !long, position: 'top', fontSize: 9, fontWeight: 'bold', color: '#374151' }
+                        }]
+                    });
+                }
             }
 
             document.querySelectorAll('.pub-echart').forEach(pubInitChart);
 
-            document.querySelectorAll('.year-checkbox').forEach(function(cb) {
-                cb.addEventListener('change', function() {
-                    var label = this.closest('.year-label');
-                    if (label) {
-                        label.classList.toggle('text-gray-900', this.checked);
-                        label.classList.toggle('text-gray-400', !this.checked);
-                    }
-                    Object.keys(pubChartInstances).forEach(pubUpdateChart);
-                });
-            });
+            window.applyFilters = function() {
+                var form = document.getElementById('filter-form');
+                if (!form) return;
+                var params = new URLSearchParams(new FormData(form)).toString();
+                var url = window.location.pathname + '?' + params;
 
-            var toggleBtn = document.getElementById('pubToggleAllYears');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function() {
-                    var checked = this.textContent === 'Check All';
-                    document.querySelectorAll('.year-checkbox').forEach(function(cb) {
-                        cb.checked = checked;
-                        var label = cb.closest('.year-label');
-                        if (label) {
-                            label.classList.toggle('text-gray-900', checked);
-                            label.classList.toggle('text-gray-400', !checked);
-                        }
+                fetch(url, { headers: { 'Accept': 'application/json' } })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        // Update KPIs
+                        function kpiByTitle(arr, t) { return arr.find(function(k) { return k.title === t; }); }
+
+                        var kpiHtml = '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">';
+                        ['Perkara','Terdakwa','Pengadilan'].forEach(function(t) {
+                            var k = kpiByTitle(data.kpiData, t);
+                            if (k) kpiHtml += '<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center hover:shadow-md transition-shadow"><div class="text-lg font-bold text-gray-900">' + k.display + '</div><div class="text-xs text-gray-500 mt-0.5">' + k.title + '</div></div>';
+                        });
+                        kpiHtml += '</div>';
+                        kpiHtml += '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">';
+                        kpiHtml += '<div><h4 class="text-sm font-semibold text-gray-700 mb-2 text-center">Subjek Hukum</h4><div class="grid grid-cols-2 gap-3">';
+                        ['Perorangan','Korporasi'].forEach(function(t) {
+                            var k = kpiByTitle(data.kpiData, t);
+                            if (k) kpiHtml += '<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center hover:shadow-md transition-shadow"><div class="text-lg font-bold text-gray-900">' + k.display + '</div><div class="text-xs text-gray-500 mt-0.5">' + k.title + '</div></div>';
+                        });
+                        kpiHtml += '</div></div>';
+                        kpiHtml += '<div><h4 class="text-sm font-semibold text-gray-700 mb-2 text-center">Vonis Putusan</h4><div class="grid grid-cols-3 gap-3">';
+                        ['Bebas','Lepas','Bersalah'].forEach(function(t) {
+                            var k = kpiByTitle(data.kpiData, 'Vonis ' + t);
+                            if (k) kpiHtml += '<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 text-center hover:shadow-md transition-shadow"><div class="text-lg font-bold text-gray-900">' + k.display + '</div><div class="text-xs text-gray-500 mt-0.5">' + k.title + '</div></div>';
+                        });
+                        kpiHtml += '</div></div></div></div>';
+                        document.getElementById('kpi-container').innerHTML = kpiHtml;
+
+                        // Show/hide reset link
+                        var sp = new URLSearchParams(params);
+                        document.getElementById('reset-filter-container').style.display = (sp.has('tahun') || sp.has('klasifikasi') || sp.has('pulau')) ? '' : 'none';
+
+                        // Update charts
+                        var row1 = document.getElementById('charts-row-1');
+                        var row2 = document.getElementById('charts-row-2');
+                        row1.innerHTML = '';
+                        row2.innerHTML = '';
+
+                        data.publicCharts.forEach(function(ch, idx) {
+                            var card = document.createElement('div');
+                            card.className = 'bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow';
+                            card.innerHTML = '<div class="px-5 py-4 border-b border-gray-50"><h3 class="text-sm font-semibold text-gray-800">' + ch.title + '</h3></div>'
+                                + '<div wire:ignore><div class="pub-echart" id="pub-' + ch.id + '" data-chart=\'' + JSON.stringify(ch.data) + '\' data-type="' + ch.type + '" style="height:' + (idx < 2 ? 400 : 350) + 'px;width:100%"></div></div>';
+                            if (idx < 2) row1.appendChild(card);
+                            else row2.appendChild(card);
+                        });
+
+                        // Re-init charts
+                        Object.keys(window.pubChartInstances).forEach(function(id) {
+                            if (window.pubChartInstances[id]) { window.pubChartInstances[id].dispose(); delete window.pubChartInstances[id]; }
+                        });
+                        document.querySelectorAll('.pub-echart').forEach(window.pubInitChart);
+                        setTimeout(pubResizeAll, 100);
+
+                        // Update tables
+                        var tableHtml = '';
+                        data.tableData.forEach(function(td) {
+                            var rowCount = td.rows ? td.rows.length : 0;
+                            tableHtml += '<div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">';
+                            tableHtml += '<div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">';
+                            tableHtml += '<h3 class="text-sm font-semibold text-gray-800">' + td.title + '</h3>';
+                            tableHtml += '<span class="text-xs text-gray-400">' + rowCount + ' baris</span></div>';
+                            tableHtml += '<div class="overflow-x-auto"><table class="min-w-full text-sm"><thead><tr class="bg-gray-50 border-b">';
+                            tableHtml += '<th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase w-8">#</th>';
+                            tableHtml += '<th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Nama</th>';
+                            tableHtml += '<th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Jumlah</th></tr></thead>';
+                            tableHtml += '<tbody class="divide-y divide-gray-100">';
+                            if (td.rows) {
+                                td.rows.forEach(function(r, i) {
+                                    var val = r.value !== undefined && r.value !== null ? Number(r.value).toLocaleString() : '-';
+                                    tableHtml += '<tr class="hover:bg-gray-50 transition-colors">';
+                                    tableHtml += '<td class="px-4 py-2 text-gray-400 text-xs">' + (i + 1) + '</td>';
+                                    tableHtml += '<td class="px-4 py-2 text-gray-700 max-w-md truncate">' + (r.label || '') + '</td>';
+                                    tableHtml += '<td class="px-4 py-2 text-right font-medium text-gray-800">' + val + '</td></tr>';
+                                });
+                            }
+                            tableHtml += '</tbody></table></div></div>';
+                        });
+                        if (!tableHtml) tableHtml = '<div class="text-center py-10 text-gray-400">Belum ada data.</div>';
+                        document.getElementById('tables-container').innerHTML = tableHtml;
                     });
-                    this.textContent = checked ? 'Uncheck All' : 'Check All';
-                    Object.keys(pubChartInstances).forEach(pubUpdateChart);
+            };
+
+            window.resetFilters = function() {
+                document.getElementById('filter-form').querySelectorAll('select').forEach(function(s) { s.value = ''; });
+                applyFilters();
+            };
+
+            function pubResizeAll() {
+                Object.keys(window.pubChartInstances).forEach(function(id) {
+                    if (window.pubChartInstances[id]) window.pubChartInstances[id].resize();
                 });
             }
-
-            document.addEventListener('click', function(e) {
-                var dd = document.getElementById('pubYearDropdown');
-                if (dd && !document.getElementById('pubYearFilter').contains(e.target)) {
-                    dd.classList.add('hidden');
-                }
-            });
+            window.pubResizeAll = pubResizeAll;
+            window.addEventListener('resize', pubResizeAll);
         })();
 
         // ========================

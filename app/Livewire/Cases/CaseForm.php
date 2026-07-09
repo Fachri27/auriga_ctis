@@ -522,6 +522,8 @@ class CaseForm extends Component
                 "trace" => $e->getTraceAsString(),
             ]);
 
+            $this->dispatch("notify-error", message: "Gagal menyimpan: " . $e->getMessage());
+
             session()->flash(
                 "error",
                 "Gagal menyimpan kasus: " . $e->getMessage(),

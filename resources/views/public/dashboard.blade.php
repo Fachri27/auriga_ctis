@@ -13,7 +13,7 @@
                     <p class="text-gray-500 text-sm mt-1">Pantau dan telusuri informasi kasus hukum yang terbuka untuk masyarakat</p>
                 </div>
                 <p class="text-xs text-gray-400 flex-shrink-0">
-                    🕐 Diperbarui: <strong>{{ now()->format('d M Y, H:i') }} WIB</strong>
+                    Diperbarui: <strong>{{ now()->format('d M Y, H:i') }} WIB</strong>
                 </p>
             </div>
         </div>
@@ -77,7 +77,7 @@
                     <div>
                         <p class="text-xs text-gray-400 uppercase tracking-wide font-medium">Provinsi Terdampak</p>
                         <p class="mt-1.5 text-2xl sm:text-3xl font-bold text-purple-600">
-                            {{ collect($cases)->pluck('province')->filter()->unique()->count() }}
+                            {{ $provinceCount }}
                         </p>
                         <p class="text-xs text-gray-400 mt-1">Dari 38 provinsi di Indonesia</p>
                     </div>
@@ -111,8 +111,8 @@
                 <select id="filterStatus"
                     class="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white text-gray-700 transition-colors">
                     <option value="">Semua Status</option>
-                    @foreach($cases->pluck('status')->filter()->unique('name') as $s)
-                    <option value="{{ $s->name ?? '' }}">{{ $s->name ?? '' }}</option>
+                    @foreach($cases->pluck('status')->filter()->unique(function ($s) { return $s['name'] ?? ''; }) as $s)
+                    <option value="{{ $s['name'] ?? '' }}">{{ $s['name'] ?? '' }}</option>
                     @endforeach
                 </select>
 
@@ -120,8 +120,8 @@
                 <select id="filterCategory"
                     class="px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 bg-white text-gray-700 transition-colors">
                     <option value="">Semua Kategori</option>
-                    @foreach($cases->pluck('category')->filter()->unique('name') as $cat)
-                    <option value="{{ $cat->name ?? '' }}">{{ $cat->name ?? '' }}</option>
+                    @foreach($cases->pluck('category')->filter()->unique(function ($cat) { return $cat['name'] ?? ''; }) as $cat)
+                    <option value="{{ $cat['name'] ?? '' }}">{{ $cat['name'] ?? '' }}</option>
                     @endforeach
                 </select>
 
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const marker = L.marker([lat, lng], { icon });
 
-            const detailUrl = c.slug ? `/kasus/${c.slug}` : '#';
+            const detailUrl = c.detail_url ?? '#';
 
             marker.bindPopup(`
                 <div style="min-width:200px;font-family:inherit">
@@ -329,15 +329,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                     ${c.title ? `<div style="font-size:12px;color:#374151;margin-bottom:6px;line-height:1.4">${escapeHtml(c.title)}</div>` : ''}
                     <div style="font-size:11px;color:#6b7280;margin-bottom:3px">
-                        📁 <strong>Kategori:</strong> ${escapeHtml(catName)}
+                        <strong>Kategori:</strong> ${escapeHtml(catName)}
                     </div>
                     <div style="font-size:11px;margin-bottom:3px">
                         <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;background:${color}22;color:${color}">
                             ${escapeHtml(statusName)}
                         </span>
                     </div>
-                    ${c.event_date ? `<div style="font-size:11px;color:#6b7280;margin-bottom:8px">📅 ${escapeHtml(c.event_date)}</div>` : ''}
-                    ${c.province ? `<div style="font-size:11px;color:#6b7280;margin-bottom:8px">📍 ${escapeHtml(c.province)}</div>` : ''}
+                    ${c.event_date ? `<div style="font-size:11px;color:#6b7280;margin-bottom:8px">${escapeHtml(c.event_date)}</div>` : ''}
+                    ${c.province ? `<div style="font-size:11px;color:#6b7280;margin-bottom:8px">${escapeHtml(c.province)}</div>` : ''}
                     <a href="${detailUrl}" style="display:inline-block;margin-top:4px;padding:5px 12px;background:#111;color:#fff;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">
                         Lihat Detail →
                     </a>
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Desktop table
         document.getElementById('caseTableBody').innerHTML = paged.map(c => {
             const color = getStatusColorHex(c.status?.key ?? '');
-            const detailUrl = c.slug ? `/kasus/${c.slug}` : '#';
+            const detailUrl = c.detail_url ?? '#';
             return `<tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-5 py-3 font-mono text-xs text-gray-500 whitespace-nowrap">${escapeHtml(c.case_number ?? '-')}</td>
                 <td class="px-5 py-3 max-w-[200px]">
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Mobile cards
         document.getElementById('mobileCardList').innerHTML = paged.map(c => {
             const color = getStatusColorHex(c.status?.key ?? '');
-            const detailUrl = c.slug ? `/kasus/${c.slug}` : '#';
+            const detailUrl = c.detail_url ?? '#';
             return `<div class="px-4 py-4">
                 <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
@@ -427,9 +427,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     </span>
                 </div>
                 <div class="flex items-center gap-3 mt-2 text-xs text-gray-400">
-                    <span>📁 ${escapeHtml(c.category?.name ?? '-')}</span>
-                    ${c.province ? `<span>📍 ${escapeHtml(c.province)}</span>` : ''}
-                    ${c.event_date ? `<span>📅 ${escapeHtml(c.event_date)}</span>` : ''}
+                    <span>${escapeHtml(c.category?.name ?? '-')}</span>
+                    ${c.province ? `<span>${escapeHtml(c.province)}</span>` : ''}
+                    ${c.event_date ? `<span>${escapeHtml(c.event_date)}</span>` : ''}
                 </div>
                 <a href="${detailUrl}" class="inline-block mt-2 text-xs text-blue-600 hover:underline font-medium">Lihat Detail →</a>
             </div>`;

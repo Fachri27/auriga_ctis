@@ -3,38 +3,37 @@
         <h2 class="text-lg font-semibold">Assigned to Me</h2>
     </div>
 
-    <div class="bg-white shadow rounded-md overflow-hidden">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
                 <tr>
-                    <th class="px-4 py-2">Case Number</th>
-                    <th class="px-4 py-2">Title</th>
-                    <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2">Event Date</th>
-                    <th class="px-4 py-2">Action</th>
+                    <th class="px-5 py-3.5 text-left font-semibold">Case Number</th>
+                    <th class="px-5 py-3.5 text-left font-semibold">Title</th>
+                    <th class="px-5 py-3.5 text-left font-semibold">Status</th>
+                    <th class="px-5 py-3.5 text-left font-semibold">Event Date</th>
+                    <th class="px-5 py-3.5 text-left font-semibold">Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-50">
                 @forelse($cases as $c)
-                <tr class="border-t hover:bg-slate-50">
-                    <td class="px-4 py-2">{{ $c->case_number }}</td>
-                    <td class="px-4 py-2">{{ optional($c->translations->firstWhere('locale', app()->getLocale()))->title
-                        ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ $c->status->name ?? '-' }}</td>
-                    <td class="px-4 py-2">{{ optional($c->event_date)->format('Y-m-d') ?? '-' }}</td>
-                    <td class="px-4 py-2">
-                        <a href="{{ route('case.detail', $c->id) }}" class="text-blue-600 hover:underline">Open</a>
+                <tr class="hover:bg-gray-50/70 transition-colors">
+                    <td class="px-5 py-4 font-semibold text-gray-900">{{ $c->case_number }}</td>
+                    <td class="px-5 py-4 text-sm text-gray-600">{{ optional($c->translations->firstWhere('locale', app()->getLocale()))->title ?? '-' }}</td>
+                    <td class="px-5 py-4 text-sm text-gray-600">{{ $c->status->name ?? '-' }}</td>
+                    <td class="px-5 py-4 text-sm text-gray-600">{{ optional($c->event_date)->format('Y-m-d') ?? '-' }}</td>
+                    <td class="px-5 py-4 text-sm">
+                        <a href="{{ route('case.detail', $c->id) }}" class="text-xs font-semibold text-blue-600 hover:text-blue-900 transition-colors">Open</a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td class="px-4 py-6 text-center" colspan="5">No cases assigned to you.</td>
+                    <td class="px-5 py-8 text-center text-sm text-gray-400" colspan="5">No cases assigned to you.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
 
-        <div class="p-4">
+        <div class="px-5 py-4 border-t border-gray-100">
             {{ $cases->links() }}
         </div>
     </div>

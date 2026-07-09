@@ -5,8 +5,8 @@
         window.addEventListener('scroll', () => {
             scrolled = window.scrollY > 10;
         });
-    " :class="scrolled ? 'border-transparent' : 'border-white'"
-    class="border-b bg-[#032A36] fixed top-0 left-0 z-[9999] w-full transition-colors duration-300 poppins-regular">
+    " :class="scrolled ? 'border-transparent'"
+    class="border-b bg-[#264c16] fixed top-0 left-0 z-[9999] w-full transition-colors duration-300 poppins-regular">
     <div class="max-w-7xl mx-auto px-4 h-25 flex items-center justify-between">
 
         <!-- LEFT: Hamburger (mobile) + Logo -->
@@ -148,27 +148,26 @@
     </div>
 
     <!-- MOBILE MENU (opens below logo) -->
-    <div x-show="open" class="lg:hidden bg-[#032A36] text-white text-sm px-6 pb-4 space-y-4"
+    <div x-show="open" class="lg:hidden bg-[#264c16] text-white text-sm px-6 pb-4 space-y-4"
         style="display: none !important;">
-        <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="block">About</a>
+        <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="block text-xs uppercase tracking-wide hover:text-gray-300">About</a>
         <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']) }}"
-            class="block">Dashboard</a>
+            class="block text-xs uppercase tracking-wide hover:text-gray-300">Dashboard</a>
         <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}"
-            class="block">{{ __('messages.verified_cases') }}</a>
+            class="block text-xs uppercase tracking-wide hover:text-gray-300">Artikel</a>
         <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}"
-            class="block">Artikel</a>
-        {{-- <a href="#" class="block">Documentation</a> --}}
+            class="block text-xs uppercase tracking-wide hover:text-gray-300">{{ __('messages.verified_cases') }}</a>
 
-        <div class="pt-3 border-t border-white/10">
+        <div class="pt-3 border-t border-white/20">
             @guest
-            <a href="{{ route('login') }}" class="block pt-2">Login</a>
-            <a href="{{ route('register') }}" class="block pt-2">Sign Up</a>
+            <a href="{{ route('login') }}" class="block pt-2 text-xs uppercase tracking-wide hover:text-gray-300">Login</a>
+            <a href="{{ route('register') }}" class="block pt-2 text-xs uppercase tracking-wide hover:text-gray-300">Sign Up</a>
             @else
             <div class="pt-2">
                 <div class="font-semibold">{{ auth()->user()->name }}</div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="block pt-2 text-left">Logout</button>
+                    <button type="submit" class="block pt-2 text-left text-xs uppercase tracking-wide hover:text-gray-300">Logout</button>
                 </form>
             </div>
             @endguest

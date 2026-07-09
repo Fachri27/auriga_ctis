@@ -1,61 +1,67 @@
 <div>
     <div class="flex flex-col justify-center items-center mt-20">
-        <div class="bg-white shadow rounded-lg p-6 overflow">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">Daftar Pengguna</h2>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-800">Daftar Pengguna</h2>
                 <a href="{{ route('user.create') }}">
-                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium">
-                        🚀 Create
+                    <button class="px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors">
+                        + Create
                     </button>
                 </a>
             </div>
-            <div class="flex items-center justify-between mb-4">
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search..." class="border p-2">
+            <div class="px-5 py-3 border-b border-gray-100">
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search..." class="border border-gray-200 rounded-lg px-3 py-2 text-sm w-64">
             </div>
-
-            <table id="userTable" class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-gray-100 text-left text-sm font-medium text-gray-600">
-                        <th class="p-3">No</th>
-                        <th class="p-3">Name</th>
-                        <th class="p-3">Email</th>
-                        <th class="p-3">Role</th>
-                        <th class="p-3">Action</th>
-                    </tr>
-                </thead>
-                @foreach ($users as $index => $data)
-                <tbody>
-                    <tr>
-                        <td class="p-3">{{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}</td>
-                        <td class="p-3">{{ $data->name }}</td>
-                        <td class="p-3">{{ $data->email }}</td>
-                        <td class="px-6 py-4">
-                            @if ($data->id !== auth()->id())
-                            <select wire:change="updateRole({{ $data->id }}, $event.target.value)"
-                                class="text-xs rounded-lg border-gray-300 focus:ring focus:ring-blue-200">
-                                @foreach ($roles as $role)
-                                <option value="{{ $role }}" @selected($data->hasRole($role))>{{ ucfirst($role) }}
-                                </option>
-                                @endforeach
-                            </select>
-                            @else
-                            <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700">
-                                {{ $data->getRoleNames()->first() }} (You)
-                            </span>
-                            @endif
-                        </td>
-                        <td class="p-3">
-                            <a href="{{ route('user.edit', $data->id) }}"
-                                class="bg-yellow-600 px-3 py-1 rounded text-white">Edit</a>
-                            <button wire:click='delete({{ $data->id }})'
-                                class="bg-red-600 px-3 py-1 rounded text-white">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-                @endforeach
-            </table>
-            <!-- Pagination -->
-            <div class="mt-4">
+            <div class="overflow-x-auto">
+                <table id="userTable" class="w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                        <tr>
+                            <th class="px-5 py-3.5 text-left font-semibold">No</th>
+                            <th class="px-5 py-3.5 text-left font-semibold">Name</th>
+                            <th class="px-5 py-3.5 text-left font-semibold">Email</th>
+                            <th class="px-5 py-3.5 text-left font-semibold">Role</th>
+                            <th class="px-5 py-3.5 text-right font-semibold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @forelse ($users as $index => $data)
+                        <tr class="hover:bg-gray-50/70 transition-colors">
+                            <td class="px-5 py-4 font-semibold text-gray-900">{{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}</td>
+                            <td class="px-5 py-4 text-sm text-gray-600">{{ $data->name }}</td>
+                            <td class="px-5 py-4 text-sm text-gray-600">{{ $data->email }}</td>
+                            <td class="px-5 py-4">
+                                @if ($data->id !== auth()->id())
+                                <select wire:change="updateRole({{ $data->id }}, $event.target.value)"
+                                    class="text-xs rounded-lg border-gray-200 px-2 py-1">
+                                    @foreach ($roles as $role)
+                                    <option value="{{ $role }}" @selected($data->hasRole($role))>{{ ucfirst($role) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @else
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">
+                                    {{ $data->getRoleNames()->first() }} (You)
+                                </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <a href="{{ route('user.edit', $data->id) }}"
+                                        class="text-xs font-semibold text-blue-600 hover:text-blue-900 transition-colors">Edit</a>
+                                    <button wire:click='delete({{ $data->id }})'
+                                        class="text-xs font-semibold text-red-600 hover:text-red-900 transition-colors">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-5 py-8 text-center text-sm text-gray-400">No users found.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-100">
                 {{ $users->links() }}
             </div>
         </div>

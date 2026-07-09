@@ -1,4 +1,4 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#032A36] via-[#034454] to-[#045E72] px-4 py-12">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#264c16] via-[#1d3d11] to-[#132b0b] px-4 py-12">
     <div class="w-full max-w-md">
 
         {{-- Card --}}
@@ -20,7 +20,7 @@
                         Nama Lengkap
                     </label>
                     <input type="text" wire:model="name" id="name"
-                        class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#032A36] focus:ring-2 focus:ring-[#032A36]/20 transition duration-200 @error('name') border-red-400 @enderror"
+                        class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#264c16] focus:ring-2 focus:ring-[#264c16]/20 transition duration-200 @error('name') border-red-400 @enderror"
                         placeholder="Masukkan nama lengkap" autocomplete="name">
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -34,7 +34,7 @@
                     </label>
                     <div class="relative">
                         <input type="email" wire:model="email" id="email"
-                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#032A36] focus:ring-2 focus:ring-[#032A36]/20 transition duration-200 @error('email') border-red-400 @enderror"
+                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#264c16] focus:ring-2 focus:ring-[#264c16]/20 transition duration-200 @error('email') border-red-400 @enderror"
                             placeholder="nama@example.com" autocomplete="email">
                         @if($email && !$errors->has('email'))
                             <div class="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
@@ -56,7 +56,7 @@
                     </label>
                     <div class="relative">
                         <input type="{{ $showPassword ? 'text' : 'password' }}" wire:model="password" id="password"
-                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#032A36] focus:ring-2 focus:ring-[#032A36]/20 transition duration-200 @error('password') border-red-400 @enderror"
+                            class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#264c16] focus:ring-2 focus:ring-[#264c16]/20 transition duration-200 @error('password') border-red-400 @enderror"
                             placeholder="Minimal 8 karakter" autocomplete="new-password">
                         <button type="button" wire:click="togglePasswordVisibility"
                             class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
@@ -84,7 +84,7 @@
                         Konfirmasi Kata Sandi
                     </label>
                     <input type="{{ $showPassword ? 'text' : 'password' }}" wire:model="password_confirmation" id="password_confirmation"
-                        class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#032A36] focus:ring-2 focus:ring-[#032A36]/20 transition duration-200 @error('password_confirmation') border-red-400 @enderror"
+                        class="block w-full px-4 py-3 rounded-xl border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-[#264c16] focus:ring-2 focus:ring-[#264c16]/20 transition duration-200 @error('password_confirmation') border-red-400 @enderror"
                         placeholder="Ulangi kata sandi" autocomplete="new-password">
                     @error('password_confirmation')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -93,7 +93,7 @@
 
                 {{-- Submit --}}
                 <button type="submit" wire:loading.attr="disabled"
-                    class="w-full py-3 px-4 rounded-xl bg-[#032A36] text-white font-semibold hover:bg-[#034454] focus:ring-2 focus:ring-[#032A36]/30 transition duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+                    class="w-full py-3 px-4 rounded-xl bg-[#264c16] text-white font-semibold hover:bg-[#034454] focus:ring-2 focus:ring-[#264c16]/30 transition duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
                     @if($isSubmitting)
                         <span class="inline-flex items-center gap-2">
                             <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@
             {{-- Login link --}}
             <p class="text-center text-sm text-gray-500 mt-6">
                 Sudah punya akun?
-                <a href="{{ route('login') }}" class="text-[#032A36] font-medium hover:underline">
+                <a href="{{ route('login') }}" class="text-[#264c16] font-medium hover:underline">
                     Masuk
                 </a>
             </p>
@@ -125,9 +125,9 @@
             {{-- Terms --}}
             <p class="text-center text-xs text-gray-400 mt-4 leading-relaxed">
                 Dengan mendaftar, Anda menyetujui
-                <a href="#" class="text-[#032A36] hover:underline">Ketentuan Layanan</a>
+                <a href="#" class="text-[#264c16] hover:underline">Ketentuan Layanan</a>
                 dan
-                <a href="#" class="text-[#032A36] hover:underline">Kebijakan Privasi</a>
+                <a href="#" class="text-[#264c16] hover:underline">Kebijakan Privasi</a>
             </p>
 
         </div>

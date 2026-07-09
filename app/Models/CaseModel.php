@@ -65,6 +65,11 @@ class CaseModel extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function province()
+    {
+        return $this->belongsTo(Province::class);
+    }
+
     public function status()
     {
         return $this->belongsTo(Status::class);

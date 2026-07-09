@@ -59,7 +59,8 @@
 
     <style>
         body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            line-height: 24px;
             color: #fff !important;
         }
 

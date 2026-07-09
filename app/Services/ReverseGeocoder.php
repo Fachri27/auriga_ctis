@@ -18,12 +18,12 @@ class ReverseGeocoder
 
             return [
                 'province' => $nominatim['province'],
-                'district' => $this->lookup('POLITICAL_LEVEL_5_dissolved', $point)
+                'district' => $nominatim['district']
                             ?? $this->lookup('POLITICAL_LEVEL_5_dissolved', $point)
-                            ?? $nominatim['district'], // fallback ke Nominatim kalau GeoServer kosong
-                'village'  => $this->lookup('POLITICAL_LEVEL_6_dissolved', $point)
-                        ?? $this->lookup('POLITICAL_LEVEL_5_dissolved', $point)
-                        ?? $nominatim['village'], // fallback ke Nominatim kalau GeoServer kosong
+                            ?? $this->lookup('POLITICAL_LEVEL_5_dissolved', $point),
+                'village'  => $nominatim['village']
+                        ?? $this->lookup('POLITICAL_LEVEL_6_dissolved', $point)
+                        ?? $this->lookup('POLITICAL_LEVEL_5_dissolved', $point),
             ];
         });
     }
@@ -33,6 +33,7 @@ class ReverseGeocoder
         try {
             $response = Http::withHeaders([
                 'User-Agent' => 'CTIS-Auriga/1.0 (contact@auriga.or.id)',
+                'Accept-Language' => 'id',
             ])->timeout(8)->get('https://nominatim.openstreetmap.org/reverse', [
                 'format'         => 'json',
                 'lat'            => $lat,

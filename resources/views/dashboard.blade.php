@@ -137,76 +137,92 @@ $pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
     </div>
 
     {{-- ================= LATEST CASES TABLE ================= --}}
-    <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 max-w-7xl mx-auto mb-20">
-        <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Latest Cases</h3>
-            <p class="text-sm text-gray-500 mt-1">Most recently created cases</p>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-7xl mx-auto mb-20">
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Latest Cases</h3>
+                <p class="text-sm text-gray-500 mt-0.5">Most recently created cases</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="{{ route('charts.sync') }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider bg-[#264c16] text-white rounded-lg hover:bg-[#034454] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Sync Charts
+                </a>
+                <a href="{{ route('dashboard.export.csv') }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    CSV
+                </a>
+                <a href="{{ route('dashboard.export.excel') }}"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Excel
+                </a>
+            </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
                     <tr>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Case
-                            Number</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Category</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event
-                            Date</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Public?</th>
-                        <th scope="col"
-                            class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Case Number</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Category</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Status</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Event Date</th>
+                        <th class="px-5 py-3.5 text-left font-semibold">Public?</th>
+                        <th class="px-5 py-3.5 text-right font-semibold">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-50">
                     @forelse($latestCases as $case)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr class="hover:bg-gray-50/70 transition-colors">
+                        <td class="px-5 py-4 whitespace-nowrap font-semibold text-gray-900">
                             {{ $case->case_number }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $case->category?->translation('id')?->name ?? $case->category?->slug ?? 'Uncategorized'
-                            }}
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ $case->category?->translation('id')?->name ?? $case->category?->slug ?? 'Uncategorized' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-5 py-4 whitespace-nowrap">
                             <x-internal.badge
                                 variant="{{ $case->status?->key === 'new' || $case->status?->key === 'unverified' ? 'new' : ($case->status?->key === 'investigation' || $case->status?->key === 'in_progress' ? 'investigation' : ($case->is_public ? 'published' : 'default')) }}">
                                 {{ $case->status?->name ?? 'Unknown' }}
                             </x-internal.badge>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
                             {{ $case->event_date ? \Carbon\Carbon::parse($case->event_date)->format('M d, Y') : 'N/A' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <td class="px-5 py-4 whitespace-nowrap text-sm">
                             @if($case->is_public)
-                            <span class="text-green-600 font-medium">Yes</span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-700">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></span>
+                                Publik
+                            </span>
                             @else
-                            <span class="text-gray-500">No</span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
+                                Privat
+                            </span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end items-center gap-2">
                                 <a href="{{ route('case.detail', $case->id) }}"
-                                    class="text-blue-600 hover:text-blue-900">
+                                    class="text-xs font-semibold text-blue-600 hover:text-blue-900 transition-colors">
                                     View
                                 </a>
                                 @can('case.update', $case)
                                 @if(!$case->is_public)
                                 <a href="{{ route('case.detail', $case->id) }}"
-                                    class="text-purple-600 hover:text-purple-900">
+                                    class="text-xs font-semibold text-purple-600 hover:text-purple-900 transition-colors">
                                     Publish
                                 </a>
                                 @else
                                 <a href="{{ route('case.detail', $case->id) }}"
-                                    class="text-orange-600 hover:text-orange-900">
+                                    class="text-xs font-semibold text-orange-600 hover:text-orange-900 transition-colors">
                                     Unpublish
                                 </a>
                                 @endif
@@ -216,7 +232,7 @@ $pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colspan="6" class="px-5 py-8 text-center text-sm text-gray-400">
                             No cases found.
                         </td>
                     </tr>
@@ -224,8 +240,7 @@ $pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
                 </tbody>
             </table>
         </div>
-        {{--
-    </div> --}}
+    </div>
 
     @push('styles')
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />

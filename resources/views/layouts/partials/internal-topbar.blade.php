@@ -1,5 +1,5 @@
 {{-- INTERNAL NAVBAR --}}
-<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10">
+<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-[1000]">
     {{-- Left: Logo / Title --}}
     <div class="flex items-center gap-4">
         <h1 class="text-lg font-semibold text-gray-900">CTIS Internal System</h1>

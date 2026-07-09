@@ -2,7 +2,7 @@
     #map {
         width: 100%;
         height: 400px;
-        background: #00323C;
+        background: #264c16;
         position: relative;
     }
 
@@ -133,7 +133,7 @@
     }
 </style>
 
-<div class="w-full bg-[#00323C] py-10 mt-25 px-4 text-white poppins-regular" x-data="filterUI()">
+<div class="w-full bg-[#264c16] py-10 mt-25 px-4 text-white poppins-regular" x-data="filterUI()">
 
     {{-- MAP WRAPPER --}}
     <div class="max-w-7xl mx-auto mb-8 sm:mb-10"
@@ -206,7 +206,7 @@
         </div>
         {{-- END SIDEBAR --}}
 
-        <div id="map" class="bg-[#032A36] relative z-1"></div>
+        <div id="map" class="bg-[#264c16] relative z-1"></div>
     </div>
 
     <div class="max-w-4xl mx-auto">

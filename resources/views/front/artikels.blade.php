@@ -25,7 +25,7 @@
                         {{-- Badge Artikel --}}
                         <span
                             class="absolute top-3 left-3 px-2 py-0.5 text-xs font-bold tracking-widest uppercase bg-gray-900 text-white">
-                            📰 Artikel
+                            Artikel
                         </span>
 
                         {{-- Category Badge --}}
@@ -40,25 +40,25 @@
                     {{-- Content --}}
                     <div class="p-5 flex flex-col flex-1">
                         {{-- Title --}}
-                        <h3 class="text-lg font-black text-gray-900 leading-tight mb-3 tracking-tight line-clamp-2">
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight mb-3 tracking-tight line-clamp-2">
                             {!! Str::limit(strip_tags($c->title), 80) !!}
                         </h3>
 
                         {{-- Excerpt --}}
-                        <p class="text-sm text-gray-500 leading-relaxed italic flex-1 mb-4 line-clamp-3">
-                            {!! Str::limit(strip_tags($c->excerpt), 120) !!}
+                        <p class="text-sm text-gray-500 leading-relaxed flex-1 mb-4">
+                            {!! Str::limit(strip_tags($c->excerpt), 300) !!}
                         </p>
 
                         {{-- Footer --}}
                         <div class="pt-3 border-t border-gray-100">
                             @if ($c->type === 'internal')
                                 <a href="{{ route('public.artikel.detail', ['slug' => $c->slug]) }}"
-                                    class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                                    class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-[#264c16] transition-colors after:content-['_→']">
                                     Baca Selengkapnya
                                 </a>
                             @else
                                 <a href="{{ $c->link }}" target="_blank" rel="noopener"
-                                    class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-red-900 transition-colors after:content-['_→']">
+                                    class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-[#264c16] transition-colors after:content-['_→']">
                                     Baca Selengkapnya
                                 </a>
                             @endif
