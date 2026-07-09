@@ -61,9 +61,18 @@ class Register extends Component
         $this->isSubmitting = true;
 
         try {
-            // Validate input
             $validated = $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->isSubmitting = false;
 
+            if (in_array('Email sudah terdaftar di sistem.', $e->errors()['email'] ?? [])) {
+                $this->dispatch('notify', type: 'error', message: 'Email sudah terdaftar. Silakan masuk atau gunakan email lain.');
+            }
+
+            throw $e;
+        }
+
+        try {
             // Create user
             $user = User::create([
                 'name' => $validated['name'],
