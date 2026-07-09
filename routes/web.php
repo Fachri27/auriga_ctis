@@ -133,8 +133,8 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('/cms/charts/upload', \App\Livewire\Charts\CsvUpload::class)->name('charts.upload');
     Route::get('/cms/charts', \App\Livewire\Charts\ChartsDashboard::class)->name('charts.dashboard');
     Route::get('/cms/charts/sync', function () {
-        \Illuminate\Support\Facades\Artisan::call('chart:sync');
-        return redirect()->route('charts.dashboard')->with('success', 'Sync selesai! Data chart diperbarui.');
+        \Illuminate\Support\Facades\Artisan::queue('chart:sync');
+        return redirect()->route('charts.dashboard')->with('success', 'Sync dijadwalkan, data akan diperbarui di background.');
     })->name('charts.sync');
     
 
