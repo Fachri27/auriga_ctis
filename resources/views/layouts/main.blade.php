@@ -6,59 +6,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- @php
-    use Illuminate\Support\Str;
 
-    $appName = 'CMS Environmental Defender';
-    $locale = app()->getLocale();
-    $currentPath = request()->path(); // contoh: id/about
-    $pathParts = explode('/', $currentPath);
-    $urlSegment = end($pathParts);
+    <title>{{ $pageTitle ?? 'Auriga - Environmental Defender' }}</title>
+    <meta name="description" content="{{ $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
+    <meta name="keywords" content="kasus lingkungan, hukum lingkungan, transparansi publik, environmental defender, Indonesia">
 
-    // Format URL segment ke Title
-    $urlTitle = Str::of($urlSegment)
-    ->replace('-', ' ')
-    ->title(); // contoh: apa-itu-pembela-lingkungan => Apa Itu Pembela Lingkungan
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ $ogTitle ?? 'Auriga - Environmental Defender' }}">
+    <meta property="og:description" content="{{ $ogDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
+    <meta property="og:image" content="{{ $ogImage ?? asset('img/image.png') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="{{ $ogType ?? 'website' }}">
+    <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-    // Gunakan title/deskripsi default
-    $pageTitle = $pageTitle ?? "$urlTitle | $appName";
-    $pageDescription = $pageDescription ?? "Informasi tentang $urlTitle di $appName.";
-    $pageImage = $pageImage ?? asset('images/new3.png');
-    $pageType = $pageType ?? 'website';
-    $currentUrl = url()->current();
-    @endphp --}}
-
-    <!-- 🌐 Basic Meta -->
-    <title>Auriga</title>
-    {{--
-    <meta name="description" content="{{ $pageDescription }}">
-    <meta name="title" content="{{ $pageType }}">
-    <meta itemprop="image" content="{{ $pageImage }}"> --}}
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle ?? 'Auriga - Environmental Defender' }}">
+    <meta name="twitter:description" content="{{ $ogDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
+    <meta name="twitter:image" content="{{ $ogImage ?? asset('img/image.png') }}">
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    {{--
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-    --}}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
     <link rel="stylesheet"
         href="https://unpkg.com/@raruto/leaflet-gesture-handling@latest/dist/leaflet-gesture-handling.min.css"
         type="text/css">
-    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
-    {{-- PruneCluster stylesheet --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/LeafletStyleSheet.css" />
 
 
     <style>
@@ -114,21 +91,12 @@
     {{-- Footer --}}
     @include('front.components.footer')
     @livewireScripts
-    {{-- <script src="/js/tinymce/tinymce.min.js"></script> --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    <script src="https://unpkg.com/@raruto/leaflet-gesture-handling@latest/dist/leaflet-gesture-handling.min.js">
-    </script>
-    <script src="/js/tinymce/tinymce.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
-
-
-    {{-- PruneCluster JS --}}
+    <script src="https://unpkg.com/@raruto/leaflet-gesture-handling@latest/dist/leaflet-gesture-handling.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/dist/PruneCluster.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     @stack('scripts')
-
-
 
 </body>
 

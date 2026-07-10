@@ -14,7 +14,7 @@
             }
         }
     </style>
-    <div class="w-full bg-[#00323C] py-10 mt-25 px-4 text-white" x-data="filterUI()">
+    <div class="w-full bg-[#00323C] py-10 mt-25 px-4 text-white">
 
         <!-- MAP -->
         <div class="max-w-7xl mx-auto mb-8 sm:mb-10">
@@ -43,7 +43,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" />
                         </svg>
-                        <input type="text" class="w-full bg-transparent outline-none text-sm placeholder:text-white/60"
+                        <input type="text" wire:model.live="keyword"
+                            class="w-full bg-transparent outline-none text-sm placeholder:text-white/60"
                             placeholder="Cari kata kunci...">
                     </div>
                 </div>
@@ -51,34 +52,38 @@
                 <!-- Sector -->
                 <div class="flex flex-col">
                     <label class="text-xs tracking-wider mb-1 opacity-70">SECTOR</label>
-                    <select
+                    <select wire:model.live="sector"
                         class="w-full bg-white/10 border border-white/30 rounded-lg px-3 h-[46px] outline-none text-sm">
-                        <option>Pilih Sector</option>
-                        for
-                        <option value=""></option>
+                        <option value="">Pilih Sector</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->slug }}">{{ $cat->slug }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <!-- Status -->
                 <div class="flex flex-col">
                     <label class="text-xs tracking-wider mb-1 opacity-70">STATUS</label>
-                    <select
+                    <select wire:model.live="status"
                         class="w-full bg-white/10 border border-white/30 rounded-lg px-3 h-[46px] outline-none text-sm">
-                        <option>Aktif / Tidak Aktif</option>
+                        <option value="">Semua Status</option>
+                        @foreach($statuses as $st)
+                            <option value="{{ $st->key }}">{{ $st->name }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <!-- Location -->
                 <div class="flex flex-col">
                     <label class="text-xs tracking-wider mb-1 opacity-70">LOCATION</label>
-                    <input type="text"
+                    <input type="text" wire:model.live="location"
                         class="w-full bg-white/10 border border-white/30 rounded-lg px-3 h-[46px] outline-none text-sm"
                         placeholder="Masukkan lokasi...">
                 </div>
 
                 <!-- Button -->
                 <div class="flex flex-col justify-end">
-                    <button
+                    <button wire:click="applyFilter"
                         class="w-full h-[46px] rounded-lg border border-white/30 bg-white/10 hover:bg-white hover:text-[#00323C] transition flex items-center justify-center gap-2">
                         <span>Cari</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

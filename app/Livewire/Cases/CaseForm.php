@@ -398,7 +398,7 @@ class CaseForm extends Component
                             $locale === "id"
                                 ? $this->desc_id
                                 : $this->desc_en ?? "",
-                        )->words(20, "..."),
+                        )->stripTags()->limit(300, "..."),
                         "description" =>
                             $locale === "id"
                                 ? $this->desc_id
@@ -540,7 +540,7 @@ class CaseForm extends Component
             ["case_id" => $caseId, "locale" => "id"],
             [
                 "title" => $this->title_id,
-                "summary" => $this->summary_id,
+                "summary" => Str::of($this->desc_id)->stripTags()->limit(300, "..."),
                 "description" => $this->desc_id,
             ],
         );
@@ -549,7 +549,7 @@ class CaseForm extends Component
             ["case_id" => $caseId, "locale" => "en"],
             [
                 "title" => $this->title_en,
-                "summary" => $this->summary_en,
+                "summary" => Str::of($this->desc_en)->stripTags()->limit(300, "..."),
                 "description" => $this->desc_en,
             ],
         );

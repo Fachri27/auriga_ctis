@@ -15,6 +15,24 @@
 }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.scrollable-tab::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable-tab::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scrollable-tab::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+.scrollable-tab::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+.scrollable-tab {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+}
 </style>
 
     <div class="bg-gray-50 mt-20">
@@ -94,76 +112,80 @@
             // Penjelasan status dalam bahasa sederhana
             $statusExplainer = [
                 'open' => [
-                    'icon' => '📂',
+                    'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
                     'color' => 'blue',
                     'text' => 'Kasus ini baru saja masuk dan sedang menunggu proses lebih lanjut dari penegak hukum.',
                 ],
                 'verified' => [
-                    'icon' => '✅',
+                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                     'color' => 'blue',
                     'text' => 'Laporan kasus ini sudah diverifikasi kebenarannya oleh tim kami.',
                 ],
                 'published' => [
-                    'icon' => '📢',
+                    'icon' => 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
                     'color' => 'blue',
                     'text' => 'Kasus ini sudah dipublikasikan agar masyarakat dapat mengikuti perkembangannya.',
                 ],
                 'penyelidikan' => [
-                    'icon' => '🔍',
+                    'icon' => 'M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z',
                     'color' => 'yellow',
                     'text' => 'Penegak hukum sedang mengumpulkan bukti awal. Belum ada tersangka resmi saat ini.',
                 ],
                 'investigation' => [
-                    'icon' => '🔍',
+                    'icon' => 'M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z',
                     'color' => 'yellow',
                     'text' => 'Penegak hukum sedang mengumpulkan bukti awal. Belum ada tersangka resmi saat ini.',
                 ],
                 'penyidikan' => [
-                    'icon' => '🔎',
+                    'icon' => 'M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z',
                     'color' => 'yellow',
                     'text' =>
                         'Sudah ada tersangka. Penyidik resmi sedang mengumpulkan alat bukti untuk pelimpahan ke jaksa.',
                 ],
                 'prosecution' => [
-                    'icon' => '⚖️',
+                    'icon' => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
                     'color' => 'orange',
                     'text' => 'Jaksa sedang menyusun surat dakwaan. Kasus ini akan segera masuk ke pengadilan.',
                 ],
                 'trial' => [
-                    'icon' => '🏛️',
+                    'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
                     'color' => 'orange',
                     'text' =>
                         'Sidang sedang berlangsung di pengadilan. Hakim, jaksa, dan pengacara memeriksa fakta-fakta kasus.',
                 ],
                 'vonis' => [
-                    'icon' => '🔨',
+                    'icon' => 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
                     'color' => 'purple',
                     'text' => 'Hakim telah menjatuhkan putusan. Terdakwa dinyatakan bersalah atau bebas.',
                 ],
                 'Berkekuatan hukum tetap' => [
-                    'icon' => '📌',
+                    'icon' => 'M5 13l4 4L19 7',
                     'color' => 'purple',
                     'text' =>
                         'Putusan sudah final dan tidak bisa digugat lagi. Proses banding atau kasasi telah selesai.',
                 ],
                 'executed' => [
-                    'icon' => '🏢',
+                    'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
                     'color' => 'red',
                     'text' => 'Terpidana sedang menjalani hukuman — baik penjara, denda, maupun hukuman lainnya.',
                 ],
                 'completed' => [
-                    'icon' => '✔️',
+                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                     'color' => 'green',
                     'text' => 'Seluruh proses hukum pada kasus ini telah selesai.',
                 ],
-                'closed' => ['icon' => '🔒', 'color' => 'gray', 'text' => 'Kasus ini telah ditutup.'],
+                'closed' => [
+                    'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+                    'color' => 'gray',
+                    'text' => 'Kasus ini telah ditutup.',
+                ],
                 'rejected' => [
-                    'icon' => '❌',
+                    'icon' => 'M6 18L18 6M6 6l12 12',
                     'color' => 'red',
                     'text' => 'Kasus ini ditolak karena tidak memenuhi syarat atau tidak cukup bukti.',
                 ],
                 'converted' => [
-                    'icon' => '🔄',
+                    'icon' => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
                     'color' => 'gray',
                     'text' => 'Status kasus ini telah dikonversi ke proses atau jalur hukum lain.',
                 ],
@@ -183,11 +205,6 @@
             $shareUrl = urlencode(request()->fullUrl());
             $shareTitle = urlencode(strip_tags($trans?->title ?? 'Detail Kasus'));
 
-            // Remove any <img> tags from the summary when showing the hero/lead
-            $summaryLead = null;
-            if (!empty($trans?->summary)) {
-                $summaryLead = preg_replace('/<img[^>]*>/i', '', $trans->summary);
-            }
         @endphp
 
         {{-- ===================== HERO ===================== --}}
@@ -218,11 +235,6 @@
                     {!! $trans?->title ?? $noTransMsg !!}
                 </h1>
 
-                {{-- Ringkasan singkat --}}
-                <p class="mt-4 text-gray-600 max-w-3xl leading-relaxed">
-                    {!! strip_tags($summaryLead ?? $trans?->summary ?? '') !!}
-                </p>
-
                 {{-- Meta info inti: hanya 3 hal paling penting untuk konteks cepat --}}
                 <div class="mt-6 flex flex-wrap gap-6 text-sm text-gray-700">
                     <div>
@@ -247,7 +259,7 @@
                 </p>
 
                 {{-- ===== STATUS EXPLAINER (gabungan badge + narasi + durasi) ===== --}}
-                <!--@if ($explainer)
+                @if ($explainer)
                     @php
                         $daysSinceUpdate = $case->updated_at ? $case->updated_at->diffInDays(now()) : null;
                         $durationText = null;
@@ -264,18 +276,27 @@
                     @endphp
                     <div
                         class="mt-6 flex items-start gap-3 px-4 py-3 rounded-xl border {{ $explainerColor[$explainer['color']] ?? 'bg-gray-50 border-gray-200 text-gray-700' }} max-w-3xl">
-                        <span class="text-xl mt-0.5">{{ $explainer['icon'] }}</span>
+                        <span class="w-5 h-5 mt-0.5 flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $explainer['icon'] }}" />
+                            </svg>
+                        </span>
                         <div>
                             <p class="text-sm font-semibold mb-0.5">
                                 Apa artinya status "{{ $case->status->name ?? '' }}"?
                             </p>
                             <p class="text-sm leading-relaxed">{{ $explainer['text'] }}</p>
                             @if ($durationText)
-                                <p class="text-xs mt-1.5 opacity-75 font-medium">⏱️ {{ $durationText }}</p>
+                                <p class="text-xs mt-1.5 opacity-75 font-medium flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {{ $durationText }}
+                                </p>
                             @endif
                         </div>
                     </div>
-                @endif-->
+                @endif
 
                 {{-- ===== SHARE BUTTONS ===== --}}
                 <div class="mt-6 flex items-center gap-3 flex-wrap">
@@ -475,84 +496,99 @@
                 </div>
 
                 {{-- Panel: Kronologi --}}
-                <div id="panel-kronologi" class="tab-panel">
-                    @if ($trans?->description)
-                        <div class="prose prose-gray max-w-none">{!! $trans->description !!}</div>
-                    @else
-                        <p class="text-gray-400 italic">Kronologi belum tersedia.</p>
-                    @endif
+                <div id="panel-kronologi" class="tab-panel relative">
+                    <div class="max-h-[500px] overflow-y-auto pr-2 scrollable-tab">
+                        @if ($trans?->description)
+                            <div class="prose prose-gray max-w-none">{!! $trans->description !!}</div>
+                        @else
+                            <p class="text-gray-400 italic">Kronologi belum tersedia.</p>
+                        @endif
+                    </div>
+                    <div class="pointer-events-none absolute bottom-0 left-0 right-2 h-12 bg-gradient-to-t from-white to-transparent transition-opacity duration-200"></div>
                 </div>
 
                 {{-- Panel: Perkembangan --}}
-                <div id="panel-perkembangan" class="tab-panel hidden">
-                    @php
-                        $perkembangan = $trans->perkembangan ?? null;
-                        $perkembanganArr = null;
-                        if (is_string($perkembangan)) {
-                            $json = json_decode($perkembangan, true);
-                            if (is_array($json)) {
-                                $perkembanganArr = $json;
+                <div id="panel-perkembangan" class="tab-panel hidden relative">
+                    <div class="max-h-[500px] overflow-y-auto pr-2 scrollable-tab">
+                        @php
+                            $perkembangan = $trans->perkembangan ?? null;
+                            $perkembanganArr = null;
+                            if (is_string($perkembangan)) {
+                                $json = json_decode($perkembangan, true);
+                                if (is_array($json)) {
+                                    $perkembanganArr = $json;
+                                }
                             }
-                        }
-                    @endphp
-                    @if ($perkembanganArr)
-                        <div class="space-y-6 border-l-2 border-green-600 pl-6">
-                            @forelse ($perkembanganArr as $entry)
-                                <div class="relative">
-                                    <span class="absolute -left-[11px] top-1 w-4 h-4 bg-green-600 rounded-full"></span>
-                                    <div class="ml-5">
-                                        <h3 class="font-semibold text-gray-800">
-                                            {{ $entry['title'] ?? 'Perkembangan Kasus' }}</h3>
-                                        <p class="text-sm text-gray-600 mt-1">{{ $entry['notes'] ?? '' }}</p>
-                                        @if (!empty($entry['created_at']))
-                                            <p class="text-xs text-gray-400 mt-2">
-                                                {{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y H:i') }}
-                                            </p>
-                                        @endif
+                        @endphp
+                        @if ($perkembanganArr)
+                            <div class="space-y-6 border-l-2 border-green-600 pl-6">
+                                @forelse ($perkembanganArr as $entry)
+                                    <div class="relative">
+                                        <span class="absolute -left-[11px] top-1 w-4 h-4 bg-green-600 rounded-full"></span>
+                                        <div class="ml-5">
+                                            <h3 class="font-semibold text-gray-800">
+                                                {{ $entry['title'] ?? 'Perkembangan Kasus' }}</h3>
+                                            <p class="text-sm text-gray-600 mt-1">{{ $entry['notes'] ?? '' }}</p>
+                                            @if (!empty($entry['created_at']))
+                                                <p class="text-xs text-gray-400 mt-2">
+                                                    {{ \Carbon\Carbon::parse($entry['created_at'])->format('d M Y H:i') }}
+                                                </p>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
-                            @empty
-                                <p class="text-gray-500 italic">Belum ada perkembangan.</p>
-                            @endforelse
-                        </div>
-                    @elseif(!empty($perkembangan))
-                        <div class="prose prose-gray max-w-none">{!! $perkembangan !!}</div>
-                    @else
-                        <p class="text-gray-500 italic">Belum ada perkembangan.</p>
-                    @endif
+                                @empty
+                                    <p class="text-gray-500 italic">Belum ada perkembangan.</p>
+                                @endforelse
+                            </div>
+                        @elseif(!empty($perkembangan))
+                            <div class="prose prose-gray max-w-none">{!! $perkembangan !!}</div>
+                        @else
+                            <p class="text-gray-500 italic">Belum ada perkembangan.</p>
+                        @endif
+                    </div>
+                    <div class="pointer-events-none absolute bottom-0 left-0 right-2 h-12 bg-gradient-to-t from-white to-transparent transition-opacity duration-200"></div>
                 </div>
 
                 {{-- Panel: permasalahan --}}
-                <div id="panel-permasalahan" class="tab-panel hidden">
-                    @if ($trans?->dugaan_permasalahan)
-                        <div class="prose-content text-gray-700 leading-relaxed">
-                            {!! $trans->dugaan_permasalahan !!}
-                        </div>
-                    @else
-                        <p class="text-gray-400 italic">Dugaan permasalahan belum tersedia.</p>
-                    @endif
+                <div id="panel-permasalahan" class="tab-panel hidden relative">
+                    <div class="max-h-[500px] overflow-y-auto pr-2 scrollable-tab">
+                        @if ($trans?->dugaan_permasalahan)
+                            <div class="prose-content text-gray-700 leading-relaxed">
+                                {!! $trans->dugaan_permasalahan !!}
+                            </div>
+                        @else
+                            <p class="text-gray-400 italic">Dugaan permasalahan belum tersedia.</p>
+                        @endif
+                    </div>
+                    <div class="pointer-events-none absolute bottom-0 left-0 right-2 h-12 bg-gradient-to-t from-white to-transparent transition-opacity duration-200"></div>
                 </div>
 
                 {{-- Panel: Pembelajaran --}}
-                <div id="panel-pembelajaran" class="tab-panel hidden">
-                    @if ($trans?->pembelajaran)
-                        <div class="prose-content text-gray-700 leading-relaxed">
-                            {!! $trans->pembelajaran !!}
-                        </div>
-                    @else
-                        <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>
-                    @endif
+                <div id="panel-pembelajaran" class="tab-panel hidden relative">
+                    <div class="max-h-[500px] overflow-y-auto pr-2 scrollable-tab">
+                        @if ($trans?->pembelajaran)
+                            <div class="prose-content text-gray-700 leading-relaxed">
+                                {!! $trans->pembelajaran !!}
+                            </div>
+                        @else
+                            <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>
+                        @endif
+                    </div>
+                    <div class="pointer-events-none absolute bottom-0 left-0 right-2 h-12 bg-gradient-to-t from-white to-transparent transition-opacity duration-200"></div>
                 </div>
 
                 {{-- Panel: Status narasi --}}
-                <div id="panel-status" class="tab-panel hidden">
-                    @if ($case->status_narasi)
-                        <div class="prose-content text-gray-700 leading-relaxed">
-                            {!! $case->status_narasi !!}
-                        </div>
-                    @else
-                        <p class="text-gray-400 italic">Pembelajaran belum tersedia.</p>
-                    @endif
+                <div id="panel-status" class="tab-panel hidden relative">
+                    <div class="max-h-[500px] overflow-y-auto pr-2 scrollable-tab">
+                        @if ($case->status_narasi)
+                            <div class="prose-content text-gray-700 leading-relaxed">
+                                {!! $case->status_narasi !!}
+                            </div>
+                        @else
+                            <p class="text-gray-400 italic">Status belum tersedia.</p>
+                        @endif
+                    </div>
+                    <div class="pointer-events-none absolute bottom-0 left-0 right-2 h-12 bg-gradient-to-t from-white to-transparent transition-opacity duration-200"></div>
                 </div>
             </div>
         </section>
@@ -575,7 +611,7 @@
                             {{-- Badge Artikel --}}
                             <span
                                 class="absolute top-3 left-3 px-2 py-0.5 text-xs font-bold tracking-widest uppercase bg-gray-900 text-white">
-                                📰 Artikel
+                                Artikel
                             </span>
 
                             {{-- Category Badge --}}
@@ -590,13 +626,13 @@
                         {{-- Content --}}
                         <div class="p-5 flex flex-col flex-1">
                             {{-- Title --}}
-                            <h3 class="text-lg font-black text-gray-900 leading-tight mb-3 tracking-tight line-clamp-2">
-                                {!! Str::limit(strip_tags($c->title), 80) !!}
+                            <h3 class="text-lg font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                {!! strip_tags($c->title) !!}
                             </h3>
 
                             {{-- Excerpt --}}
-                            <p class="text-sm text-gray-500 leading-relaxed italic flex-1 mb-4 line-clamp-3">
-                                {!! Str::limit(strip_tags($c->excerpt), 120) !!}
+                            <p class="text-sm text-gray-500 leading-relaxed flex-1 mb-4">
+                                {!! Str::limit(strip_tags($c->excerpt), 300) !!}
                             </p>
 
                             {{-- Footer --}}
@@ -642,13 +678,13 @@
                                     <span class="text-xs text-gray-400">{{ $related->case_number }}</span>
                                 </div>
                                 <h3
-                                    class="font-bold text-gray-800 text-sm leading-snug group-hover:text-green-700 transition-colors line-clamp-2">
+                                    class="font-bold text-gray-800 text-sm leading-snug group-hover:text-green-700 transition-colors">
                                     {{ $relatedTrans?->title ?? 'Tanpa judul' }}
                                 </h3>
-                                <p class="mt-2 text-xs text-gray-500 line-clamp-2">
+                                <p class="mt-2 text-xs text-gray-500">
                                     {{ Str::limit(strip_tags($relatedTrans?->summary ?? ''), 100) }}
                                 </p>
-                                <p class="mt-3 text-[10px] text-gray-400">📍 {{ $related->location['province'] ?? '-' }}
+                                <p class="mt-3 text-[10px] text-gray-400">{{ $related->location['province'] ?? '-' }}
                                 </p>
                             </a>
                         @endforeach
@@ -749,7 +785,26 @@
             const activeBtn = document.getElementById('tab-' + name);
             activeBtn.classList.add('bg-white', 'text-gray-800', 'shadow-sm');
             activeBtn.classList.remove('text-gray-500');
+            updateGradients();
         }
+
+        // ===== Scrollable Tab Gradient =====
+        function updateGradients() {
+            document.querySelectorAll('.scrollable-tab').forEach(el => {
+                const gradient = el.parentElement.querySelector('.absolute.bottom-0');
+                if (!gradient) return;
+                const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 1;
+                const overflows = el.scrollHeight > el.clientHeight;
+                gradient.classList.toggle('opacity-0', !overflows || atBottom);
+                gradient.classList.toggle('opacity-100', overflows && !atBottom);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            updateGradients();
+            document.querySelectorAll('.scrollable-tab').forEach(el => {
+                el.addEventListener('scroll', updateGradients);
+            });
+        });
 
         // ===== FAQ Accordion =====
         function toggleFaq(btn) {

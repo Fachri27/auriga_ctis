@@ -133,7 +133,9 @@
     }
 </style>
 
-<div class="w-full bg-[#264c16] py-10 mt-25 px-4 text-white poppins-regular" x-data="filterUI()">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/LeafletStyleSheet.css" />
+
+<div class="w-full bg-[#264c16] py-10 mt-25 px-4 text-white poppins-regular">
 
     {{-- MAP WRAPPER --}}
     <div class="max-w-7xl mx-auto mb-8 sm:mb-10"

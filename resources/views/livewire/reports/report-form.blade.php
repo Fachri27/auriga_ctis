@@ -1,3 +1,7 @@
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+@endpush
+
 <div>
     <div class="max-w-7xl mx-auto py-12 mt-20 poppins-regular" x-data="{ locale: @entangle('locale') }">
 

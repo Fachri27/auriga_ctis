@@ -1,3 +1,7 @@
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+@endpush
+
 <div>
     <div class="max-w-7xl mx-auto py-12 poppins-regular" x-data="{ lang: 'id' }">
 
@@ -34,7 +38,7 @@
 
         {{-- Language --}}
         <div class="flex flex-col mb-10">
-            <label class="font-medium mb-2">🌐 Bahasa</label>
+            <label class="font-medium mb-2">Bahasa</label>
             <div class="flex rounded-lg border bg-gray-100 p-1 w-80">
                 <!-- Indonesia -->
                 <button :class="lang === 'id' ? 'bg-blue-600 text-white' : 'text-gray-700'" @click="lang = 'id'"
@@ -299,25 +303,7 @@
                 <input type="text" wire:model="konflik" class="w-full border  p-2 mt-1 bg-gray-50">
             </div>
         </div>
-
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div x-show="lang === 'id'">
-                <label class="font-medium">Judul</label>
-                <input type="text" wire:model="title_id" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
-            <div x-show="lang === 'en'">
-                <label class="font-medium">Title</label>
-                <input type="text" wire:model="title_en" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
-            <div x-show="lang === 'id'">
-                <label class="font-medium">Summary (ID)</label>
-                <input type="text" wire:model="summary_id" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
-            <div x-show="lang === 'en'">
-                <label class="font-medium">Summary (EN)</label>
-                <input type="text" wire:model="summary_en" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
-        </div> --}}
+        --}}
 
         <!-- ========================= -->
         <!-- DESKRIPSI -->
@@ -333,7 +319,7 @@
 
                 <div>
                     {{-- editor_id --}}
-                    @includeWhen(true, 'front.components.instansi')
+                    @include('front.components.instansi')
                 </div>
             </div>
 
@@ -352,7 +338,7 @@
 
                 <div>
                     {{-- editor_id --}}
-                    @includeWhen(true, 'front.components.status')
+                    @include('front.components.status')
                 </div>
             </div>
 
@@ -474,7 +460,7 @@
 
                 <div>
                     {{-- editor_id --}}
-                    @includeWhen(true, 'front.components.sumber')
+                    @include('front.components.sumber')
                 </div>
             </div>
 

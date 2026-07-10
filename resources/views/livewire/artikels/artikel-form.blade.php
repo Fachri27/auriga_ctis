@@ -10,12 +10,12 @@
                 </a>
                 <span class="text-gray-400">›</span>
                 <span class="text-blue-600 font-semibold">
-                    {{ $artikel ? '✏️ Edit Artikel' : 'Tambah Artikel' }}
+                    {{ $artikel ? 'Edit Artikel' : 'Tambah Artikel' }}
                 </span>
             </nav>
 
             <h1 class="text-2xl font-bold mb-8 text-gray-700">
-                {{ $artikel ? '✏️ Edit Artikel' : '➕ Add Artikel' }}
+                {{ $artikel ? 'Edit Artikel' : 'Add Artikel' }}
             </h1>
 
             <form wire:submit.prevent="save">
@@ -27,7 +27,7 @@
 
                             {{-- Language --}}
                             <div>
-                                <label class="font-medium">🌐 Bahasa</label>
+                                <label class="font-medium">Bahasa</label>
                                 <select x-model="lang" class="w-full border rounded-lg px-3 py-2 mt-1">
                                     <option value="id">Indonesia</option>
                                     <option value="en">English</option>
@@ -81,7 +81,7 @@
                             {{-- Publish + Page Type --}}
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="text-sm">📅 Publish</label>
+                                    <label class="text-sm">Publish</label>
                                     <input type="date" wire:model="publishedAt"
                                         class="w-full border rounded-lg px-2 py-2">
                                 </div>
@@ -195,7 +195,7 @@
 
                             {{-- Text --}}
                             <span wire:loading.remove wire:target="save">
-                                {{ $artikel ? '💾 Update' : '🚀 Create' }}
+                                {{ $artikel ? 'Update' : 'Create' }}
                             </span>
 
                             <span wire:loading wire:target="save">

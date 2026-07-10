@@ -10,7 +10,7 @@
         <select wire:model="sector" wire:change="applyFilter"
             class="px-3 py-2 rounded bg-white/10 border border-white/20">
             <option value="" class="text-black">All sectors</option>
-            @foreach(\Illuminate\Support\Facades\DB::table('categories')->get() as $s)
+            @foreach($categories as $s)
             <option value="{{ $s->slug }}" class="text-black">{{ $s->slug }}</option>
             @endforeach
         </select>
@@ -18,9 +18,9 @@
 
     <div class="flex flex-col w-full md:w-1/4">
         <label class="text-xs text-white mb-1">{{ __('messages.status') }}</label>
-        <select wire:model="status" class="px-3 py-2 rounded bg-white/10 border border-white/20">
+        <select wire:model="status" wire:change="applyFilter" class="px-3 py-2 rounded bg-white/10 border border-white/20">
             <option value="" class="text-black">All statuses</option>
-            @foreach(\Illuminate\Support\Facades\DB::table('statuses')->get() as $st)
+            @foreach($statuses as $st)
             <option value="{{ $st->key }}" class="text-black">{{ $st->name }}</option>
             @endforeach
         </select>

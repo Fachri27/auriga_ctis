@@ -28,6 +28,14 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * Send the email verification notification using custom template.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
+    }
+
+    /**
      * Convenience wrapper matching project conventions.
      */
     public function hasPermission(string $permission): bool
@@ -53,11 +61,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isPublicUser(): bool
     {
         return $this->hasRole('public');
-    }
-
-    public function sendEmailVerificationNotification(): void
-    {
-        $this->notify(new VerifyEmailNotification());
     }
 
     // LEGACY: previous User model without convenience helpers

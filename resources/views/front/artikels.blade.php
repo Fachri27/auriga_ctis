@@ -40,8 +40,8 @@
                     {{-- Content --}}
                     <div class="p-5 flex flex-col flex-1">
                         {{-- Title --}}
-                        <h3 class="text-lg font-bold text-gray-900 leading-tight mb-3 tracking-tight line-clamp-2">
-                            {!! Str::limit(strip_tags($c->title), 80) !!}
+                        <h3 class="text-lg font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                            {!! strip_tags($c->title) !!}
                         </h3>
 
                         {{-- Excerpt --}}

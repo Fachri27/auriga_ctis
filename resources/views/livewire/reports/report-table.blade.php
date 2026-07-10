@@ -39,22 +39,17 @@
 
                     {{-- DESCRIPTION --}}
                     <p class="text-gray-700 text-sm max-w-2xl line-clamp-2">
-                        {!!
-                        optional(
-                        $r->translations->where('locale','id')->first()
-                        )->description
-                        ?? 'No description provided by reporter.'
-                        !!}
+                        {{ strip_tags(optional($r->translations->where('locale','id')->first())->description ?? 'No description provided by reporter.') }}
                     </p>
 
                     {{-- META --}}
                     <div class="text-xs text-gray-500 flex gap-4">
                         <span>
-                            📅 {{ $r->created_at->format('d M Y') }}
+                            {{ $r->created_at->format('d M Y') }}
                         </span>
 
                         <span>
-                            🆔 Report ID: {{ $r->id }}
+                            Report ID: {{ $r->id }}
                         </span>
                     </div>
                 </div>
@@ -83,7 +78,7 @@
         @else
         {{-- EMPTY STATE --}}
         <div class="bg-white border rounded-xl p-12 text-center text-gray-500">
-            <div class="text-4xl mb-3">📭</div>
+            <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
             <p class="font-semibold">No reports available</p>
             <p class="text-sm mt-1">
                 New reports will appear here once submitted by users.

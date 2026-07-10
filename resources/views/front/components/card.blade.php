@@ -50,7 +50,7 @@
                         $_trans = $case->translations->where('locale', app()->getLocale())->first();
                     @endphp
                     @if ($_trans?->title)
-                    <p class="text-sm text-gray-600 mb-2 leading-snug line-clamp-2">
+                    <p class="text-sm text-gray-600 mb-2 leading-snug">
                         {{ strip_tags($_trans->title) }}
                     </p>
                     @endif

@@ -157,7 +157,7 @@ class HomeController extends Controller
         $kasus = CaseModel::with(['category', 'status'])
             ->whereNotNull('published_at')
             ->where('is_public', true)
-            ->orderByDesc('event_date')
+            ->latest('published_at')
             ->get();
 
         // Get all categories used by all public cases

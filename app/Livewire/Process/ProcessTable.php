@@ -15,6 +15,12 @@ class ProcessTable extends Component
 
     public $categoryFilter = null;
 
+    public function delete(Process $process)
+    {
+        $process->delete();
+        session()->flash('success', 'Process deleted');
+    }
+
     public function render()
     {
         $processes = Process::with('translations', 'category')

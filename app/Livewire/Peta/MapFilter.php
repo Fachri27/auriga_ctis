@@ -3,6 +3,7 @@
 namespace App\Livewire\Peta;
 
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
 
 class MapFilter extends Component
 {
@@ -12,7 +13,7 @@ class MapFilter extends Component
     public $location = '';
     public $lat = null;
     public $lng = null;
-    public $radius = 5; // km
+    public $radius = 5;
 
     public function applyFilter()
     {
@@ -22,7 +23,6 @@ class MapFilter extends Component
             'search' => $this->search,
             'lat' => $this->lat,
             'lng' => $this->lng,
-            // 'radius' => $this->radius,
         ]);
     }
 
@@ -33,7 +33,6 @@ class MapFilter extends Component
         $this->search = '';
         $this->lat = null;
         $this->lng = null;
-        // $this->radius = 5;
 
         $this->dispatch('reset-leaflet-filter', [
             'sector' => '',
@@ -57,6 +56,9 @@ class MapFilter extends Component
 
     public function render()
     {
-        return view('livewire.peta.map-filter');
+        return view('livewire.peta.map-filter', [
+            'categories' => DB::table('categories')->get(),
+            'statuses' => DB::table('statuses')->get(),
+        ]);
     }
 }

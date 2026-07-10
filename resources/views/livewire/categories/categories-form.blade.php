@@ -44,13 +44,13 @@
                 <button type="button" @click="tab = 'id'"
                     :class="tab === 'id' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700'"
                     class="px-4 py-1.5 rounded-lg text-sm font-medium">
-                    🇮🇩 Indonesia
+                    Indonesia
                 </button>
 
                 <button type="button" @click="tab = 'en'"
                     :class="tab === 'en' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700'"
                     class="px-4 py-1.5 rounded-lg text-sm font-medium">
-                    🇺🇸 English
+                    English
                 </button>
             </div>
 

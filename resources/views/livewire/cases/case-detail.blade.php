@@ -91,11 +91,13 @@
                         @endif
 
                         @if ($case->is_public)
-                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium">✅
-                                Dipublikasikan</span>
+                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium">
+                                Dipublikasikan
+                            </span>
                         @else
-                            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">🔒 Tidak
-                                Publik</span>
+                            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+                                Tidak Publik
+                            </span>
                         @endif
                     </div>
 
@@ -118,13 +120,12 @@
 
                     {{-- Meta --}}
                     <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
-                        <span>📅 Dibuat: <strong
+                        <span>Dibuat: <strong
                                 class="text-gray-600">{{ optional($case->created_at)->format('d M Y, H:i') }}</strong></span>
-                        <span>✏️ Diperbarui: <strong
-                                class="text-gray-600">{{ optional($case->updated_at)->format('d M Y,
-                                                                                                                                                                                                                                                                                            H:i') }}</strong></span>
+                        <span>Diperbarui: <strong
+                                class="text-gray-600">{{ optional($case->updated_at)->format('d M Y, H:i') }}</strong></span>
                         @if ($case->updatedBy ?? false)
-                            <span>👤 Oleh: <strong class="text-gray-600">{{ $case->updatedBy->name }}</strong></span>
+                            <span>Oleh: <strong class="text-gray-600">{{ $case->updatedBy->name }}</strong></span>
                         @endif
                     </div>
                 </div>
@@ -135,7 +136,7 @@
                     @can('case.publish')
                         <button wire:click="publishCases"
                             class="flex-1 sm:flex-none px-4 py-2 text-center {{ $case->is_public ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded-lg text-sm font-medium transition-colors">
-                            {{ $case->is_public ? '🔒 Batalkan Publikasi' : '📢 Publikasikan' }}
+                            {{ $case->is_public ? 'Batalkan Publikasi' : 'Publikasikan' }}
                         </button>
                     @endcan
 
@@ -161,7 +162,7 @@
                     @can('case.edit')
                         <a href="{{ route('admin.cases.edit', $case->id) }}"
                             class="flex-1 sm:flex-none px-4 py-2 text-center bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition-colors">
-                            ✏️ Edit
+                            Edit
                         </a>
                     @endcan
                 </div>
@@ -173,7 +174,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
             <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
-                    📄
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                 </div>
                 <div>
                     <p class="text-xs text-gray-400">Dokumen</p>
@@ -183,7 +184,8 @@
             <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
                 <div
                     class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 flex-shrink-0">
-                    👤</div>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                </div>
                 <div>
                     <p class="text-xs text-gray-400">Aktor</p>
                     <p class="text-lg font-bold text-gray-800">{{ $actorCount }}</p>
@@ -193,7 +195,8 @@
                 class="col-span-2 sm:col-span-1 bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
                 <div
                     class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 flex-shrink-0">
-                    🖼️</div>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
+                </div>
                 <div>
                     <p class="text-xs text-gray-400">Bukti</p>
                     <p class="text-lg font-bold text-gray-800">{{ is_array($case->bukti) ? count($case->bukti) : 0 }}
@@ -219,9 +222,9 @@
         <div class="bg-white rounded-t-xl shadow-sm border-b overflow-x-auto">
             <div class="flex gap-1 px-4 min-w-max sm:min-w-0">
                 @foreach ([
-        'overview' => '📋 Ringkasan',
-        'handling' => '🔧 Penanganan',
-        'timeline' => '🕐 Linimasa',
+        'overview' => 'Ringkasan',
+        'handling' => 'Penanganan',
+        'timeline' => 'Linimasa',
     ] as $tab => $label)
                     <button wire:click="setTab('{{ $tab }}')"
                         class="relative py-4 px-3 text-sm font-medium whitespace-nowrap transition-colors
@@ -413,7 +416,6 @@
                                             $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                                             $isPdf = $ext === 'pdf';
                                             $label = $isImage ? 'Gambar ' . ($i + 1) : strtoupper($ext) . ' File';
-                                            $icon = $isImage ? '🖼️' : ($isPdf ? '📄' : '📎');
                                         @endphp
                                         @if ($isImage)
                                             <a href="{{ asset($path) }}" target="_blank"
@@ -429,7 +431,7 @@
                                             <a href="{{ asset($path) }}" target="{{ $isPdf ? '_blank' : '_self' }}"
                                                 {{ !$isPdf ? 'download' : '' }}
                                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition text-sm text-gray-700 flex-shrink-0">
-                                                <span>{{ $icon }}</span><span>{{ $label }}</span>
+                                                <span>{{ $label }}</span>
                                             </a>
                                         @endif
                                     @endforeach
@@ -507,7 +509,7 @@
 
                         {{-- Internal Notes --}}
                         <div class="bg-amber-50 rounded-xl p-4 border border-amber-100 text-sm">
-                            <h3 class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-2">📝 Catatan
+                            <h3 class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-2">Catatan
                                 Internal
                             </h3>
                             @if ($case->internal_notes ?? false)

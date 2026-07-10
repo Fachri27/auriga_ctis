@@ -77,6 +77,22 @@
             </div>
         </div>
 
+        @php
+        $statusColors = [
+            'open'          => 'bg-sky-100 text-sky-700',
+            'investigation' => 'bg-yellow-100 text-yellow-700',
+            'penyelidikan'  => 'bg-yellow-100 text-yellow-700',
+            'penyidikan'    => 'bg-orange-100 text-orange-700',
+            'prosecution'   => 'bg-blue-100 text-blue-700',
+            'trial'         => 'bg-purple-100 text-purple-700',
+            'vonis'         => 'bg-indigo-100 text-indigo-700',
+            'executed'      => 'bg-orange-100 text-orange-700',
+            'completed'     => 'bg-green-100 text-green-700',
+            'closed'        => 'bg-gray-100 text-gray-600',
+            'rejected'      => 'bg-red-100 text-red-700',
+        ];
+        @endphp
+
         {{-- ===== TABLE CARD ===== --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
@@ -103,19 +119,6 @@
                         $desc         = $tr?->description ?? '-';
                         $perkembangan = $tr?->perkembangan ?? '-';
                         $statusKey    = $c->status?->key ?? '';
-                        $statusColors = [
-                            'open'          => 'bg-sky-100 text-sky-700',
-                            'investigation' => 'bg-yellow-100 text-yellow-700',
-                            'penyelidikan'  => 'bg-yellow-100 text-yellow-700',
-                            'penyidikan'    => 'bg-orange-100 text-orange-700',
-                            'prosecution'   => 'bg-blue-100 text-blue-700',
-                            'trial'         => 'bg-purple-100 text-purple-700',
-                            'vonis'         => 'bg-indigo-100 text-indigo-700',
-                            'executed'      => 'bg-orange-100 text-orange-700',
-                            'completed'     => 'bg-green-100 text-green-700',
-                            'closed'        => 'bg-gray-100 text-gray-600',
-                            'rejected'      => 'bg-red-100 text-red-700',
-                        ];
                         $statusClass = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-600';
                         $hasDesc     = $desc !== '-' && !empty(strip_tags($desc));
                         if ($perkembangan !== '-' && preg_match('/^\[/', $perkembangan)) {
@@ -262,19 +265,6 @@
                 $desc         = $tr?->description ?? '-';
                 $perkembangan = $tr?->perkembangan ?? '-';
                 $statusKey    = $c->status?->key ?? '';
-                $statusColors = [
-                    'open'          => 'bg-sky-100 text-sky-700',
-                    'investigation' => 'bg-yellow-100 text-yellow-700',
-                    'penyelidikan'  => 'bg-yellow-100 text-yellow-700',
-                    'penyidikan'    => 'bg-orange-100 text-orange-700',
-                    'prosecution'   => 'bg-blue-100 text-blue-700',
-                    'trial'         => 'bg-purple-100 text-purple-700',
-                    'vonis'         => 'bg-indigo-100 text-indigo-700',
-                    'executed'      => 'bg-orange-100 text-orange-700',
-                    'completed'     => 'bg-green-100 text-green-700',
-                    'closed'        => 'bg-gray-100 text-gray-600',
-                    'rejected'      => 'bg-red-100 text-red-700',
-                ];
                 $statusClass = $statusColors[$statusKey] ?? 'bg-gray-100 text-gray-600';
                 $hasDesc     = $desc !== '-' && !empty(strip_tags($desc));
                 if ($perkembangan !== '-' && preg_match('/^\[/', $perkembangan)) {
@@ -317,7 +307,10 @@
                             {{ Str::limit(strip_tags($perkembangan), 120) }}
                         </p>
                         @else
-                        <p class="text-[10px] text-orange-500 font-medium">⚠ Belum diisi</p>
+                        <p class="text-[10px] text-orange-500 font-medium inline-flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                            Belum diisi
+                        </p>
                         @endif
                     </div>
 
@@ -333,11 +326,20 @@
 
                     {{-- Meta row --}}
                     <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
-                        <span>📅 {{ $c->event_date ? \Carbon\Carbon::parse($c->event_date)->format('d M Y') : '-' }}</span>
+                        <span class="inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            {{ $c->event_date ? \Carbon\Carbon::parse($c->event_date)->format('d M Y') : '-' }}
+                        </span>
                         @if($c->verified_by)
-                        <span class="text-blue-500">✓ {{ $c->verifiedBy?->name ?? 'Terverifikasi' }}</span>
+                        <span class="text-blue-500 inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            {{ $c->verifiedBy?->name ?? 'Terverifikasi' }}
+                        </span>
                         @else
-                        <span class="text-orange-400">⏳ Belum diverifikasi</span>
+                        <span class="text-orange-400 inline-flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Belum diverifikasi
+                        </span>
                         @endif
                     </div>
 

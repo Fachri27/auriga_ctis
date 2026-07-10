@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\{Auth, Hash};
 use Illuminate\Validation\Rules\Password;
@@ -87,8 +88,8 @@ class Register extends Component
             // Login user so they can access verification notice page
             Auth::login($user);
 
-            // Fire registered event (triggers email verification immediately)
-            event(new Registered($user));
+            // Send email verification notification manually
+            $user->sendEmailVerificationNotification();
 
             // Flash success message
             session()->flash('success', 'Pendaftaran berhasil! Email verifikasi telah dikirim ke ' . $user->email);

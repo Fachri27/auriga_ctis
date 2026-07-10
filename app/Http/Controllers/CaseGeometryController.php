@@ -59,7 +59,10 @@ class CaseGeometryController extends Controller
             );
 
         if ($sector) {
-            $q->where('g.category', $sector);
+            $cat = DB::table('categories')->where('slug', $sector)->first(['id']);
+            if ($cat) {
+                $q->whereRaw('JSON_CONTAINS(c.category_ids, ?)', [json_encode((int)$cat->id)]);
+            }
         }
 
         if ($status) {
@@ -70,6 +73,8 @@ class CaseGeometryController extends Controller
             $s = '%' . $request->query('search') . '%';
             $q->where(function ($q2) use ($s) {
                 $q2->where('g.title', 'like', $s)
+                    ->orWhere('ct_locale.title', 'like', $s)
+                    ->orWhere('ct_id.title', 'like', $s)
                     ->orWhere('ct_locale.description', 'like', $s)
                     ->orWhere('ct_id.description', 'like', $s);
             });

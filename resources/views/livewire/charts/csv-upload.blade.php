@@ -11,23 +11,23 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">Dataset</label>
             <input type="text" wire:model="dataset"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-gray-200 focus:border-gray-400">
             @error('dataset') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
         <div>
             <label class="block text-sm font-medium text-gray-700">Tahun (opsional, isi jika data spesifik tahun)</label>
             <input type="number" wire:model="year" min="2000" max="2099" placeholder="cth: 2024"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-gray-200 focus:border-gray-400">
             @error('year') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
         <div>
             <label class="block text-sm font-medium text-gray-700">File CSV</label>
             <input type="file" wire:model="file" accept=".csv"
-                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
             @error('file') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            <div wire:loading wire:target="file" class="text-blue-500 text-sm mt-1">Loading preview...</div>
+            <div wire:loading wire:target="file" class="text-gray-500 text-sm mt-1">Loading preview...</div>
         </div>
 
         @if ($preview)
@@ -58,7 +58,7 @@
             </div>
 
             <button type="submit"
-                class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                class="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors">
                 Import ke Database
             </button>
         @endif
@@ -84,12 +84,12 @@
                             <td class="px-4 py-2">{{ $ds->years > 0 ? $ds->years . ' tahun' : '-' }}</td>
                             <td class="px-4 py-2 text-right space-x-2">
                                 <button wire:click="editDataset('{{ $ds->dataset }}')"
-                                    class="text-blue-600 hover:text-blue-800 text-sm">
+                                    class="text-blue-600 hover:text-blue-900 text-xs font-semibold">
                                     Edit
                                 </button>
                                 <button wire:confirm="Hapus dataset '{{ $ds->dataset }}'?"
                                     wire:click="deleteDataset('{{ $ds->dataset }}')"
-                                    class="text-red-600 hover:text-red-800 text-sm">
+                                    class="text-red-600 hover:text-red-900 text-xs font-semibold">
                                     Hapus
                                 </button>
                             </td>

@@ -10,87 +10,7 @@
 
         <div id="case-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             @forelse($cases as $case)
-                <div
-                    class="group bg-white border border-gray-200 border-t-4 border-t-gray-900 rounded-sm p-5 flex flex-col hover:shadow-[4px_4px_0_#111] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-200">
-
-                    {{-- Badges --}}
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="px-2 py-0.5 text-xs font-bold tracking-widest uppercase bg-gray-900 text-white">
-                            ✓ Terverifikasi
-                        </span>
-                        @if ($case->published_at)
-                            <span
-                                class="px-2 py-0.5 text-xs font-bold tracking-widest uppercase border border-[#032A36] text-[#032A36]">
-                                Dipublikasikan
-                            </span>
-                        @endif
-                    </div>
-
-                    {{-- Case Number --}}
-                    <div class="text-lg font-bold text-gray-900 leading-tight mb-1 tracking-tight">
-                        {{ $case->case_number ?? 'No. Kasus' }}
-                    </div>
-
-                    {{-- Title --}}
-                    @php
-                        $_vtrans = $case->translations->where('locale', app()->getLocale())->first();
-                    @endphp
-                    @if ($_vtrans?->title)
-                    <p class="text-sm text-gray-600 mb-2 leading-snug line-clamp-2">
-                        {{ strip_tags($_vtrans->title) }}
-                    </p>
-                    @endif
-
-                    {{-- Meta --}}
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 py-3 border-t border-b border-gray-100 mb-3">
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Kategori</p>
-                            <p class="text-xs text-gray-800">
-                                @php
-                                    $locale = app()->getLocale();
-                                @endphp
-                                {{-- hasil dari category_ids --}}
-                                @if (isset($categories))
-                                    {{ $categories->whereIn('id', $case->category_ids ?? [])->map(function ($cat) use ($locale) {
-                                            $t = $cat->translations->firstWhere('locale', $locale) ?? $cat->translations->first();
-                                            return $t ? $t->name : 'Kategori';
-                                        })->implode(', ') }}
-                                @else
-                                    {{ $case->category?->translations->firstWhere('locale', $locale)?->name ?? 'Kategori' }}
-                                @endif
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Status</p>
-                            <p class="text-xs text-gray-800">{{ $case->current_status_label }}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Tanggal Kejadian
-                            </p>
-                            <p class="text-xs text-gray-800">
-                                {{ $case->event_date ? date('d M Y', strtotime($case->event_date)) : '—' }}
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Excerpt --}}
-                    <p class="text-sm text-gray-500 leading-relaxed flex-1">
-                        @php
-                            $locale = app()->getLocale();
-                            $trans = $case->translations->where('locale', $locale)->first();
-                        @endphp
-                        {!! Str::limit(strip_tags($trans?->description ?? ($case->description ?? '—')), 180) !!}
-                    </p>
-
-                    {{-- Footer --}}
-                    <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                        <a href="{{ route('public.verify.case', $case->case_number) }}"
-                            class="text-xs font-bold uppercase tracking-widest text-[#032A36] hover:text-[#264c16] transition-colors after:content-['_→']">
-                            Lihat Detail
-                        </a>
-                    </div>
-
-                </div>
+                @include('front.verified-case-card')
             @empty
                 <div class="col-span-3 text-center text-gray-400 py-16 text-base">
                     Belum ada kasus terverifikasi &amp; dipublikasikan.
@@ -98,31 +18,53 @@
             @endforelse
         </div>
 
-        <div id="loading-spinner" class="w-full hidden justify-center py-8">
+        @if ($cases->hasMorePages())
+        <div id="load-more-sentinel" class="w-full h-1"></div>
+        <div id="loading-spinner" class="w-full flex justify-center py-8">
             <div class="w-8 h-8 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
         </div>
+        @endif
     </div>
 
     @push('scripts')
         <script>
-            // Spinner hanya muncul jika kasus banyak (>12)
-            let loading = false;
-            const caseCount = {{ count($cases) }};
-            window.addEventListener('scroll', function() {
-                const spinner = document.getElementById('loading-spinner');
-                if (caseCount <= 12) {
-                    spinner.classList.add('hidden');
-                    return;
+            let nextPage = {{ $cases->hasMorePages() ? $cases->currentPage() + 1 : 'null' }};
+            let loadingMore = false;
+            let scrollFired = false;
+            const spinner = document.getElementById('loading-spinner');
+
+            async function loadMore() {
+                if (loadingMore || !nextPage) return;
+                loadingMore = true;
+
+                try {
+                    const res = await fetch('{{ url()->current() }}?page=' + nextPage, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await res.json();
+                    document.getElementById('case-list').insertAdjacentHTML('beforeend', data.html);
+                    nextPage = data.nextPage;
+                    if (!nextPage && spinner) spinner.remove();
+                } catch (e) {
+                    console.error('Failed to load more cases', e);
+                } finally {
+                    loadingMore = false;
                 }
-                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200 && !loading) {
-                    loading = true;
-                    spinner.classList.remove('hidden');
-                    setTimeout(() => {
-                        spinner.classList.add('hidden');
-                        loading = false;
-                    }, 1200);
-                }
-            });
+            }
+
+            const sentinel = document.getElementById('load-more-sentinel');
+            if (sentinel) {
+                const observer = new IntersectionObserver(function (entries) {
+                    if (entries[0].isIntersecting && scrollFired) {
+                        loadMore();
+                    }
+                }, { rootMargin: '300px' });
+                observer.observe(sentinel);
+
+                window.addEventListener('scroll', function () {
+                    scrollFired = true;
+                }, { once: true });
+            }
         </script>
     @endpush
 @endsection

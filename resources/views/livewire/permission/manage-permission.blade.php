@@ -4,10 +4,10 @@
         {{-- HEADER --}}
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-800">
-                🔐 Manage Role Permissions
+                Manage Role Permissions
             </h2>
 
-            <select wire:model.live="roleName" class="rounded-lg border-gray-300 focus:ring focus:ring-blue-200">
+            <select wire:model.live="roleName" class="rounded-lg border-gray-300 text-sm px-3 py-2 focus:ring-2 focus:ring-gray-200 focus:border-gray-400">
                 @foreach ($roles as $role)
                 <option value="{{ $role->name }}">
                     {{ strtoupper($role->name) }}
@@ -19,9 +19,9 @@
         {{-- FORM TAMBAH PERMISSION --}}
         <form wire:submit.prevent="addPermission" class="flex items-center gap-3 mt-4">
             <input type="text" wire:model="newPermission" placeholder="Nama permission baru"
-                class="rounded-lg border-gray-300 focus:ring focus:ring-blue-200 px-3 py-2 text-sm" />
+                class="rounded-lg border-gray-200 px-3 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400" />
             <button type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">
+                class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors">
                 Tambah Permission
             </button>
         </form>
@@ -46,10 +46,10 @@
             <div class="flex items-center gap-3 p-4 rounded-xl border transition relative {{ in_array($permission->name, $selectedPermissions) ? 'bg-blue-50 border-blue-400' : 'bg-gray-50 border-gray-200 hover:bg-gray-100' }}"
                 wire:key="{{ $roleName }}-{{ $permission->id }}">
                 <input type="checkbox" value="{{ $permission->name }}" wire:model.live="selectedPermissions"
-                    class="rounded text-blue-600 focus:ring-blue-500">
+                    class="rounded text-gray-900 focus:ring-gray-400">
 
                 @if ($editPermissionId === $permission->id)
-                <input type="text" wire:model.defer="editPermissionName" class="rounded border px-2 py-1 text-sm" />
+                <input type="text" wire:model.defer="editPermissionName" class="rounded border border-gray-200 px-2 py-1 text-sm" />
                 <button wire:click.prevent="updatePermission"
                     class="ml-1 px-2 py-1 bg-green-500 text-white rounded text-xs">Simpan</button>
                 <button wire:click.prevent="cancelEditPermission"
@@ -65,12 +65,5 @@
             </div>
             @endforeach
         </div>
-
-        {{-- DEBUG (hapus kalau sudah yakin) --}}
-        {{--
-        <pre class="text-xs bg-gray-100 p-3 rounded">
-{{ json_encode($selectedPermissions, JSON_PRETTY_PRINT) }}
-        </pre>
-        --}}
     </div>
 </div>

@@ -308,7 +308,6 @@
 @endsection
 
 @push('scripts')
-    <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js"></script>
 
     <script>
@@ -321,31 +320,34 @@
             // ========================
             // INSIGHT: Category
             // ========================
-            if (categories.length) {
+            const catEl = document.getElementById('categoryInsight');
+            if (catEl && categories.length) {
                 const top = categories.reduce((a, b) => a.count > b.count ? a : b);
                 const total = categories.reduce((sum, i) => sum + i.count, 0);
                 const pct = Math.round((top.count / total) * 100);
-                document.getElementById('categoryInsight').textContent =
+                catEl.textContent =
                     `"${top.category_name}" mendominasi dengan ${top.count} kasus (${pct}% dari total ${total} kasus terdaftar).`;
             }
 
             // ========================
             // INSIGHT: Status
             // ========================
-            if (statuses.length) {
+            const statEl = document.getElementById('statusInsight');
+            if (statEl && statuses.length) {
                 const total = statuses.reduce((sum, i) => sum + i.count, 0);
                 const active = statuses.filter(s => ['investigation', 'penyelidikan', 'penyidikan', 'prosecution',
                     'trial'
                 ].includes(s.status_key)).reduce((sum, i) => sum + i.count, 0);
                 const activePct = Math.round((active / total) * 100);
-                document.getElementById('statusInsight').textContent =
+                statEl.textContent =
                     `${activePct}% dari ${total} kasus sedang dalam proses hukum aktif.`;
             }
 
             // ========================
             // INSIGHT: Monthly
             // ========================
-            if (months.length) {
+            const monEl = document.getElementById('monthlyInsight');
+            if (monEl && months.length) {
                 const latest = months[months.length - 1];
                 const prev = months.length > 1 ? months[months.length - 2] : null;
                 let insight = `Pada ${latest.month}, terdapat ${latest.count} kasus baru.`;
@@ -355,163 +357,8 @@
                     else if (diff < 0) insight += ` Turun ${Math.abs(diff)} kasus dibanding bulan sebelumnya.`;
                     else insight += ' Sama dengan bulan sebelumnya.';
                 }
-                document.getElementById('monthlyInsight').textContent = insight;
+                monEl.textContent = insight;
             }
-
-            // ========================
-            // CATEGORY CHART
-            // ========================
-            Highcharts.chart('categoryChart', {
-                chart: {
-                    type: 'column',
-                    style: {
-                        fontFamily: 'inherit'
-                    }
-                },
-                title: {
-                    text: null
-                },
-                xAxis: {
-                    categories: categories.map(i => i.category_name),
-                    labels: {
-                        style: {
-                            fontSize: '11px'
-                        }
-                    }
-                },
-                yAxis: {
-                    min: 0,
-                    title: {
-                        text: 'Jumlah Kasus'
-                    },
-                    allowDecimals: false
-                },
-                tooltip: {
-                    formatter: function() {
-                        return `<b>${this.x}</b><br/>Jumlah kasus: <b>${this.y}</b>`;
-                    }
-                },
-                legend: {
-                    enabled: false
-                },
-                series: [{
-                    name: 'Kasus',
-                    data: categories.map(i => i.count),
-                    color: '#0d9488'
-                }],
-                credits: {
-                    enabled: false
-                },
-                plotOptions: {
-                    column: {
-                        borderRadius: 4
-                    }
-                }
-            });
-
-            // ========================
-            // STATUS CHART
-            // ========================
-            Highcharts.chart('statusChart', {
-                chart: {
-                    type: 'pie',
-                    style: {
-                        fontFamily: 'inherit'
-                    }
-                },
-                title: {
-                    text: null
-                },
-                tooltip: {
-                    formatter: function() {
-                        return `<b>${this.point.name}</b><br/>
-                    ${this.y} kasus (${Math.round(this.percentage)}%)`;
-                    }
-                },
-                plotOptions: {
-                    pie: {
-                        allowPointSelect: true,
-                        cursor: 'pointer',
-                        dataLabels: {
-                            enabled: true,
-                            format: '<b>{point.name}</b><br>{point.percentage:.0f}%',
-                            style: {
-                                fontSize: '11px',
-                                fontWeight: 'normal'
-                            }
-                        }
-                    }
-                },
-                series: [{
-                    name: 'Kasus',
-                    data: statuses.map(i => ({
-                        name: i.status_name,
-                        y: i.count
-                    }))
-                }],
-                credits: {
-                    enabled: false
-                }
-            });
-
-            // ========================
-            // MONTHLY CHART
-            // ========================
-            Highcharts.chart('monthlyChart', {
-                chart: {
-                    type: 'area',
-                    style: {
-                        fontFamily: 'inherit'
-                    }
-                },
-                title: {
-                    text: null
-                },
-                xAxis: {
-                    categories: months.map(i => i.month),
-                    labels: {
-                        style: {
-                            fontSize: '11px'
-                        }
-                    }
-                },
-                yAxis: {
-                    title: {
-                        text: 'Jumlah Kasus'
-                    },
-                    allowDecimals: false
-                },
-                tooltip: {
-                    formatter: function() {
-                        return `<b>${this.x}</b><br/>Kasus baru: <b>${this.y}</b>`;
-                    }
-                },
-                series: [{
-                    name: 'Kasus Baru',
-                    data: months.map(i => i.count),
-                    color: '#0d9488',
-                    fillColor: {
-                        linearGradient: {
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 1
-                        },
-                        stops: [
-                            [0, 'rgba(13,148,136,0.25)'],
-                            [1, 'rgba(13,148,136,0)']
-                        ]
-                    },
-                    lineWidth: 2,
-                    marker: {
-                        radius: 4
-                    }
-                }],
-                credits: {
-                    enabled: false
-                }
-            });
-
         });
 
         // ========================
