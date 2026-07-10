@@ -39,7 +39,7 @@ class VerifyEmailNotification extends BaseVerifyEmail implements ShouldQueue
             ->line('---')
             ->line('')
             ->line('**⏰ Informasi Penting:**')
-            ->line('• Link verifikasi ini akan berlaku selama 24 jam')
+            ->line('• Link verifikasi ini akan berlaku selama 1 jam')
             ->line('• Jika tautan tidak berfungsi, hubungi tim support kami')
             ->line('')
             ->line('**⚠️ Keamanan:**')
