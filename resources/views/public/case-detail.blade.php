@@ -341,6 +341,19 @@
                         <span id="copyLabel">Salin Link</span>
                     </button>
                 </div>
+
+                {{-- ===== IKUTI KASUS INI ===== --}}
+                @if (! in_array($case->status?->key, ['completed', 'closed']))
+                    <div class="mt-8 pt-6 border-t border-gray-100 max-w-xl">
+                        <h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Ikuti Perkembangan Kasus Ini</h2>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Dapatkan notifikasi email setiap ada perkembangan terbaru pada kasus ini.
+                        </p>
+                        <div class="mt-3">
+                            @livewire('case-subscribe-form', ['caseId' => $case->id])
+                        </div>
+                    </div>
+                @endif
             </div>
         </section>
 

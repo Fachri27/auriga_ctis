@@ -59,6 +59,10 @@
             class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('artikel.*') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }}">
             Artikels
         </a>
+        <a href="{{ route('subscription.index') }}"
+            class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('subscription.*') ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-700 hover:text-white' }}">
+            Subscriptions
+        </a>
 
         {{-- CHARTS --}}
         <a href="{{ route('charts.dashboard') }}"

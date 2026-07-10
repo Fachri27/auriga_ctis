@@ -35,6 +35,12 @@ return [
         ],
     ],
 
+    'turnstile' => [
+        // defaults = Cloudflare test keys (always pass) so dev works without setup
+        'site_key' => env('TURNSTILE_SITE_KEY', '1x00000000000000000000AA'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY', '1x0000000000000000000000000000000AA'),
+    ],
+
     'google_sheets' => [
         'spreadsheet_id' => env('GOOGLE_SPREADSHEET_ID'),
         'range' => env('GOOGLE_SHEETS_RANGE', 'Sheet1!A1:Z'),
