@@ -304,6 +304,20 @@
     </div>
     @endif
 
+    {{-- ===================== LANGGANAN KASUS TERBARU ===================== --}}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <div class="bg-[#032A36] rounded-sm p-8 sm:p-10 text-center">
+            <h2 class="text-2xl font-black text-white tracking-tight">Berlangganan Kasus Terbaru</h2>
+            <p class="mt-2 text-sm text-gray-300 max-w-xl mx-auto">
+                Masukkan email Anda untuk menerima informasi setiap ada kasus terverifikasi terbaru yang
+                dipublikasikan.
+            </p>
+            <div class="mt-6 max-w-md mx-auto text-left">
+                @livewire('case-subscribe-form')
+            </div>
+        </div>
+    </section>
+
     {{-- ===================== CTA SECTION ===================== --}}
 @endsection
 

@@ -10,7 +10,7 @@ use App\Livewire\Process\{ProcessForm, ProcessTable};
 use App\Livewire\Reports\{ReportDetail, ReportForm, ReportTable};
 use App\Livewire\Status\StatusList;
 use App\Livewire\Tasks\{TaskForm, TaskList, TaskRequirementForm, TaskRequirementList};
-use App\Livewire\{UserForm, UserList};
+use App\Livewire\{SubscriptionList, UserForm, UserList};
 use App\Livewire\Permission\ManagePermission;
 
 Route::get('/', function () {
@@ -119,6 +119,8 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
 
     Route::get('cms/artikels/create/', ArtikelForm::class)->name('artikel.create');
     Route::get('cms/artikels/', ArtikelTable::class)->name('artikel.index');
+
+    Route::get('/cms/subscriptions', SubscriptionList::class)->name('subscription.index');
     Route::get('cms/artikels/{artikelId}/edit/', ArtikelForm::class)->name('artikel.edit');
 
     Route::get('cms/users/', UserList::class)->name('user.index');

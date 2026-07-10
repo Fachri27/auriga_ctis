@@ -125,7 +125,9 @@
 
     {{-- PruneCluster JS --}}
     <script src="https://cdn.jsdelivr.net/npm/prunecluster@2.1.0/dist/PruneCluster.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    {{-- Alpine sudah dibundel di dalam @livewireScripts (Livewire 3) — memuatnya lagi dari
+         CDN membuat dua instance Alpine berjalan bersamaan dan merusak sinkronisasi DOM
+         Livewire (wire:ignore, morph), yang bikin widget Turnstile kehilangan referensinya. --}}
     @stack('scripts')
 
 

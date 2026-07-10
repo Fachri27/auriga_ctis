@@ -3,7 +3,7 @@
 namespace App\Livewire\Cases;
 
 use Illuminate\Support\Facades\{DB, Log};
-use App\Models\{CaseModel, Status};
+use App\Models\{CaseModel, CaseSubscription, Status};
 use App\Services\{CaseActionService, CaseStatusService, ReverseGeocoder};
 use Livewire\{Component, WithFileUploads};
 
@@ -665,6 +665,10 @@ class CaseDetail extends Component
         //     session()->flash('error', 'Status tidak valid.');
         // }
 
+        // simpan status lama SEBELUM update (diambil dari case yang sudah di-join di loadCase)
+        $oldStatusKey = $this->case->status_key ?? null;
+        $oldStatusName = $this->case->status_name ?? $oldStatusKey;
+
         DB::transaction(function () use ($statusKey) {
             // cek permission
             if (! auth()->user()->can('case.update')) {
@@ -694,6 +698,20 @@ class CaseDetail extends Component
                 'updated_at' => now(),
             ]);
         });
+
+        // ✉️ beri tahu subscriber yang mengikuti kasus ini saat status benar-benar berubah
+        if ($oldStatusKey !== $statusKey && $status) {
+            CaseSubscription::notifyStatusUpdate(
+                (object) [
+                    'id'          => $this->case_id,
+                    'case_number' => $this->case->case_number ?? null,
+                    'title'       => $this->case->title ?? null,
+                    'description' => $this->case->description ?? null,
+                ],
+                $oldStatusName ?? '—',
+                $status->name ?? $statusKey,
+            );
+        }
 
         session()->flash('success', 'Status berhasil diperbarui.');
         $this->loadCase(); // reload data
