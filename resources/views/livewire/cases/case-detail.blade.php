@@ -1,413 +1,257 @@
-<div class="bg-gray-100 min-h-screen">
-    <div class="px-4 sm:px-6 lg:mx-10 py-6">
+@php
+    use Illuminate\Support\Str;
 
-        @php
-            $completeness = [
-                'Deskripsi' => !empty($case->description),
-                'Perkembangan' => !empty($case->perkembangan),
-                'Dugaan Permasalahan' => !empty($case->dugaan_permasalahan),
-                'Lesson Learning' => !empty($case->pembelajaran),
-                'Status' => !empty($case->status_narasi),
-                'Bukti' => !empty($case->bukti) && count($case->bukti) > 0,
-                'Pelapor' => !empty($case->pelapor),
-                'Pelaku' => $actors->isNotEmpty(),
-                'Lokasi' => !empty($location['province']),
-            ];
-            $completeCount = collect($completeness)->filter()->count();
-            $totalCount = count($completeness);
-            $completePct = round(($completeCount / $totalCount) * 100);
-            $daysSinceUpdate = $case->updated_at ? now()->diffInDays($case->updated_at) : null;
-            $isStale = $daysSinceUpdate !== null && $daysSinceUpdate >= 30;
-            $docCount = isset($documents) ? count($documents) : 0;
-            $actorCount = $actors->count();
-        @endphp
+    $completeness = [
+        'Deskripsi'           => !empty($case->description),
+        'Perkembangan'        => !empty($case->perkembangan),
+        'Dugaan Permasalahan' => !empty($case->dugaan_permasalahan),
+        'Lesson Learning'     => !empty($case->pembelajaran),
+        'Status'              => !empty($case->status_narasi),
+        'Bukti'               => !empty($case->bukti) && count($case->bukti) > 0,
+        'Pelapor'             => !empty($case->pelapor),
+        'Pelaku'              => $actors->isNotEmpty(),
+        'Lokasi'              => !empty($location['province']),
+    ];
+    $completeCount = collect($completeness)->filter()->count();
+    $completePct   = round(($completeCount / count($completeness)) * 100);
+    $daysSinceUpdate = $case->updated_at ? now()->diffInDays($case->updated_at) : null;
+    $isStale   = $daysSinceUpdate !== null && $daysSinceUpdate >= 30;
+    $docCount  = isset($documents) ? count($documents) : 0;
+    $actorCount = $actors->count();
+    $buktiCount = is_array($case->bukti) ? count($case->bukti) : 0;
 
-        {{-- WARNING: Tidak aktif --}}
+    // Signature: legal lifecycle rail (real ordered process)
+    $legalFlow   = ['open', 'investigation', 'prosecution', 'trial', 'executed', 'closed'];
+    $flowLabels  = ['open' => 'Terbuka', 'investigation' => 'Investigasi', 'prosecution' => 'Penuntutan', 'trial' => 'Persidangan', 'executed' => 'Putusan', 'closed' => 'Ditutup'];
+    $currentIdx  = array_search($case->status_key, $legalFlow);
+@endphp
+
+<div class="min-h-screen bg-slate-50">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 py-6 space-y-4">
+
+        {{-- ===== SLIM WARNINGS ===== --}}
         @if ($isStale)
-            <div
-                class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 text-sm text-red-800">
-                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                </svg>
-                <span><strong>Perhatian:</strong> Tidak ada aktivitas selama <strong>{{ $daysSinceUpdate }}
-                        hari</strong>.
-                    Segera perbarui data atau status kasus.</span>
+            <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-800">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                <span>Tidak ada aktivitas <strong>{{ $daysSinceUpdate }} hari</strong>. Perbarui data atau status kasus.</span>
             </div>
         @endif
-
-        {{-- WARNING: Publik tapi belum lengkap --}}
         @if ($case->is_public && $completePct < 70)
-            <div
-                class="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 mb-4 text-sm text-orange-800">
-                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
-                </svg>
-                <span><strong>Kasus ini sudah dipublikasikan</strong> namun kelengkapan data baru
-                    <strong>{{ $completePct }}%</strong>. Lengkapi data sebelum dilihat publik.</span>
+            <div class="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-xs text-orange-800">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" /></svg>
+                <span>Sudah dipublikasikan, kelengkapan baru <strong>{{ $completePct }}%</strong>. Lengkapi data sebelum dilihat publik.</span>
             </div>
         @endif
 
-        {{-- ================= HEADER ================= --}}
-        <div class="bg-white rounded-xl shadow p-4 sm:p-6 mb-4">
+        {{-- ===== MASTHEAD ===== --}}
+        <header class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            {{-- identity + status --}}
+            <div class="px-5 pt-5 flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="font-mono text-[11px] tracking-widest uppercase text-slate-400">{{ $case->case_number }}</p>
+                    <h1 class="mt-1 text-lg sm:text-xl font-semibold text-slate-900 leading-snug break-words">{!! $case->title !!}</h1>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold
+                        @if ($case->status_key === 'investigation') bg-yellow-100 text-yellow-800
+                        @elseif($case->status_key === 'prosecution') bg-blue-100 text-blue-800
+                        @elseif($case->status_key === 'trial') bg-purple-100 text-purple-800
+                        @elseif($case->status_key === 'executed') bg-orange-100 text-orange-800
+                        @elseif($case->status_key === 'closed') bg-slate-200 text-slate-700
+                        @elseif($case->status_key === 'rejected') bg-red-100 text-red-800
+                        @else bg-slate-100 text-slate-700 @endif">
+                        {{ $case->status_name }}
+                    </span>
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-medium
+                        {{ $case->is_public ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-500' }}">
+                        {{ $case->is_public ? 'Publik' : 'Draft' }}
+                    </span>
+                </div>
+            </div>
 
-            {{-- Mobile: stack, Desktop: side by side --}}
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-
-                {{-- LEFT --}}
-                <div class="flex-1 min-w-0">
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 break-words leading-snug">
-                        {!! $case->title !!}
-                    </h1>
-                    <p class="text-sm text-gray-400 mt-1 mb-3">{{ $case->case_number }}</p>
-
-                    {{-- Badges --}}
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span
-                            class="px-3 py-1 rounded-full text-xs font-medium
-                            @if ($case->status_key === 'investigation') bg-yellow-100 text-yellow-800
-                            @elseif($case->status_key === 'prosecution') bg-blue-100 text-blue-800
-                            @elseif($case->status_key === 'trial') bg-purple-100 text-purple-800
-                            @elseif($case->status_key === 'executed') bg-orange-100 text-orange-800
-                            @elseif($case->status_key === 'closed') bg-gray-200 text-gray-700
-                            @elseif($case->status_key === 'rejected') bg-red-100 text-red-800
-                            @else bg-gray-100 text-gray-700 @endif">
-                            {{ $case->status_name }}
-                        </span>
-
-                        @if ($statusGroup !== 'unknown')
-                            <span
-                                class="px-3 py-1 rounded-full text-xs font-medium
-                            @if ($statusGroup === 'working') bg-yellow-50 text-yellow-900 border border-yellow-300
-                            @elseif($statusGroup === 'decision') bg-blue-50 text-blue-900 border border-blue-300
-                            @elseif($statusGroup === 'final') bg-gray-50 text-gray-900 border border-gray-300
-                            @elseif($statusGroup === 'review') bg-indigo-50 text-indigo-900 border border-indigo-300
-                            @else bg-gray-50 text-gray-700 @endif">
-                                {{ ucfirst($statusGroup) }}
-                            </span>
-                        @endif
-
-                        @if ($case->is_public)
-                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium">
-                                Dipublikasikan
-                            </span>
-                        @else
-                            <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
-                                Tidak Publik
-                            </span>
-                        @endif
+            {{-- SIGNATURE: lifecycle rail --}}
+            <div class="px-5 py-4 mt-4 border-y border-slate-100 bg-slate-50/60">
+                @if ($case->status_key === 'rejected')
+                    <div class="flex items-center gap-2 text-xs text-red-700">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 ring-4 ring-red-100"></span>
+                        <span class="font-semibold tracking-wide uppercase">Kasus Ditolak</span>
+                        <span class="text-red-400">— status akhir, tidak ada lanjutan.</span>
                     </div>
-
-                    {{-- Progress kelengkapan --}}
-                    <div class="mt-4 max-w-xs sm:max-w-sm">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs text-gray-500 font-medium">Kelengkapan Data</span>
-                            <span
-                                class="text-xs font-bold {{ $completePct >= 80 ? 'text-green-600' : ($completePct >= 50 ? 'text-yellow-600' : 'text-red-500') }}">
-                                {{ $completePct }}%
-                            </span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="h-2 rounded-full transition-all duration-500
-                                {{ $completePct >= 80 ? 'bg-green-500' : ($completePct >= 50 ? 'bg-yellow-400' : 'bg-red-400') }}"
-                                style="width: {{ $completePct }}%">
+                @else
+                    <div class="flex items-center">
+                        @foreach ($legalFlow as $i => $key)
+                            @php $done = is_int($currentIdx) && $i < $currentIdx; $current = $i === $currentIdx; @endphp
+                            <div class="flex flex-col items-center gap-1.5 z-10">
+                                <span class="w-2.5 h-2.5 rounded-full ring-4 ring-slate-50
+                                    {{ $current ? 'bg-blue-600 ring-blue-100' : ($done ? 'bg-slate-900' : 'bg-slate-300') }}"></span>
+                                <span class="text-[9px] font-medium tracking-wide hidden sm:block
+                                    {{ $current ? 'text-slate-900' : ($done ? 'text-slate-500' : 'text-slate-300') }}">{{ $flowLabels[$key] }}</span>
                             </div>
-                        </div>
-                    </div>
-
-                    {{-- Meta --}}
-                    <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
-                        <span>Dibuat: <strong
-                                class="text-gray-600">{{ optional($case->created_at)->format('d M Y, H:i') }}</strong></span>
-                        <span>Diperbarui: <strong
-                                class="text-gray-600">{{ optional($case->updated_at)->format('d M Y, H:i') }}</strong></span>
-                        @if ($case->updatedBy ?? false)
-                            <span>Oleh: <strong class="text-gray-600">{{ $case->updatedBy->name }}</strong></span>
-                        @endif
-                    </div>
-                </div>
-
-                {{-- RIGHT: Action buttons — full width on mobile --}}
-                <div
-                    class="flex flex-row sm:flex-col md:flex-row items-stretch sm:items-end gap-2 flex-wrap sm:flex-shrink-0">
-                    @can('case.publish')
-                        <button wire:click="publishCases"
-                            class="flex-1 sm:flex-none px-4 py-2 text-center {{ $case->is_public ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded-lg text-sm font-medium transition-colors">
-                            {{ $case->is_public ? 'Batalkan Publikasi' : 'Publikasikan' }}
-                        </button>
-                    @endcan
-
-                    @can('case.change-status')
-                        <div class="relative flex-1 sm:flex-none" x-data="{ open: false }">
-                            <button @click="open = !open"
-                                class="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors">
-                                Ubah Status ▾
-                            </button>
-                            <div x-show="open" x-cloak @click.away="open = false"
-                                class="absolute right-0 mt-2 w-52 bg-white border rounded-xl shadow-lg z-50 overflow-hidden">
-                                @foreach ($availableStatuses as $name => $label)
-                                    <button wire:click="changeStatus('{{ $name }}')" @click="open = false"
-                                        onclick="return confirm('Ubah status menjadi {{ $label }}?')"
-                                        class="block w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
-                                        {{ $label }}
-                                    </button>
-                                @endforeach
+                            @if (!$loop->last)
+                                <div class="flex-1 h-px mx-1 {{ is_int($currentIdx) && $i < $currentIdx ? 'bg-slate-900' : 'bg-slate-200' }}"></div>
+                            @endif
+                        @endforeach
+                        {{-- completeness, tucked at the end of the rail row --}}
+                        <div class="flex items-center gap-2 pl-4 ml-2 border-l border-slate-200">
+                            <div class="w-20 sm:w-28 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500
+                                    {{ $completePct >= 80 ? 'bg-green-500' : ($completePct >= 50 ? 'bg-yellow-400' : 'bg-red-400') }}"
+                                    style="width: {{ $completePct }}%"></div>
                             </div>
+                            <span class="text-[11px] font-bold tabular-nums {{ $completePct >= 80 ? 'text-green-600' : ($completePct >= 50 ? 'text-yellow-600' : 'text-red-500') }}">{{ $completePct }}%</span>
                         </div>
-                    @endcan
-
-                    @can('case.edit')
-                        <a href="{{ route('admin.cases.edit', $case->id) }}"
-                            class="flex-1 sm:flex-none px-4 py-2 text-center bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition-colors">
-                            Edit
-                        </a>
-                    @endcan
-                </div>
-
+                    </div>
+                @endif
             </div>
-        </div>
 
-        {{-- ===== STATISTIK CEPAT ===== --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400">Dokumen</p>
-                    <p class="text-lg font-bold text-gray-800">{{ $docCount }}</p>
-                </div>
+            {{-- facts strip --}}
+            <div class="px-5 py-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-2.5 text-xs">
+                <div><p class="font-mono text-[9px] tracking-widest uppercase text-slate-400 mb-0.5">Tanggal</p><p class="text-slate-700 truncate">{{ $case->event_date ?? '—' }}</p></div>
+                <div class="col-span-2"><p class="font-mono text-[9px] tracking-widest uppercase text-slate-400 mb-0.5">Lokasi</p><p class="text-slate-700 truncate">{{ implode(', ', array_filter([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])) ?: '—' }}</p></div>
+                <div><p class="font-mono text-[9px] tracking-widest uppercase text-slate-400 mb-0.5">Pelapor</p><p class="text-slate-700 truncate">{{ $case->pelapor ?? '—' }}</p></div>
+                <div><p class="font-mono text-[9px] tracking-widest uppercase text-slate-400 mb-0.5">Terlapor</p><p class="text-slate-700 truncate">{{ $case->terlapor ?? '—' }}</p></div>
+                <div><p class="font-mono text-[9px] tracking-widest uppercase text-slate-400 mb-0.5">Arsip</p><p class="text-slate-700"><span class="tabular-nums">{{ $docCount }}</span> dok · <span class="tabular-nums">{{ $actorCount }}</span> aktor · <span class="tabular-nums">{{ $buktiCount }}</span> bukti</p></div>
             </div>
-            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-                <div
-                    class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400">Aktor</p>
-                    <p class="text-lg font-bold text-gray-800">{{ $actorCount }}</p>
-                </div>
-            </div>
-            <div
-                class="col-span-2 sm:col-span-1 bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 flex items-center gap-3">
-                <div
-                    class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 flex-shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400">Bukti</p>
-                    <p class="text-lg font-bold text-gray-800">{{ is_array($case->bukti) ? count($case->bukti) : 0 }}
-                    </p>
-                </div>
-            </div>
-        </div>
 
-        {{-- INFO / HELP --}}
-        <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-4 mb-4 text-sm text-yellow-900">
-            <strong>Petunjuk singkat:</strong>
-            <ul class="list-disc ml-5 mt-1 space-y-0.5">
-                <li><strong>Ubah Status</strong> — perubahan legal status kasus (hanya tindakan resmi, butuh izin
-                    khusus).
-                </li>
-                <li><strong>Publikasikan</strong> — membuat kasus dapat dilihat publik; <em>tidak</em> mengubah status
-                    hukum.</li>
-                <li><strong>Tugas</strong> — item kerja internal; menyelesaikan tugas tidak mengubah status kasus.</li>
-            </ul>
-        </div>
-
-        {{-- ================= TABS ================= --}}
-        <div class="bg-white rounded-t-xl shadow-sm border-b overflow-x-auto">
-            <div class="flex gap-1 px-4 min-w-max sm:min-w-0">
-                @foreach ([
-        'overview' => 'Ringkasan',
-        'handling' => 'Penanganan',
-        'timeline' => 'Linimasa',
-    ] as $tab => $label)
-                    <button wire:click="setTab('{{ $tab }}')"
-                        class="relative py-4 px-3 text-sm font-medium whitespace-nowrap transition-colors
-                        {{ $activeTab === $tab ? 'text-black border-b-2 border-black' : 'text-gray-400 hover:text-gray-700' }}">
-                        {{ $label }}
+            {{-- actions --}}
+            <div class="px-5 py-3 border-t border-slate-100 flex flex-wrap items-center justify-end gap-2">
+                @can('case.publish')
+                    <button wire:click="publishCases"
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-colors {{ $case->is_public ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }}">
+                        {{ $case->is_public ? 'Batalkan Publikasi' : 'Publikasikan' }}
                     </button>
-                @endforeach
+                @endcan
+                @can('case.change-status')
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-yellow-500 hover:bg-yellow-600 transition-colors inline-flex items-center gap-1">
+                            Ubah Status <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <div x-show="open" x-cloak @click.away="open = false" class="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 overflow-hidden">
+                            @foreach ($availableStatuses as $name => $label)
+                                <button wire:click="changeStatus('{{ $name }}')" @click="open = false"
+                                    onclick="return confirm('Ubah status menjadi {{ $label }}?')"
+                                    class="block w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 {{ $name === $case->status_key ? 'font-semibold text-blue-600' : 'text-slate-700' }}">
+                                    {{ $label }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endcan
+                @can('case.edit')
+                    <a href="{{ route('admin.cases.edit', $case->id) }}" class="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-slate-900 hover:bg-slate-700 transition-colors">Edit</a>
+                @endcan
             </div>
-        </div>
+        </header>
 
-        {{-- ================= CONTENT ================= --}}
-        <div class="bg-white rounded-b-xl shadow-sm p-4 sm:p-6">
+        {{-- ===== TABS ===== --}}
+        <nav class="bg-white border border-slate-200 rounded-xl px-2 flex gap-1 overflow-x-auto">
+            @foreach (['overview' => 'Ringkasan', 'handling' => 'Penanganan', 'timeline' => 'Linimasa'] as $tab => $label)
+                <button wire:click="setTab('{{ $tab }}')"
+                    class="relative py-2.5 px-3 text-xs font-medium whitespace-nowrap transition-colors
+                        {{ $activeTab === $tab ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800' }}">
+                    {{ $label }}
+                    @if ($activeTab === $tab)<span class="absolute inset-x-2 -bottom-px h-0.5 bg-blue-600 rounded-full"></span>@endif
+                </button>
+            @endforeach
+        </nav>
 
-            {{-- ===== OVERVIEW ===== --}}
+        {{-- ===== CONTENT ===== --}}
+        <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+
+            {{-- OVERVIEW --}}
             @if ($activeTab === 'overview')
-
-                {{-- Mobile: stack, Desktop: 2/3 + 1/3 grid --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    {{-- KIRI: Konten utama --}}
-                    <div class="lg:col-span-2 space-y-4">
+                    {{-- LEFT: narrative --}}
+                    <div class="lg:col-span-2 divide-y divide-slate-100">
+                        @php
+                            $desc = method_exists($case, 'getTranslation')
+                                ? ($case->getTranslation('description', 'id', false) ?: $case->getTranslation('description', 'en', false))
+                                : $case->description;
+                            $perkembangan = $case->perkembangan ?? '';
+                            if ($perkembangan && preg_match('/^\[/', $perkembangan)) {
+                                $decoded = json_decode($perkembangan, true);
+                                if (is_array($decoded)) $perkembangan = collect($decoded)->pluck('notes')->filter()->implode("\n");
+                            }
+                            $pembelajaran = method_exists($case, 'getTranslation')
+                                ? ($case->getTranslation('pembelajaran', 'id', false) ?: $case->getTranslation('pembelajaran', 'en', false))
+                                : $case->pembelajaran;
+                            $dugaan = method_exists($case, 'getTranslation')
+                                ? ($case->getTranslation('dugaan_permasalahan', 'id', false) ?: $case->getTranslation('dugaan_permasalahan', 'en', false))
+                                : $case->dugaan_permasalahan;
+                            $statusNarasi = method_exists($case, 'getTranslation')
+                                ? ($case->getTranslation('status_narasi', 'id', false) ?: $case->getTranslation('status_narasi', 'en', false))
+                                : $case->status_narasi;
+                        @endphp
 
-                        {{-- Checklist kelengkapan --}}
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Checklist
-                                Kelengkapan
-                            </h3>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                        @foreach ([
+                            'Kronologi' => $desc,
+                            'Perkembangan' => $perkembangan,
+                            'Dugaan Permasalahan' => $dugaan,
+                            'Lesson Learning' => $pembelajaran,
+                            'Status' => $statusNarasi,
+                        ] as $label => $body)
+                            <section class="py-4 first:pt-0">
+                                <h2 class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-2">{{ $label }}</h2>
+                                @if ($body)
+                                    <div class="prose prose-sm prose-slate max-w-none text-slate-700">{!! $body !!}</div>
+                                @else
+                                    <p class="text-xs text-slate-300 italic">Belum diisi.</p>
+                                @endif
+                            </section>
+                        @endforeach
+                    </div>
+
+                    {{-- RIGHT: ledger --}}
+                    <div class="space-y-4">
+
+                        {{-- kelengkapan chips --}}
+                        <div class="border border-slate-200 rounded-xl p-4">
+                            <h3 class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-3">Kelengkapan</h3>
+                            <div class="flex flex-wrap gap-1.5">
                                 @foreach ($completeness as $field => $filled)
-                                    <div
-                                        class="flex items-center gap-1.5 text-sm {{ $filled ? 'text-green-700' : 'text-red-400' }}">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium
+                                        {{ $filled ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-500' }}">
                                         @if ($filled)
-                                            <svg class="w-4 h-4 flex-shrink-0 text-green-500" fill="none"
-                                                stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 13l4 4L19 7" />
-                                            </svg>
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                         @else
-                                            <svg class="w-4 h-4 flex-shrink-0 text-red-400" fill="none"
-                                                stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                                         @endif
-                                        <span class="font-medium">{{ $field }}</span>
-                                    </div>
+                                        {{ $field }}
+                                    </span>
                                 @endforeach
                             </div>
                         </div>
 
-                        {{-- Description --}}
-                        <section class="bg-white border rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <h2 class="font-bold text-base">Kronologi / Deskripsi</h2>
-                                {{-- @can('case.edit')
-                        <a href="{{ route('admin.cases.edit', $case->id) }}#description"
-                            class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>
-                        @endcan --}}
-                            </div>
-                            @php
-                                if (method_exists($case, 'getTranslation')) {
-                                    $desc = $case->getTranslation('description', 'id', false);
-                                    if (!$desc) {
-                                        $desc = $case->getTranslation('description', 'en', false);
-                                    }
-                                } else {
-                                    $desc = $case->description;
-                                }
-                            @endphp
-                            @if ($desc)
-                                <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $desc !!}
+                        {{-- pihak --}}
+                        <div class="border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+                            <h3 class="text-[10px] font-semibold tracking-widest uppercase text-slate-400">Pihak Terlibat</h3>
+                            <div class="space-y-2">
+                                <div><p class="text-slate-400">Pelapor</p><p class="text-slate-800 break-words">{{ $case->pelapor ?? '—' }}</p></div>
+                                <div><p class="text-slate-400">Terlapor</p><p class="text-slate-800 break-words">{{ $case->terlapor ?? '—' }}</p></div>
+                                <div><p class="text-slate-400">Instansi Terkait</p><p class="text-slate-800 break-words">{{ $case->instansi ?? '—' }}</p></div>
+                                <div>
+                                    <p class="text-slate-400 mb-1">Pelaku</p>
+                                    @if ($actors->isEmpty())
+                                        <p class="text-slate-300 italic">Belum ada pelaku.</p>
+                                    @else
+                                        <ul class="space-y-1">
+                                            @foreach ($actors as $actor)
+                                                <li class="flex items-start gap-1.5"><span class="w-1 h-1 rounded-full bg-slate-400 flex-shrink-0 mt-1.5"></span><span class="text-slate-700 break-words">{{ ucfirst($actor->type) }} — {{ $actor->name }}</span></li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                    @can('case.actor.manage')
+                                        <button class="mt-2 px-2.5 py-1 bg-slate-900 text-white rounded-md text-[10px] font-medium hover:bg-slate-700 transition-colors" x-on:click="$dispatch('open-actor-modal', { caseId: {{ $case->id }} })">+ Tambah Pelaku</button>
+                                    @endcan
                                 </div>
-                            @endif
-                        </section>
-
-                        {{-- Perkembangan --}}
-                        <section class="bg-white border rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <h2 class="font-bold text-base">Perkembangan</h2>
-                                {{-- @can('case.edit')
-                        <a href="{{ route('admin.cases.edit', $case->id) }}#perkembangan"
-                            class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>
-                        @endcan --}}
                             </div>
-                            @php
-                                $perkembangan = $case->perkembangan ?? '';
-                                if ($perkembangan && preg_match('/^\[/', $perkembangan)) {
-                                    $decoded = json_decode($perkembangan, true);
-                                    if (is_array($decoded)) {
-                                        $perkembangan = collect($decoded)->pluck('notes')->filter()->implode("\n");
-                                    }
-                                }
-                            @endphp
-                            @if ($perkembangan)
-                                <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $perkembangan !!}
-                                </div>
-                            @endif
-                        </section>
+                        </div>
 
-                        {{-- Pembelajaran --}}
-                        <section class="bg-white border rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <h2 class="font-bold text-base">Lesson Learning</h2>
-                                {{-- @can('case.edit')
-                        <a href="{{ route('admin.cases.edit', $case->id) }}#pembelajaran"
-                            class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>
-                        @endcan --}}
-                            </div>
-                            @php
-                                if (method_exists($case, 'getTranslation')) {
-                                    $pembelajaran = $case->getTranslation('pembelajaran', 'id', false);
-                                    if (!$pembelajaran) {
-                                        $pembelajaran = $case->getTranslation('pembelajaran', 'en', false);
-                                    }
-                                } else {
-                                    $pembelajaran = $case->pembelajaran;
-                                }
-                            @endphp
-                            @if ($pembelajaran)
-                                <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $pembelajaran !!}
-                                </div>
-                            @endif
-                        </section>
-
-                        <section class="bg-white border rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <h2 class="font-bold text-base">Dugaan Permasalahan</h2>
-                                {{-- @can('case.edit')
-                        <a href="{{ route('admin.cases.edit', $case->id) }}#pembelajaran"
-                            class="text-xs text-blue-600 hover:underline flex-shrink-0 ml-2">✏️ Edit</a>
-                        @endcan --}}
-                            </div>
-                            @php
-                                if (method_exists($case, 'getTranslation')) {
-                                    $dugaan = $case->getTranslation('dugaan_permasalahan', 'id', false);
-                                    if (!$dugaan) {
-                                        $dugaan = $case->getTranslation('dugaan_permasalahan', 'en', false);
-                                    }
-                                } else {
-                                    $dugaan = $case->dugaan_permasalahan;
-                                }
-                            @endphp
-                            @if ($dugaan)
-                                <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $dugaan !!}
-                                </div>
-                            @endif
-                        </section>
-
-
-                        {{-- status narasi --}}
-                        <section class="bg-white border rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-2">
-                                <h2 class="font-bold text-base">Status</h2>
-                            </div>
-                            @php
-                                if (method_exists($case, 'getTranslation')) {
-                                    $statusNarasi = $case->getTranslation('status_narasi', 'id', false);
-                                    if (!$statusNarasi) {
-                                        $statusNarasi = $case->getTranslation('status_narasi', 'en', false);
-                                    }
-                                } else {
-                                    $statusNarasi = $case->status_narasi;
-                                }
-                            @endphp
-                            @if ($statusNarasi)
-                                <div class="prose prose-sm prose-gray max-w-none text-gray-700">{!! $statusNarasi !!}
-                                </div>
-                            @endif
-                        </section>
-
-
-
-
-                        {{-- Bukti / Evidence --}}
-                        <div class="bg-white border rounded-xl p-4">
-                            <h2 class="font-semibold text-sm text-gray-500 uppercase tracking-wide mb-3">
-                                Bukti / Evidence
-                                @if ($case->bukti && count($case->bukti))
-                                    <span
-                                        class="ml-2 text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ count($case->bukti) }}</span>
-                                @endif
-                            </h2>
-                            @if ($case->bukti && count($case->bukti))
+                        {{-- bukti --}}
+                        <div class="border border-slate-200 rounded-xl p-4">
+                            <h3 class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-3">Bukti <span class="ml-1 text-slate-300 tabular-nums">{{ $buktiCount }}</span></h3>
+                            @if ($buktiCount)
                                 <div class="flex flex-wrap gap-2">
                                     @foreach ($case->bukti as $i => $ev)
                                         @php
@@ -416,230 +260,111 @@
                                             $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                                             $isPdf = $ext === 'pdf';
                                             $label = $isImage ? 'Gambar ' . ($i + 1) : strtoupper($ext) . ' File';
+                                            $icon = $isImage ? '🖼️' : ($isPdf ? '📄' : '📎');
                                         @endphp
                                         @if ($isImage)
-                                            <a href="{{ asset($path) }}" target="_blank"
-                                                class="group relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0"
-                                                title="{{ $label }}">
-                                                <img src="{{ asset($path) }}"
-                                                    class="w-full h-full object-cover group-hover:scale-110 transition duration-200">
-                                                <div
-                                                    class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition">
-                                                </div>
+                                            <a href="{{ asset($path) }}" target="_blank" class="group relative w-12 h-12 rounded-lg overflow-hidden border border-slate-200" title="{{ $label }}">
+                                                <img src="{{ asset($path) }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-200">
                                             </a>
                                         @else
-                                            <a href="{{ asset($path) }}" target="{{ $isPdf ? '_blank' : '_self' }}"
-                                                {{ !$isPdf ? 'download' : '' }}
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 transition text-sm text-gray-700 flex-shrink-0">
-                                                <span>{{ $label }}</span>
+                                            <a href="{{ asset($path) }}" target="{{ $isPdf ? '_blank' : '_self' }}" {{ !$isPdf ? 'download' : '' }} class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition text-[11px] text-slate-700">
+                                                <span>{{ $icon }}</span><span>{{ $label }}</span>
                                             </a>
                                         @endif
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-sm text-gray-400 italic">Tidak ada bukti yang dilampirkan.</p>
+                                <p class="text-xs text-slate-300 italic">Tidak ada bukti dilampirkan.</p>
                             @endif
                         </div>
 
-                    </div>
-
-                    {{-- KANAN: Sidebar — full width on mobile, 1/3 on lg --}}
-                    <div class="space-y-4">
-
-                        {{-- Detail Kasus --}}
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3 text-sm">
-                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Detail Kasus</h3>
-                            <div>
-                                <p class="text-gray-400 text-xs">Tanggal Kejadian</p>
-                                <p class="font-medium text-gray-800">{{ $case->event_date ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-xs">Lokasi</p>
-                                @if ($location['village'] || $location['district'] || $location['province'])
-                                    <p class="text-gray-800 leading-snug break-words">
-                                        {{ implode(', ', array_filter([$location['village'], $location['district'], $location['province']])) }}
-                                    </p>
-                                @else
-                                    <p class="text-gray-400 italic">Lokasi tidak ditemukan</p>
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- Pihak Terlibat --}}
-                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3 text-sm">
-                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Pihak Terlibat
-                            </h3>
-                            <div>
-                                <p class="text-gray-400 text-xs">Pelapor</p>
-                                <p class="font-medium text-gray-800 break-words">{{ $case->pelapor ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-xs">Terlapor</p>
-                                <p class="font-medium text-gray-800 break-words">{{ $case->terlapor ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-xs">Instansi Terkait</p>
-                                <p class="font-medium text-gray-800 break-words">{{ $case->instansi ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-400 text-xs mb-1">Pelaku</p>
-                                @if ($actors->isEmpty())
-                                    <p class="text-gray-400 italic text-xs">Belum ada pelaku</p>
-                                @else
-                                    <ul class="space-y-1">
-                                        @foreach ($actors as $actor)
-                                            <li class="flex items-start gap-1.5">
-                                                <span
-                                                    class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0 mt-1.5"></span>
-                                                <span class="text-gray-700 break-words">{{ ucfirst($actor->type) }} —
-                                                    {{ $actor->name }}</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                                @can('case.actor.manage')
-                                    <button
-                                        class="mt-2 px-3 py-1 bg-gray-900 text-white rounded-lg text-xs hover:bg-gray-700 transition-colors"
-                                        x-on:click="$dispatch('open-actor-modal', { caseId: {{ $case->id }} })">
-                                        + Tambah Pelaku
-                                    </button>
-                                @endcan
-                            </div>
-                        </div>
-
-                        {{-- Internal Notes --}}
-                        <div class="bg-amber-50 rounded-xl p-4 border border-amber-100 text-sm">
-                            <h3 class="text-xs font-semibold text-amber-700 uppercase tracking-widest mb-2">Catatan
-                                Internal
-                            </h3>
+                        {{-- catatan internal --}}
+                        <div class="border border-amber-200 bg-amber-50/60 rounded-xl p-4 text-xs">
+                            <h3 class="text-[10px] font-semibold tracking-widest uppercase text-amber-700 mb-2">Catatan Internal</h3>
                             @if ($case->internal_notes ?? false)
-                                <p class="text-gray-700 text-sm leading-relaxed break-words">
-                                    {{ $case->internal_notes }}</p>
+                                <p class="text-slate-700 leading-relaxed break-words">{{ $case->internal_notes }}</p>
                             @else
-                                <p class="text-amber-600 italic text-xs">Belum ada catatan internal.</p>
+                                <p class="text-amber-600 italic">Belum ada catatan.</p>
                             @endif
                             @can('case.edit')
-                                <button class="mt-2 text-xs text-amber-700 underline hover:text-amber-900"
-                                    x-on:click="$dispatch('open-notes-modal', { caseId: {{ $case->id }} })">
-                                    + Tambah / Edit Catatan
-                                </button>
+                                <button class="mt-2 text-[10px] text-amber-700 underline hover:text-amber-900" x-on:click="$dispatch('open-notes-modal', { caseId: {{ $case->id }} })">+ Tambah / Edit Catatan</button>
                             @endcan
                         </div>
-
                     </div>
                 </div>
             @endif
 
-            {{-- ===== HANDLING ===== --}}
+            {{-- HANDLING --}}
             @if ($activeTab === 'handling')
-                <div class="space-y-6">
-
+                <div class="space-y-5">
                     @can('case.task.create')
-                        <section>
-                            <livewire:cases.case-actions :case-id="$case->id" />
-                        </section>
+                        <section><livewire:cases.case-actions :case-id="$case->id" /></section>
                     @endcan
-
                     <section>
-                        <h2 class="font-semibold text-lg mb-4">Sumber & Diskusi</h2>
-
-                        {{-- Mobile: stack, Desktop: side by side --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                            {{-- Dokumen --}}
+                        <h2 class="text-[10px] font-semibold tracking-widest uppercase text-slate-400 mb-3">Sumber & Diskusi</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <div class="flex items-center justify-between mb-3">
-                                    <h3 class="font-medium text-sm text-gray-700">
-                                        Dokumen
-                                        <span
-                                            class="ml-1 bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">{{ $docCount }}</span>
-                                    </h3>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-xs font-medium text-slate-700">Dokumen <span class="ml-1 text-slate-400 tabular-nums">{{ $docCount }}</span></h3>
                                     @can('case.document.upload')
-                                        <button
-                                            class="px-3 py-1 bg-black text-white rounded-lg text-xs hover:bg-gray-800 transition-colors"
-                                            x-on:click="$dispatch('open-upload-document-modal', { caseId: {{ $case->id }} })">
-                                            + Unggah
-                                        </button>
+                                        <button class="px-2.5 py-1 bg-slate-900 text-white rounded-md text-[10px] font-medium hover:bg-slate-700 transition-colors" x-on:click="$dispatch('open-upload-document-modal', { caseId: {{ $case->id }} })">+ Unggah</button>
                                     @endcan
                                 </div>
                                 <div class="space-y-2">
-                                    @forelse($documents as $doc)
-                                        <div
-                                            class="p-3 border rounded-xl bg-white shadow-sm flex items-center justify-between gap-3">
+                                    @forelse ($documents as $doc)
+                                        <div class="p-2.5 border border-slate-200 rounded-lg flex items-center justify-between gap-3">
                                             <div class="min-w-0">
-                                                <p class="font-medium text-sm truncate">{{ $doc->title ?? 'Dokumen' }}
-                                                </p>
-                                                <p class="text-xs text-gray-400">{{ $doc->mime }}</p>
+                                                <p class="text-xs font-medium truncate">{{ $doc->title ?? 'Dokumen' }}</p>
+                                                <p class="text-[10px] text-slate-400">{{ $doc->mime }}</p>
                                             </div>
                                             <div class="flex gap-2 flex-shrink-0">
                                                 @can('case.document.view')
-                                                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank"
-                                                        class="text-blue-600 text-xs hover:underline">Buka</a>
+                                                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-[11px] text-blue-600 hover:underline">Buka</a>
                                                 @endcan
-                                                <button class="text-xs text-gray-500 hover:underline"
-                                                    wire:click="$dispatch('open-edit-document-modal', { docId: {{ $doc->id }} })">Edit</button>
+                                                <button class="text-[11px] text-slate-500 hover:underline" wire:click="$dispatch('open-edit-document-modal', { docId: {{ $doc->id }} })">Edit</button>
                                             </div>
                                         </div>
                                     @empty
-                                        <p class="text-sm text-gray-400 italic">Belum ada dokumen.</p>
+                                        <p class="text-xs text-slate-300 italic">Belum ada dokumen.</p>
                                     @endforelse
                                 </div>
                             </div>
-
-                            {{-- Diskusi --}}
                             <div>
-                                <h3 class="font-medium text-sm text-gray-700 mb-3">Diskusi Tim</h3>
+                                <h3 class="text-xs font-medium text-slate-700 mb-2">Diskusi Tim</h3>
                                 @livewire('cases.case-discussion', ['caseId' => $case->id])
                             </div>
-
                         </div>
                     </section>
                 </div>
             @endif
 
-            {{-- ===== TIMELINE ===== --}}
+            {{-- TIMELINE --}}
             @if ($activeTab === 'timeline')
                 <div class="space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
-                        <h2 class="font-semibold text-base">Log Aktivitas & Linimasa</h2>
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-[10px] font-semibold tracking-widest uppercase text-slate-400">Log Aktivitas & Linimasa</h2>
                         @can('case.timeline.add')
-                            <button
-                                class="w-full sm:w-auto px-4 py-2 bg-black text-white rounded-lg text-sm hover:bg-gray-800 transition-colors text-center"
-                                x-on:click="$dispatch('open-upload-timeline-modal', { caseId: {{ $case->id }} })">
-                                + Tambah Timeline
-                            </button>
+                            <button class="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-700 transition-colors" x-on:click="$dispatch('open-upload-timeline-modal', { caseId: {{ $case->id }} })">+ Tambah Timeline</button>
                         @endcan
                     </div>
-
-                    <div class="border-l-2 border-gray-200 pl-4 sm:pl-5 space-y-4">
-                        @forelse($timelines as $log)
+                    <div class="border-l-2 border-slate-200 pl-4 sm:pl-5 space-y-4">
+                        @forelse ($timelines as $log)
                             <div class="relative">
-                                <span
-                                    class="absolute -left-[19px] sm:-left-[23px] top-1.5 w-3 h-3 rounded-full bg-gray-400 border-2 border-white ring-2 ring-gray-200"></span>
-                                <div class="bg-gray-50 border border-gray-100 rounded-xl p-3 sm:p-4">
-                                    <p class="text-sm text-gray-800 leading-relaxed break-words">{{ $log->notes }}
-                                    </p>
-                                    <div
-                                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mt-2">
-                                        <p class="text-xs text-gray-400">
-                                            {{ \Carbon\Carbon::parse($log->created_at)->format('d M Y,
-                                                                                                                                                                                                                                                                                                                                                                                                H:i') }}
-                                        </p>
-                                        <button
-                                            class="text-xs text-gray-400 hover:text-gray-700 hover:underline transition-colors self-start sm:self-auto"
-                                            wire:click="$dispatch('open-edit-timeline-modal', { timelineId: {{ $log->id }} })">
-                                            Edit
-                                        </button>
+                                <span class="absolute -left-[19px] sm:-left-[23px] top-1.5 w-2.5 h-2.5 rounded-full bg-slate-400 border-2 border-white ring-2 ring-slate-200"></span>
+                                <div class="bg-slate-50 border border-slate-100 rounded-lg p-3">
+                                    <p class="text-sm text-slate-800 leading-relaxed break-words">{{ $log->notes }}</p>
+                                    <div class="flex items-center justify-between gap-1 mt-2">
+                                        <p class="text-[10px] font-mono text-slate-400">{{ \Carbon\Carbon::parse($log->created_at)->format('d M Y, H:i') }}</p>
+                                        <button class="text-[10px] text-slate-400 hover:text-slate-700 hover:underline" wire:click="$dispatch('open-edit-timeline-modal', { timelineId: {{ $log->id }} })">Edit</button>
                                     </div>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-sm text-gray-400 italic pl-2">Belum ada entri linimasa.</p>
+                            <p class="text-xs text-slate-300 italic pl-2">Belum ada entri linimasa.</p>
                         @endforelse
                     </div>
                 </div>
             @endif
-
         </div>
     </div>
 
@@ -651,15 +376,8 @@
 
     {{-- SUCCESS TOAST --}}
     @if (session('success'))
-        <div x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-4" x-init="setTimeout(() => show = false, 3000)"
-            class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-green-600 text-white px-4 sm:px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 max-w-xs sm:max-w-sm">
-            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+        <div x-data="{ show: true }" x-show="show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" x-init="setTimeout(() => show = false, 3000)" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-green-600 text-white px-4 py-2.5 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 max-w-xs">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
             <span class="break-words">{{ session('success') }}</span>
         </div>
     @endif
