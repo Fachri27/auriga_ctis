@@ -160,8 +160,8 @@
             <div class="flex flex-col lg:flex-row" style="height: 600px;">
 
                 {{-- Sidebar list --}}
-                <div class="w-full lg:w-72 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col overflow-hidden"
-                     style="height: 200px; min-height: 200px;" id="sidebarWrapper">
+                <div class="w-full lg:w-72 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col overflow-hidden h-[200px] lg:h-auto"
+                     id="sidebarWrapper">
                     <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0">
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Kasus di Tampilan Saat Ini</p>
                         <p class="text-xs text-gray-400 mt-0.5">Klik untuk zoom ke lokasi</p>
