@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = 'Artikel & Berita Lingkungan — Auriga CTIS';
+    $pageTitle = 'Artikel & Berita Lingkungan — greendefender';
     $pageDescription = 'Baca artikel dan berita terbaru seputar penegakan hukum lingkungan hidup di Indonesia.';
 @endphp
 

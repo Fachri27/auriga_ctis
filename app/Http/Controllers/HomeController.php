@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{Cache, DB};
 use Illuminate\Http\Request;
 use App\Models\{AboutPage, Artikel, CaseModel, Category, ChartDataset, RawCase};
+use App\Services\ReverseGeocoder;
 
 class HomeController extends Controller
 {
@@ -138,10 +139,26 @@ class HomeController extends Controller
                 $q->where('key', 'closed');
             })->count();
 
-        $provinceCovered = CaseModel::where('is_public', true)
-            ->whereNotNull('province_id')
-            ->distinct('province_id')
-            ->count('province_id');
+        // Kabupaten/Kota terdampak: diturunkan dari koordinat tiap case publik
+        // via ReverseGeocoder (ter-cache 30 hari per koordinat). Dibungkus cache
+        // agregat 1 jam agar tidak me-loop setiap load homepage.
+        $regencyCovered = Cache::remember('home_regency_covered', now()->addHour(), function () {
+            $geo = app(ReverseGeocoder::class);
+            $regencies = [];
+
+            foreach (CaseModel::where('is_public', true)
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->get(['latitude', 'longitude']) as $c) {
+                $loc = $geo->getLocation((float) $c->latitude, (float) $c->longitude);
+                $kab = $loc['district'] ?? null;
+                if ($kab !== null && $kab !== '') {
+                    $regencies[$kab] = true;
+                }
+            }
+
+            return count($regencies);
+        });
 
 
         // =========================================
@@ -425,7 +442,7 @@ class HomeController extends Controller
 
         $viewData = compact(
             'cases', 'case', 'casesByCategory', 'status', 'casesPerMonth',
-            'totalCases', 'activeCases', 'completedCases', 'provinceCovered',
+            'totalCases', 'activeCases', 'completedCases', 'regencyCovered',
             'artikels', 'kasus', 'categories',
             'publicCharts', 'publicYears', 'tableData', 'kpiData',
             'filterOptions', 'filterTahun', 'filterKlasifikasi', 'filterPulau',

@@ -67,9 +67,17 @@ class CaseList extends Component
             $query->whereHas('status', fn ($q) => $q->where('key', 'rejected'));
         }
 
-        // Apply search
-        $query->when($this->search, fn ($q) => $q->where('case_number', 'like', "%{$this->search}%")
-        );
+        // Apply search — cocokkan nomor kasus, judul (lewat terjemahan),
+        // pelapor, maupun terlapor. Placeholder form menjanjikan "nomor kasus atau judul".
+        $query->when($this->search, function ($q) {
+            $s = '%' . $this->search . '%';
+            $q->where(function ($q) use ($s) {
+                $q->where('case_number', 'like', $s)
+                    ->orWhere('pelapor', 'like', $s)
+                    ->orWhere('terlapor', 'like', $s)
+                    ->orWhereHas('translations', fn ($q) => $q->where('title', 'like', $s));
+            });
+        });
 
         $cases = $query->orderByDesc('id')->paginate(10);
 

@@ -12,5 +12,47 @@ Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /verify-email
 
-# Sitemap
-Sitemap: /sitemap.xml
+# --- Generative AI crawlers: explicitly ALLOW public content (GEO) ---
+# OpenAI (ChatGPT, SearchGPT)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+# Google AI / Gemini (AI Overviews)
+User-agent: Google-Extended
+Allow: /
+
+# Common Crawl / Cohere / others
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# Reiterate blocks for AI crawlers (do not crawl admin/internal)
+User-agent: GPTBot
+Disallow: /cms/
+Disallow: /dashboard
+Disallow: /verification/
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Sitemap (absolute URL — sesuaikan domain produksi bila perlu)
+Sitemap: https://greendefender.id/sitemap.xml

@@ -1,8 +1,8 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = 'Dashboard Kasus Lingkungan — Auriga CTIS';
-    $pageDescription = 'Jelajahi semua kasus hukum lingkungan hidup di Indonesia. Filter berdasarkan provinsi, status, dan kategori. Data transparan dan terverifikasi.';
+    $pageTitle = 'Dashboard Kasus Lingkungan — greendefender';
+    $pageDescription = 'Jelajahi semua kasus hukum lingkungan hidup di Indonesia. Filter berdasarkan status dan kategori. Data transparan dan terverifikasi.';
 @endphp
 
 @section('content')
@@ -49,13 +49,13 @@
                 <p class="text-xs text-[#6b7268] mt-1">Proses hukum sudah final</p>
             </div>
 
-            {{-- Provinsi --}}
+            {{-- Kabupaten/Kota --}}
             <div class="bg-white rounded-sm border border-[#E2E6DA] p-5 col-span-2 lg:col-span-1">
-                <p class="text-[10px] uppercase tracking-widest text-[#6b7268] font-data">Provinsi Terdampak</p>
+                <p class="text-[10px] uppercase tracking-widest text-[#6b7268] font-data">Kabupaten Terdampak</p>
                 <p class="mt-2 text-2xl sm:text-3xl font-bold text-[#0B1E07] font-data">
-                    {{ $provinceCount }}
+                    {{ $regencyCount }}
                 </p>
-                <p class="text-xs text-[#6b7268] mt-1">Dari 38 provinsi di Indonesia</p>
+                <p class="text-xs text-[#6b7268] mt-1">Dari 514 kabupaten/kota di Indonesia</p>
             </div>
 
         </div>
@@ -79,7 +79,7 @@
                 <select id="filterStatus"
                     class="px-3 py-2.5 text-sm border border-[#E2E6DA] rounded-sm focus:outline-none focus:border-[#9BDB4D] focus:ring-1 focus:ring-[#9BDB4D] bg-white text-[#0B1E07] transition-colors">
                     <option value="">Semua Status</option>
-                    @foreach($cases->pluck('status')->filter()->unique(function ($s) { return $s['name'] ?? ''; }) as $s)
+                    @foreach($statusOptions as $s)
                     <option value="{{ $s['name'] ?? '' }}">{{ $s['name'] ?? '' }}</option>
                     @endforeach
                 </select>
@@ -145,10 +145,12 @@
                     <div class="absolute bottom-4 left-4 z-[1000] bg-white rounded-sm border border-[#E2E6DA] p-3 text-xs">
                         <p class="font-data text-[10px] uppercase tracking-widest text-[#6b7268] mb-2">Legenda Status</p>
                         <div class="space-y-1.5">
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#9BDB4D] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Aktif / Investigasi</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#9BDB4D] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Dalam Proses</span></div>
                             <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#2F6C14] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Persidangan</span></div>
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#6b7268] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Selesai / Divonis</span></div>
-                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#E2E6DA] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Ditutup / Lainnya</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#1f4d0a] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Vonis &amp; Putusan Akhir</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#6b7268] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Ditutup</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#b91c1c] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Ditolak</span></div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#d97706] flex-shrink-0"></span><span class="text-[#0B1E07] font-data">Dikonversi</span></div>
                         </div>
                     </div>
                     <div id="map" class="w-full h-full"></div>
@@ -224,15 +226,19 @@ document.addEventListener('DOMContentLoaded', function () {
     let mapMarkers = [];
     let currentView = 'map';
 
-    // Status color mapping
+    // Status color mapping — mengikuti lifecycle bar di case-detail:
+    // lifecycle (hijau) lalu terminal: closed=abu, rejected=merah, converted=amber.
     function getStatusColor(statusKey) {
-        const active  = ['investigation','penyelidikan','penyidikan','prosecution','open','verified'];
-        const trial   = ['trial'];
-        const done    = ['executed','completed','vonis','Berkekuatan hukum tetap'];
-        if (active.includes(statusKey))  return '#9BDB4D'; // leaf
-        if (trial.includes(statusKey))   return '#2F6C14'; // leaf-deep
-        if (done.includes(statusKey))    return '#6b7268'; // muted
-        return '#E2E6DA'; // hairline
+        const proses = ['open','verified','published','penyelidikan','investigation','penyidikan','prosecution'];
+        const trial  = ['trial'];
+        const vonis  = ['vonis','berkekuatan-hukum-tetap','Berkekuatan hukum tetap','executed','completed'];
+        if (proses.includes(statusKey))        return '#9BDB4D'; // leaf — Dalam Proses
+        if (trial.includes(statusKey))         return '#2F6C14'; // leaf-deep — Persidangan
+        if (vonis.includes(statusKey))         return '#1f4d0a'; // deep green — Vonis & Putusan Akhir
+        if (statusKey === 'closed')            return '#6b7268'; // muted — Ditutup
+        if (statusKey === 'rejected')          return '#b91c1c'; // red — Ditolak
+        if (statusKey === 'converted')         return '#d97706'; // amber — Dikonversi
+        return '#6b7268'; // muted — unknown
     }
 
     function getStatusColorHex(statusKey) {
@@ -306,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </span>
                     </div>
                     ${c.event_date ? `<div style="font-size:11px;color:#6b7268;margin-bottom:8px">${escapeHtml(c.event_date)}</div>` : ''}
-                    ${c.province ? `<div style="font-size:11px;color:#6b7268;margin-bottom:8px">${escapeHtml(c.province)}</div>` : ''}
+                    ${locText(c) ? `<div style="font-size:11px;color:#6b7268;margin-bottom:8px">${escapeHtml(locText(c))}</div>` : ''}
                     <a href="${detailUrl}" style="display:inline-block;margin-top:4px;padding:5px 12px;background:#0B1E07;color:#fff;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">
                         Lihat Detail →
                     </a>
@@ -338,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="flex items-center gap-1.5 mt-1.5">
                     <span style="background:${color}" class="w-2 h-2 rounded-full flex-shrink-0"></span>
                     <span class="text-[#6b7268] font-data">${escapeHtml(c.status?.name ?? '-')}</span>
-                    ${c.province ? `<span class="text-[#E2E6DA]">·</span><span class="text-[#6b7268] truncate">${escapeHtml(c.province)}</span>` : ''}
+                    ${locText(c) ? `<span class="text-[#E2E6DA]">·</span><span class="text-[#6b7268] truncate">${escapeHtml(locText(c))}</span>` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -373,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         ${escapeHtml(c.status?.name ?? '-')}
                     </span>
                 </td>
-                <td class="px-5 py-3 text-xs text-[#6b7268] whitespace-nowrap">${escapeHtml(c.province ?? '-')}</td>
+                <td class="px-5 py-3 text-xs text-[#6b7268] whitespace-nowrap">${escapeHtml(locText(c) || '-')}</td>
                 <td class="px-5 py-3 text-xs text-[#6b7268] whitespace-nowrap font-data">${escapeHtml(c.event_date ?? '-')}</td>
                 <td class="px-5 py-3 text-right">
                     <a href="${detailUrl}" class="text-xs text-[#0B1E07] hover:text-[#9BDB4D] font-medium whitespace-nowrap transition-colors">Lihat →</a>
@@ -397,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="flex items-center gap-3 mt-2 text-xs text-[#6b7268] font-data">
                     <span>${escapeHtml(c.category?.name ?? '-')}</span>
-                    ${c.province ? `<span>${escapeHtml(c.province)}</span>` : ''}
+                    ${locText(c) ? `<span>${escapeHtml(locText(c))}</span>` : ''}
                     ${c.event_date ? `<span>${escapeHtml(c.event_date)}</span>` : ''}
                 </div>
                 <a href="${detailUrl}" class="inline-block mt-2 text-xs text-[#0B1E07] hover:text-[#9BDB4D] font-medium transition-colors">Lihat Detail →</a>
@@ -417,6 +423,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const matchSearch = !search ||
                 (c.case_number ?? '').toLowerCase().includes(search) ||
                 (c.title ?? '').toLowerCase().includes(search) ||
+                (c.regency ?? '').toLowerCase().includes(search) ||
+                (c.village ?? '').toLowerCase().includes(search) ||
                 (c.province ?? '').toLowerCase().includes(search);
             const matchStatus   = !status   || (c.status?.name ?? '') === status;
             const matchCategory = !category || (c.category?.name ?? '') === category;
@@ -478,6 +486,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function escapeHtml(text) {
         const map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' };
         return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Gabungan lokasi: desa, kabupaten/kota, provinsi (yang tidak null).
+    function locText(c) {
+        return [c.village, c.regency, c.province].filter(Boolean).join(', ');
     }
 
     // ========================

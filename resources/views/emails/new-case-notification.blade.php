@@ -273,7 +273,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <div class="org">Auriga CTIS</div>
+            <div class="org">greendefender</div>
             <div class="org-sub">Case Tracking Information System</div>
             <div class="fr"></div>
             <p>

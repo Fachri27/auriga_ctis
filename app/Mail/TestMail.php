@@ -15,7 +15,7 @@ class TestMail extends Mailable
     public function build(): self
     {
         return $this
-            ->subject('Test Email - Auriga CTIS')
+            ->subject('Test Email - greendefender')
             ->view('emails.test-mail');
     }
 }

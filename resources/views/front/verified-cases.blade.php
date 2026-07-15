@@ -1,7 +1,7 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = 'Kasus Terverifikasi — Auriga CTIS';
+    $pageTitle = 'Kasus Terverifikasi — greendefender';
     $pageDescription = 'Daftar kasus hukum lingkungan yang telah diverifikasi dan dipublikasikan. Lacak perkembangan dari penyelidikan hingga putusan pengadilan.';
 @endphp
 

@@ -29,17 +29,18 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = auth()->user();
-        $role = $user->role ?? null;
 
-        // Redirect based on role
-        if (in_array($role, ['admin', 'cso'])) {
-            // Internal users go to internal dashboard
-            // Use intended() to redirect back to originally requested internal route if available
+        // Redirect based on role. Sumber kebenaran role adalah Spatie Permission
+        // (hasRole), sama dengan middleware InternalAccess — kolom users.role bisa
+        // tidak sinkron sehingga admin/cso salah terdeteksi sebagai publik.
+        if ($user->hasRole(['admin', 'cso'])) {
+            // Internal users go to internal dashboard.
+            // Use intended() to redirect back to originally requested internal route if available.
             return redirect()->intended(route('dashboard', absolute: false));
-        } else {
-            // Public users go to public homepage
-            return redirect('/');
         }
+
+        // Public users go to public homepage
+        return redirect('/');
     }
 
     /**

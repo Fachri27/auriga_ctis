@@ -1,8 +1,8 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = 'Tentang Kami — Auriga CTIS';
-    $pageDescription = 'Auriga CTIS adalah platform transparansi kasus hukum lingkungan hidup di Indonesia. Pelajari misi dan komitmen kami untuk penegakan hukum lingkungan.';
+    $pageTitle = 'Tentang Kami — greendefender';
+    $pageDescription = 'greendefender adalah platform transparansi kasus hukum lingkungan hidup di Indonesia. Pelajari misi dan komitmen kami untuk penegakan hukum lingkungan.';
 @endphp
 
 @section('content')
@@ -30,7 +30,7 @@
             <p class="font-data uppercase tracking-[0.2em] text-xs text-[#9BDB4D] mb-4">{{ app()->getLocale() === 'id' ? 'Tentang Platform' : 'About the Platform' }}</p>
             <h1 class="font-display text-3xl md:text-5xl lg:text-6xl font-semibold">{{ __('messages.about') }}</h1>
             <p class="mt-5 max-w-2xl mx-auto text-sm md:text-base text-white/80">
-                {{ app()->getLocale() === 'id' ? 'Auriga CTIS menghadirkan transparansi data kasus hukum lingkungan hidup untuk memperkuat akuntabilitas dan penegakan hukum di Indonesia.' : 'Auriga CTIS brings transparency to environmental law cases to strengthen accountability and enforcement in Indonesia.' }}
+                {{ app()->getLocale() === 'id' ? 'greendefender menghadirkan transparansi data kasus hukum lingkungan hidup untuk memperkuat akuntabilitas dan penegakan hukum di Indonesia.' : 'greendefender brings transparency to environmental law cases to strengthen accountability and enforcement in Indonesia.' }}
             </p>
         </div>
     </div>

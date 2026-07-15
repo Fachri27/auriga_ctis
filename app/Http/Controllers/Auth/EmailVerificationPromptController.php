@@ -15,12 +15,14 @@ class EmailVerificationPromptController extends Controller
     public function __invoke(Request $request): RedirectResponse|View
     {
         if ($request->user()->hasVerifiedEmail()) {
-            $role = $request->user()->role ?? 'public';
+            $user = $request->user();
 
+            // Sumber kebenaran role: Spatie hasRole (sama dengan middleware
+            // InternalAccess), bukan kolom users.role yang bisa tidak sinkron.
             // dashboard admin (route 'dashboard') berada di luar group {locale},
             // jadi tidak butuh parameter locale. Sedangkan 'dashboard-user' ada
             // di dalam group {locale} → wajib sertakan locale.
-            if (in_array($role, ['admin', 'cso'])) {
+            if ($user->hasRole(['admin', 'cso'])) {
                 return redirect()->route('dashboard');
             }
 

@@ -5,7 +5,7 @@
 {
     "@@context": "https://schema.org",
     "@@type": "WebSite",
-    "name": "Auriga CTIS",
+    "name": "greendefender",
     "url": "{{ url('/') }}",
     "description": "Platform transparansi kasus hukum lingkungan hidup di Indonesia.",
     "potentialAction": {
@@ -13,6 +13,19 @@
         "target": "{{ url('/') }}/id/verified-cases?q={search_term_string}",
         "query-input": "required name=search_term_string"
     }
+}
+</script>
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "Organization",
+    "name": "greendefender",
+    "url": "{{ url('/') }}",
+    "description": "Platform transparansi kasus hukum lingkungan hidup di Indonesia — pelacakan kasus dari penyelidikan hingga putusan pengadilan.",
+    "logo": "{{ asset('img/image.png') }}",
+    "sameAs": [
+        "https://twitter.com/auriga_id"
+    ]
 }
 </script>
 @endsection
@@ -101,8 +114,8 @@
                             <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">Proses hukum final</p>
                         </div>
                         <div class="p-5 sm:p-6">
-                            <dd class="font-data text-3xl sm:text-4xl font-semibold text-white">{{ $provinceCovered ?? '—' }}</dd>
-                            <dt class="mt-2 text-xs font-semibold text-white/80">Provinsi Terdampak</dt>
+                            <dd class="font-data text-3xl sm:text-4xl font-semibold text-white">{{ $regencyCovered ?? '—' }}</dd>
+                            <dt class="mt-2 text-xs font-semibold text-white/80">Kabupaten Terdampak</dt>
                             <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">Di seluruh Indonesia</p>
                         </div>
                     </dl>

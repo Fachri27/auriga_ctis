@@ -2,7 +2,7 @@
 
 @php
     $trans = $case->translations->firstWhere('locale', app()->getLocale()) ?? $case->translations->first();
-    $pageTitle = strip_tags($trans?->title ?? 'Detail Kasus') . ' — Auriga CTIS';
+    $pageTitle = strip_tags($trans?->title ?? 'Detail Kasus') . ' — greendefender';
     $pageDescription = 'Kasus #' . ($case->case_number ?? '') . ' — ' . strip_tags($trans?->title ?? '') . '. Status: ' . ($case->status->name ?? '-') . '. Lokasi: ' . ($location['province'] ?? '-') . '. Lacak perkembangan kasus hukum lingkungan ini.';
     $ogTitle = $pageTitle;
     $ogDescription = $pageDescription;
@@ -22,12 +22,12 @@
     "dateModified": "{{ optional($case->updated_at)->toIso8601String() }}",
     "author": {
         "@@type": "Organization",
-        "name": "Auriga CTIS",
+        "name": "greendefender",
         "url": "{{ url('/') }}"
     },
     "publisher": {
         "@@type": "Organization",
-        "name": "Auriga CTIS",
+        "name": "greendefender",
         "logo": {
             "@@type": "ImageObject",
             "url": "{{ asset('img/image.png') }}"

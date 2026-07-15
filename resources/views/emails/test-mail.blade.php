@@ -23,12 +23,12 @@
         </div>
         <div class="body">
             <p>Halo <strong>{{ $name }}</strong>,</p>
-            <p>Email ini adalah email percobaan dari sistem Auriga CTIS. Jika Anda menerima email ini, berarti konfigurasi email sudah berfungsi dengan baik.</p>
+            <p>Email ini adalah email percobaan dari sistem greendefender. Jika Anda menerima email ini, berarti konfigurasi email sudah berfungsi dengan baik.</p>
             <p style="text-align: center; padding: 20px; background: #f0fdf4; border-radius: 8px; font-size: 24px;">✅</p>
             <p>Terima kasih.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} Auriga CTIS. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} greendefender. All rights reserved.</p>
         </div>
     </div>
 </body>

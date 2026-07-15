@@ -38,7 +38,7 @@
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[color:var(--muted)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z"/>
                         </svg>
-                        <input type="text" wire:model.live="search" placeholder="Cari nomor kasus atau judul..."
+                        <input type="text" wire:model.live="search" placeholder="Cari nomor kasus, judul, pelapor, atau terlapor..."
                             class="cms-input w-full pl-9">
                     </div>
 

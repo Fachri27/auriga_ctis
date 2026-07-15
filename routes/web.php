@@ -127,6 +127,150 @@ Route::get('/sitemap.xml', function () {
     return response($xml)->header('Content-Type', 'application/xml');
 })->name('sitemap.xml');
 
+// llms.txt — Generative Engine Optimization (GEO) untuk LLM / AI engines
+// Standar llms.txt: ringkasan markdown situs agar mudah diakses & dikutip
+// oleh ChatGPT, Perplexity, Google AI Overviews, Claude, dll.
+Route::get('/llms.txt', function () {
+    $base = rtrim(url('/'), '/');
+
+    $out = [];
+    $out[] = '# greendefender';
+    $out[] = '';
+    $out[] = '> greendefender adalah platform transparansi kasus hukum lingkungan hidup di Indonesia. Pelacakan kasus dari penyelidikan, penuntutan, persidangan, hingga putusan pengadilan, serta artikel & berita lingkungan.';
+    $out[] = '';
+    $out[] = 'greendefender menyediakan data publik kasus hukum lingkungan (nomor kasus, kategori, status, lokasi, deskripsi, perkembangan, dugaan permasalahan, lesson learning, bukti) dan artikel/berita lingkungan. Hanya kasus yang ditandai publik (is_public=true) yang ditampilkan. Konten tersedia dalam Bahasa Indonesia (id) dan Inggris (en).';
+    $out[] = '';
+    $out[] = '## Bagian utama';
+    $out[] = "- [Beranda / dashboard publik]($base/id)";
+    $out[] = "- [Kasus terverifikasi]($base/id/verified-cases)";
+    $out[] = "- [Dashboard kasus lingkungan]($base/id/dashboard)";
+    $out[] = "- [Tentang platform]($base/id/about)";
+    $out[] = "- [Artikel & berita lingkungan]($base/id/artikels)";
+    $out[] = '';
+    $out[] = '## Kasus terbaru (dipublikasikan)';
+    $cases = DB::table('cases')
+        ->leftJoin('case_translations', function ($q) {
+            $q->on('case_translations.case_id', '=', 'cases.id')
+              ->where('case_translations.locale', 'id');
+        })
+        ->where('cases.is_public', true)
+        ->whereNotNull('cases.published_at')
+        ->select('cases.case_number', 'case_translations.title')
+        ->orderByDesc('cases.published_at')
+        ->limit(20)
+        ->get();
+    foreach ($cases as $c) {
+        $label = trim($c->title ?? '') !== '' ? $c->title : $c->case_number;
+        $out[] = "- [" . $label . "](" . $base . "/id/detail-case/" . $c->case_number . ")";
+    }
+    $out[] = '';
+    $out[] = '## Artikel terbaru';
+    $artikels = DB::table('artikels')
+        ->whereNotNull('published_at')
+        ->select('slug')
+        ->orderByDesc('published_at')
+        ->limit(15)
+        ->get();
+    foreach ($artikels as $a) {
+        $out[] = "- [" . $a->slug . "](" . $base . "/id/artikel/" . $a->slug . ")";
+    }
+    $out[] = '';
+    $out[] = '## Cara mengutip';
+    $out[] = 'Sebutkan sumber sebagai "greendefender" disertai tautan permanen ke halaman kasus/artikel. Setiap kasus memiliki nomor unik (format CASE-XXXXX) yang dapat dirujuk.';
+    $out[] = '';
+    $out[] = '## Peta situs lengkap';
+    $out[] = "Sitemap XML: " . $base . "/sitemap.xml";
+    $out[] = '';
+    $out[] = '## Catatan';
+    $out[] = 'Halaman CMS/admin tidak diindeks. Data lokasi kasus tersedia sebagai GeoJSON di endpoint /case-geometries untuk integrasi peta.';
+    $out[] = '';
+
+    return response(implode("\n", $out))
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('llms.txt');
+
+// llms-full.txt — versi lengkap dari llms.txt: korpus kasus publik untuk ingest LLM
+Route::get('/llms-full.txt', function () {
+    $base = rtrim(url('/'), '/');
+
+    $cases = DB::table('cases')
+        ->leftJoin('case_translations', function ($q) {
+            $q->on('case_translations.case_id', '=', 'cases.id')
+              ->where('case_translations.locale', 'id');
+        })
+        ->leftJoin('statuses', 'statuses.id', '=', 'cases.status_id')
+        ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
+        ->where('cases.is_public', true)
+        ->whereNotNull('cases.published_at')
+        ->select(
+            'cases.case_number',
+            'cases.event_date',
+            'cases.pelapor',
+            'cases.terlapor',
+            'cases.latitude',
+            'cases.longitude',
+            'case_translations.title',
+            'case_translations.description',
+            'statuses.name as status_name',
+            'categories.slug as category_slug'
+        )
+        ->orderByDesc('cases.published_at')
+        ->limit(200)
+        ->get();
+
+    $out = [];
+    $out[] = '# greendefender — Full Corpus';
+    $out[] = '';
+    $out[] = '> Daftar lengkap kasus hukum lingkungan yang dipublikasikan di greendefender. Versi lengkap dari llms.txt untuk ingest LLM/AI engines.';
+    $out[] = '';
+    $out[] = 'Platform transparansi kasus hukum lingkungan hidup di Indonesia. Setiap entri berisi nomor kasus, judul, status, kategori, tanggal kejadian, pelapor/terlapor, koordinat (bila ada), ringkasan deskripsi, dan tautan permanen. Konten utama Bahasa Indonesia (id), sebagian tersedia dalam Inggris (en).';
+    $out[] = '';
+    $out[] = 'Sitemap XML: ' . $base . '/sitemap.xml';
+    $out[] = 'Ringkasan: ' . $base . '/llms.txt';
+    $out[] = '';
+    $out[] = '## Kasus';
+    $out[] = '';
+
+    foreach ($cases as $c) {
+        $title = trim($c->title ?? '') !== '' ? $c->title : $c->case_number;
+        $out[] = '### ' . $title;
+        $out[] = '';
+        $out[] = '- Nomor kasus: ' . $c->case_number;
+        if ($c->status_name) {
+            $out[] = '- Status: ' . $c->status_name;
+        }
+        if ($c->category_slug) {
+            $out[] = '- Kategori: ' . $c->category_slug;
+        }
+        if ($c->event_date) {
+            $out[] = '- Tanggal kejadian: ' . $c->event_date;
+        }
+        if ($c->pelapor) {
+            $out[] = '- Pelapor: ' . $c->pelapor;
+        }
+        if ($c->terlapor) {
+            $out[] = '- Terlapor: ' . $c->terlapor;
+        }
+        if ($c->latitude && $c->longitude) {
+            $out[] = '- Koordinat: ' . $c->latitude . ', ' . $c->longitude;
+        }
+        $desc = trim(strip_tags($c->description ?? ''));
+        if ($desc !== '') {
+            $out[] = '- Deskripsi: ' . mb_substr($desc, 0, 600);
+        }
+        $out[] = '- URL: ' . $base . '/id/detail-case/' . $c->case_number;
+        $out[] = '';
+    }
+
+    $out[] = '---';
+    $out[] = '';
+    $out[] = 'Artikel & berita lingkungan tersedia di ' . $base . '/id/artikels. Sumber: greendefender (' . $base . ').';
+    $out[] = '';
+
+    return response(implode("\n", $out))
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('llms-full.txt');
+
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'internal.access'])
     ->name('dashboard');

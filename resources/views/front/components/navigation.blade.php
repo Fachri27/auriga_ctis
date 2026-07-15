@@ -23,7 +23,7 @@
                 </svg>
             </button>
             <a href="{{ route('dashboard-user', ['locale' => app()->getLocale()]) }}" class="flex items-center gap-3">
-                <img src="/img/image.png" class="h-8 sm:h-9 w-auto object-contain" alt="Auriga CTIS">
+                <img src="/img/image.png" class="h-8 sm:h-9 w-auto object-contain" alt="greendefender">
                 <span class="hidden md:flex items-center gap-3">
                     <span class="h-6 border-r border-white/20"></span>
                     <span class="font-data text-[10px] tracking-[0.24em] uppercase text-white/60 leading-tight">Case Tracking<br>Information System</span>

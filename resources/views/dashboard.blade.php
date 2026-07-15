@@ -10,7 +10,7 @@
                         Case Tracking Console
                     </h1>
                     <p class="text-white/65 text-sm mt-2 max-w-xl">
-                        Operasional harian Auriga CTIS — pantau kasus, laporan masuk, dan distribusi publikasi.
+                        Operasional harian greendefender — pantau kasus, laporan masuk, dan distribusi publikasi.
                     </p>
                 </div>
                 <div class="flex flex-wrap gap-2">

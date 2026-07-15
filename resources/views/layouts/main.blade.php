@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="{{ $robots ?? 'index, follow' }}">
-    <meta name="author" content="Auriga CTIS">
+    <meta name="author" content="greendefender">
     <meta name="theme-color" content="#264c16">
     @php $gsc = config('services.google_search_console.verification'); @endphp
     @if ($gsc)
@@ -17,16 +17,16 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     {{-- Primary SEO --}}
-    <title>{{ $pageTitle ?? 'Auriga CTIS — Transparansi Kasus Hukum Lingkungan' }}</title>
-    <meta name="description" content="{{ $pageDescription ?? 'Auriga CTIS: Platform transparansi kasus hukum lingkungan hidup di Indonesia. Lacak perkembangan kasus dari penyelidikan hingga putusan pengadilan.' }}">
-    <meta name="keywords" content="kasus lingkungan, hukum lingkungan, transparansi publik, environmental defender, Auriga, CTIS, Indonesia, kasus korupsi lingkungan, ekologi, penegakan hukum">
+    <title>{{ $pageTitle ?? 'greendefender — Transparansi Kasus Hukum Lingkungan' }}</title>
+    <meta name="description" content="{{ $pageDescription ?? 'greendefender: Platform transparansi kasus hukum lingkungan hidup di Indonesia. Lacak perkembangan kasus dari penyelidikan hingga putusan pengadilan.' }}">
+    <meta name="keywords" content="kasus lingkungan, hukum lingkungan, transparansi publik, environmental defender, greendefender, Indonesia, kasus korupsi lingkungan, ekologi, penegakan hukum">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph / Facebook --}}
-    <meta property="og:site_name" content="Auriga CTIS">
-    <meta property="og:title" content="{{ $ogTitle ?? $pageTitle ?? 'Auriga CTIS — Transparansi Kasus Hukum Lingkungan' }}">
+    <meta property="og:site_name" content="greendefender">
+    <meta property="og:title" content="{{ $ogTitle ?? $pageTitle ?? 'greendefender — Transparansi Kasus Hukum Lingkungan' }}">
     <meta property="og:description" content="{{ $ogDescription ?? $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
-    <meta property="og:image" content="{{ $ogImage ?? asset('img/image.png') }}">
+    <meta property="og:image" content="{{ asset('img/image.png') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) == 'id' ? 'id_ID' : 'en_US' }}">
@@ -34,9 +34,9 @@
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@auriga_id">
-    <meta name="twitter:title" content="{{ $ogTitle ?? $pageTitle ?? 'Auriga CTIS' }}">
+    <meta name="twitter:title" content="{{ $ogTitle ?? $pageTitle ?? 'greendefender' }}">
     <meta name="twitter:description" content="{{ $ogDescription ?? $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
-    <meta name="twitter:image" content="{{ $ogImage ?? asset('img/image.png') }}">
+    <meta name="twitter:image" content="{{ asset('img/image.png') }}">
 
     {{-- JSON-LD Structured Data --}}
     @yield('structured-data')

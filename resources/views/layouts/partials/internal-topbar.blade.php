@@ -31,7 +31,7 @@
                 </svg>
             </div>
             <div class="leading-tight">
-                <div class="text-[13px] font-semibold tracking-wide">AURIGA <span style="color:var(--leaf)">CTIS</span></div>
+                <div class="text-[13px] font-semibold tracking-wide">green<span style="color:var(--leaf)">defender</span></div>
                 <div class="cms-eyebrow on-ink" style="letter-spacing:.2em;">Case Console</div>
             </div>
         </div>

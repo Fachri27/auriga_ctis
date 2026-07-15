@@ -29,7 +29,7 @@
     @endphp --}}
 
     <!-- 🌐 Basic Meta -->
-    <title>Auriga</title>
+    <title>greendefender</title>
     {{--
     <meta name="description" content="{{ $pageDescription }}">
     <meta name="title" content="{{ $pageType }}">

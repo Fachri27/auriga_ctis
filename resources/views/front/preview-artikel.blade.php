@@ -1,11 +1,39 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = ($case->title ?? $case->slug ?? 'Artikel') . ' — Auriga CTIS';
-    $pageDescription = 'Artikel dari Auriga CTIS tentang penegakan hukum lingkungan hidup di Indonesia.';
+    $pageTitle = ($case->title ?? $case->slug ?? 'Artikel') . ' — greendefender';
+    $pageDescription = 'Artikel dari greendefender tentang penegakan hukum lingkungan hidup di Indonesia.';
     $ogImage = $case->image ? asset('storage/' . $case->image) : asset('img/image.png');
     $ogType = 'article';
 @endphp
+
+@section('structured-data')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@@type": "Article",
+    "headline": {{ json_encode($case->title ?? $case->slug ?? 'Artikel') }},
+    "description": {{ json_encode(mb_substr(strip_tags($case->content ?? ''), 0, 300)) }},
+    "image": {{ json_encode($case->image ? asset('storage/' . $case->image) : asset('img/image.png')) }},
+    "datePublished": {{ json_encode(optional($case->created_at)->toIso8601String()) }},
+    "dateModified": {{ json_encode(optional($case->updated_at)->toIso8601String()) }},
+    "author": {
+        "@@type": "Organization",
+        "name": "greendefender"
+    },
+    "publisher": {
+        "@@type": "Organization",
+        "name": "greendefender",
+        "logo": { "@@type": "ImageObject", "url": {{ json_encode(asset('img/image.png')) }} }
+    },
+    "mainEntityOfPage": {
+        "@@type": "WebPage",
+        "@@id": {{ json_encode(url()->current()) }}
+    },
+    "articleSection": "Lingkungan"
+}
+</script>
+@endsection
 
 @section('content')
 
@@ -38,7 +66,7 @@
         <div
             class="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0B1E07]/80 backdrop-blur-sm py-4 px-4 md:px-8">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-                <span class="font-data uppercase tracking-[0.2em] text-[10px] text-[#9BDB4D]">Auriga CTIS / Artikel</span>
+                <span class="font-data uppercase tracking-[0.2em] text-[10px] text-[#9BDB4D]">greendefender / Artikel</span>
 
                 <div class="flex flex-wrap items-center gap-3 font-data text-[11px] text-white/70">
                     @if (!empty($case->category_name))

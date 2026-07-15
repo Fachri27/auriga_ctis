@@ -242,7 +242,7 @@
             <p class="greeting">Halo {{ $user->name }},</p>
 
             <p class="text">
-                Terima kasih telah mendaftar di Auriga CTIS. Untuk menyelesaikan pendaftaran dan mengaktifkan akun Anda, silakan verifikasi alamat email dengan menekan tombol di bawah.
+                Terima kasih telah mendaftar di greendefender. Untuk menyelesaikan pendaftaran dan mengaktifkan akun Anda, silakan verifikasi alamat email dengan menekan tombol di bawah.
             </p>
 
             <div class="ctawrap">
@@ -270,18 +270,18 @@
 
             <div class="sig">
                 Salam hangat,<br>
-                <strong>Tim Auriga CTIS</strong>
+                <strong>Tim greendefender</strong>
             </div>
 
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <div class="org">Auriga CTIS</div>
+            <div class="org">greendefender</div>
             <div class="org-sub">Case Tracking Information System</div>
             <div class="fr"></div>
             <p>
-                Anda menerima email ini karena mendaftar di platform Auriga CTIS.<br>
+                Anda menerima email ini karena mendaftar di platform greendefender.<br>
                 Mohon jangan membalas email ini secara langsung.<br>
                 <a href="{{ url('/') }}">Kunjungi situs</a>
             </p>
