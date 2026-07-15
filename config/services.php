@@ -48,4 +48,10 @@ return [
         'credentials' => storage_path(env('GOOGLE_SERVICE_ACCOUNT_JSON', 'app/google-service-account.json')),
     ],
 
+    'google_search_console' => [
+        // Kode verifikasi meta tag Google Search Console.
+        // Render hanya jika diisi (lihat layouts/main.blade.php).
+        'verification' => env('GOOGLE_SITE_VERIFICATION'),
+    ],
+
 ];

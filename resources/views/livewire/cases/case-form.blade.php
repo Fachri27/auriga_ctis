@@ -1,502 +1,310 @@
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<style>.ksect + .ksect { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--hairline); }</style>
 @endpush
 
-<div>
-    <div class="max-w-7xl mx-auto py-12 poppins-regular" x-data="{ lang: 'id' }">
+<div class="max-w-5xl mx-auto px-6 py-6 space-y-4" x-data="{ lang: 'id' }">
 
-        <h1 class="text-3xl font-semibold mb-6">
-            <span x-show="lang === 'id'">Buat Kasus</span>
-            <span x-show="lang === 'en'">Submit Cases</span>
-        </h1>
+    {{-- ================= HEADER + LANGUAGE TOGGLE (inline) ================= --}}
+    <div class="cms-panel-head border-b border-[color:var(--hairline)] pb-3 flex items-center justify-between gap-4">
+        <div>
+            <div class="cms-eyebrow">CASES</div>
+            <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">
+                <span x-show="lang === 'id'">Buat Kasus</span>
+                <span x-show="lang === 'en'">Submit Cases</span>
+            </h1>
+        </div>
+        <div class="flex rounded-lg border border-[color:var(--hairline)] bg-[color:var(--paper-2)] p-1">
+            <button :class="lang === 'id' ? 'cms-btn-primary' : 'cms-btn-ghost'" @click="lang = 'id'"
+                class="px-3 py-1.5 text-xs rounded-md transition-colors">Indonesia</button>
+            <button :class="lang === 'en' ? 'cms-btn-primary' : 'cms-btn-ghost'" @click="lang = 'en'"
+                class="px-3 py-1.5 text-xs rounded-md transition-colors">English</button>
+        </div>
+        <input type="hidden" name="lang" :value="lang">
+    </div>
 
-        @if (session('success'))
-            <div class="p-4 mb-5 text-green-700 bg-green-100 rounded">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="p-4 mb-5 text-red-700 bg-red-100 rounded">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="p-4 mb-5 bg-red-50 border border-red-200 rounded-lg">
-                <div class="flex items-center gap-2 text-red-700 font-semibold mb-1">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    {{-- ================= ALERTS ================= --}}
+    @if (session('success'))
+        <div class="cms-pill cms-pill-ok"><span class="dot"></span>{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="cms-pill cms-pill-danger"><span class="dot"></span>{{ session('error') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="cms-panel" style="border-color:var(--danger-soft)">
+            <div class="cms-panel-body" style="padding:12px 16px">
+                <div class="flex items-center gap-2 font-semibold mb-1 text-sm" style="color:var(--danger)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Form belum lengkap
                 </div>
-                <ul class="list-disc list-inside text-sm text-red-600">
+                <ul class="list-disc list-inside text-sm" style="color:var(--danger)">
                     @foreach ($errors->all() as $err)
                         <li>{{ $err }}</li>
                     @endforeach
                 </ul>
             </div>
-        @endif
-
-        {{-- Language --}}
-        <div class="flex flex-col mb-10">
-            <label class="font-medium mb-2">Bahasa</label>
-            <div class="flex rounded-lg border bg-gray-100 p-1 w-80">
-                <!-- Indonesia -->
-                <button :class="lang === 'id' ? 'bg-blue-600 text-white' : 'text-gray-700'" @click="lang = 'id'"
-                    class="flex-1 text-center py-2 rounded-lg transition-colors">
-                    Indonesia
-                </button>
-                <!-- English -->
-                <button :class="lang === 'en' ? 'bg-blue-600 text-white' : 'text-gray-700'" @click="lang = 'en'"
-                    class="flex-1 text-center py-2 rounded-lg transition-colors">
-                    English
-                </button>
-            </div>
-
-            <!-- Optional: hidden input untuk form -->
-            <input type="hidden" name="lang" :value="lang">
         </div>
+    @endif
 
-        {{-- TWO COLUMNS RESPONSIVE --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <!-- Category -->
-            <div x-data="{
-                ts: null,
-                init() {
-                    this.ts = new TomSelect(this.$refs.select, {
-                        plugins: ['remove_button'],
-                        closeAfterSelect: false,
-                        hideSelected: true,
-                        onChange: (values) => {
-                            const parsed = values.map(v => Number(v))
-            
-                            //PAKSA SET KE LIVEWIRE
-                            @this.set('category_ids', parsed)
-                        }
-                    })
-            
-                    //SET VALUE SAAT COMPONENT LOAD
-                    this.$nextTick(() => {
-                        if (@this.get('category_ids')?.length) {
-                            this.ts.setValue(@this.get('category_ids').map(v => String(v)))
-                        }
-                    })
-                }
-            }" wire:ignore class="mb-6">
-                <label class="text-sm font-medium">Category</label>
+    {{-- ================= DETAIL KASUS (Category / Status / Title / Event Date) ================= --}}
+    <div class="cms-panel" style="overflow:visible">
+        <div class="cms-panel-body" style="padding:16px 20px">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Category (TomSelect) -->
+                <div x-data="{
+                    ts: null,
+                    init() {
+                        this.ts = new TomSelect(this.$refs.select, {
+                            plugins: ['remove_button'],
+                            closeAfterSelect: false,
+                            hideSelected: true,
+                            onChange: (values) => {
+                                const parsed = values.map(v => Number(v))
+                                //PAKSA SET KE LIVEWIRE
+                                @this.set('category_ids', parsed)
+                            }
+                        })
+                        //SET VALUE SAAT COMPONENT LOAD
+                        this.$nextTick(() => {
+                            if (@this.get('category_ids')?.length) {
+                                this.ts.setValue(@this.get('category_ids').map(v => String(v)))
+                            }
+                        })
+                    }
+                }" wire:ignore>
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Category</label>
+                    <select x-ref="select" multiple class="cms-input w-full">
+                        @foreach ($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name ?? $cat->slug }}</option>
+                        @endforeach
+                    </select>
+                    @error('category_ids')
+                        <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                <select x-ref="select" multiple class="w-full border p-1 mt-1 bg-gray-50">
-                    @foreach ($categories as $cat)
-                        <option value="{{ $cat->id }}">
-                            {{ $cat->name ?? $cat->slug }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('category_ids')
-                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                @enderror
+                <!-- Status -->
+                <div>
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Status</label>
+                    <select wire:model="status_id" class="cms-input w-full">
+                        <option value="">Select status…</option>
+                        @foreach ($statuses as $st)
+                            <option value="{{ $st->id }}">{{ $st->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('status_id')
+                        <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Title ID -->
+                <div class="md:col-span-2" x-show="lang === 'id'" x-data="{
+                    title: @js(old('title_id', $title_id ?? '')),
+                    slug: @js(old('slugId', $slugId ?? '')),
+                    makeSlug(text) {
+                        return text.toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                    }
+                }" x-init="if (title && !slug) { slug = makeSlug(title) }">
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Judul Kasus (ID)</label>
+                    <input type="text" wire:model="title_id" x-model="title" @input="slug = makeSlug(title)" class="cms-input w-full">
+                </div>
+
+                <!-- Title EN -->
+                <div class="md:col-span-2" x-show="lang === 'en'" x-data="{
+                    slug: @js(old('slugEn', $slugEn ?? '')),
+                    makeSlug(text) {
+                        return text.toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                    }
+                }" x-init="if (title && !slug) { slug = makeSlug(title) }">
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Title Case (EN)</label>
+                    <input type="text" wire:model="title_en" class="cms-input w-full">
+                </div>
+
+                <!-- Event Date -->
+                <div class="md:col-span-2">
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Event Date</label>
+                    <input type="date" wire:model="event_date" class="cms-input w-full">
+                    @error('event_date')
+                        <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
+        </div>
+    </div>
 
-
-
-
-            <!-- Status -->
+    {{-- ================= LOCATION (map + pelapor/terlapor) ================= --}}
+    <div class="cms-panel" style="overflow:visible">
+        <div class="cms-panel-head" style="padding:14px 20px">
             <div>
-                <label class="text-sm">Status</label>
-                <select wire:model="status_id" class="w-full border  p-2 mt-1 bg-gray-50">
-                    <option value="">Select status…</option>
-                    @foreach ($statuses as $st)
-                        <option value="{{ $st->id }}">{{ $st->name }}</option>
-                    @endforeach
-                </select>
-                @error('status_id')
-                    <p class="text-red-600 text-sm">{{ $message }}</p>
-                @enderror
+                <div class="cms-eyebrow">LOCATION</div>
+                <div class="cms-panel-title">Lokasi & Pelapor</div>
             </div>
-
-
         </div>
-
-        {{-- Title & Slug ID --}}
-        <div x-show="lang === 'id'" x-data="{
-            title: @js(old('title_id', $title_id ?? '')),
-            slug: @js(old('slugId', $slugId ?? '')),
-            makeSlug(text) {
-                return text.toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-            }
-        }" x-init="if (title && !slug) { slug = makeSlug(title) }">
-
-            <label class="font-medium">Judul Kasus (ID)</label>
-            <input type="text" wire:model="title_id" x-model="title" @input="slug = makeSlug(title)"
-                class="w-full border px-3 py-2 mt-1">
-        </div>
-
-        {{-- Title EN --}}
-        <div x-show="lang === 'en'" x-data="{
-            slug: @js(old('slugEn', $slugEn ?? '')),
-            makeSlug(text) {
-                return text.toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-            }
-        }" x-init="if (title && !slug) { slug = makeSlug(title) }">
-            <label class="font-medium">Title Case (EN)</label>
-            <input type="text" wire:model="title_en" class="w-full border px-3 py-2 mt-1">
-        </div>
-        <!-- Event Date -->
-        <div class="mt-8">
-            <label class="text-sm">Event Date</label>
-            <input type="date" wire:model="event_date" class="w-full border  p-2 mt-1 bg-gray-50">
-            @error('event_date')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <!-- ========================= -->
-        <!-- MAP PICKER -->
-        <!-- ========================= -->
-        <div class="max-w-7xl mx-auto py-10">
-
-            <!-- PROVINCE -->
-            {{-- <label class="block font-medium mb-1">Provinsi</label>
-            <select wire:model.live="province_id" class="w-full border rounded-xl p-2 bg-gray-50 mb-4">
-                <option value="">Pilih provinsi...</option>
-                @foreach ($provinces as $p)
-                <option value="{{ $p['id'] }}">{{ $p['name'] }}</option>
-                @endforeach
-            </select> --}}
-
-            <!-- CITY -->
-            {{-- <label class="block font-medium mb-1">Kota / Kabupaten</label>
-            <select wire:model.live="city_id" class="w-full border rounded-xl p-2 bg-gray-50 mb-4">
-                <option value="">Pilih kota...</option>
-                @foreach ($cities as $c)
-                <option value="{{ $c['id'] }}">{{ $c['name'] }}</option>
-                @endforeach
-            </select> --}}
-
-            <!-- DISTRICT -->
-            {{-- <label class="block font-medium mb-1">Kecamatan</label>
-            <select wire:model.live="district_id" class="w-full border rounded-xl p-2 bg-gray-50 mb-6">
-                <option value="">Pilih kecamatan...</option>
-                @foreach ($districts as $d)
-                <option value="{{ $d['id'] }}">{{ $d['name'] }}</option>
-                @endforeach
-            </select> --}}
-
-
-
-            <!-- Lat/Lng -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="cms-panel-body" style="padding:16px 20px">
+            <!-- Pelapor / Terlapor -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="font-medium">Identitas Pelapor</label>
-                    <input type="text" wire:model="pelapor" class="w-full border  p-2 mt-1 bg-gray-50">
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Identitas Pelapor</label>
+                    <input type="text" wire:model="pelapor" class="cms-input w-full">
                 </div>
                 <div>
-                    <label class="font-medium">Identitas Terlapor</label>
-                    <input type="text" wire:model="terlapor" class="w-full border  p-2 mt-1 bg-gray-50">
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Identitas Terlapor</label>
+                    <input type="text" wire:model="terlapor" class="cms-input w-full">
                 </div>
             </div>
 
-            <!-- MAP -->
-            {{-- <div x-data="mapComponent()" x-init="initMap()">
-                <div id="map" class="w-full h-72 rounded-lg border"></div>
-            </div> --}}
-            {{-- <div x-data="mapComponent()" x-init="initMap()">
-
-                <label class="block font-medium mb-1">
-                    {{ $lang === 'id' ? 'Lokasi Kejadian' : 'Location' }}
-                </label>
-
-                <div wire:ignore id="map" class="w-full h-64 rounded border"></div>
-                <livewire:geo-server wire:key="geo-server-map-report" />
-
-                <input type="hidden" x-model="lat" wire:model="lat">
-                <input type="hidden" x-model="lng" wire:model="lng">
-
-                <template x-if="lat && lng">
-                    <p class="mt-2 text-sm text-gray-600">
-                        Lokasi: <strong x-text="lat + ', ' + lng"></strong>
-                    </p>
-                </template>
-            </div> --}}
+            <!-- Map + search -->
             <div x-data="mapComponent(@entangle('lat').live, @entangle('lng').live)" x-init="initMap()">
-
-                {{-- <div class="text-sm text-red-600">
-                    DEBUG: lat={{ $lat }} | lng={{ $lng }}
-                </div> --}}
-
-
-                <div wire:ignore id="map" class="w-full h-100 rounded border"></div>
-                <div x-data="{ open: false }" class="relative w-full">
-
+                <div wire:ignore id="map" class="w-full h-100 rounded border border-[color:var(--hairline)]"></div>
+                <div x-data="{ open: false }" class="relative w-full mt-3">
                     <input type="text" wire:model.live.debounce.150ms="searchLocation" @focus="open = true"
-                        @keydown.escape="open = false" placeholder="Cari desa / kelurahan..."
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-black focus:border-black" />
-
-                    {{-- DROPDOWN --}}
+                        @keydown.escape="open = false" placeholder="Cari desa / kelurahan..." class="cms-input w-full" />
                     @if (count($results) > 0)
                         <div x-show="open" x-transition x-cloak @click.away="open = false"
-                            class="absolute left-0 right-0 z-[9999] mt-1
-                               bg-white border border-gray-300
-                               rounded-lg shadow-lg max-h-60 overflow-auto">
+                            class="absolute left-0 right-0 z-[9999] mt-1 bg-white border border-[color:var(--hairline)] rounded-lg shadow-lg max-h-60 overflow-auto">
                             @foreach ($results as $item)
-                                <div wire:click="select(
-                                                '{{ $item['id'] }}',
-                                                '{{ $item['text'] }}',
-                                                '{{ $item['lat'] }}',
-                                                '{{ $item['long'] }}'
-                                            )"
-                                    @click="open = false" class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                <div wire:click="select('{{ $item['id'] }}','{{ $item['text'] }}','{{ $item['lat'] }}','{{ $item['long'] }}')"
+                                    @click="open = false" class="px-4 py-2 hover:bg-[color:var(--paper-2)] cursor-pointer text-sm">
                                     {{ $item['text'] }}
                                 </div>
                             @endforeach
                         </div>
                     @endif
-
                 </div>
-
 
                 <input type="hidden" x-model="lat" wire:model="lat">
                 <input type="hidden" x-model="lng" wire:model="lng">
-
                 <template x-if="lat && lng">
-                    <p class="mt-2 text-sm text-gray-600">
-                        Lokasi: <strong x-text="lat + ', ' + lng"></strong>
+                    <p class="mt-2 text-sm" style="color:var(--muted)">
+                        Lokasi: <strong class="font-mono-c" x-text="lat + ', ' + lng"></strong>
                     </p>
                 </template>
             </div>
         </div>
+    </div>
 
-        {{-- <div class="grid grid-cols-2 gap-4 mb-10">
-            <div>
-                <label for="" class="font-medium">Korban</label>
-                <input type="text" wire:model="korban" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
+    {{-- ================= KONTEN (7 editor rich-text dalam 1 panel, label inline + divider) ================= --}}
+    <div class="cms-panel">
+        <div class="cms-panel-body" style="padding:18px 20px">
 
-            <div>
-                <label for="" class="font-medium">Pekerjaan</label>
-                <input type="text" wire:model="pekerjaan" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
+            {{-- Instansi (ID only) --}}
+            <section x-show="lang === 'id'" class="ksect">
+                <div class="cms-eyebrow mb-2">INSTANSI</div>
+                @include('front.components.instansi')
+                @error('instansi')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
+
+            {{-- Narasi Status (ID only) --}}
+            <section x-show="lang === 'id'" class="ksect">
+                <div class="cms-eyebrow mb-2">NARASI STATUS</div>
+                @include('front.components.status')
+                @error('status')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
+
+            {{-- Deskripsi (ID + EN) --}}
+            <section class="ksect">
+                <div class="cms-eyebrow mb-2">
+                    <span x-show="lang === 'id'">DESKRIPSI KASUS</span>
+                    <span x-show="lang === 'en'">CASES DESCRIPTION</span>
+                </div>
+                <div x-show="lang === 'id'">@includeWhen(true, 'front.components.tinymce-content-id')</div>
+                <div x-show="lang === 'en'">@includeWhen(true, 'front.components.tinymce-content-en')</div>
+                @error('description')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
+
+            {{-- Pembelajaran (ID + EN) --}}
+            <section class="ksect">
+                <div class="cms-eyebrow mb-2">
+                    <span x-show="lang === 'id'">PEMBELAJARAN</span>
+                    <span x-show="lang === 'en'">LESSON LEARNING</span>
+                </div>
+                <div x-show="lang === 'id'">@includeWhen(true, 'front.components.tinymce-pembelajaran-id')</div>
+                <div x-show="lang === 'en'">@includeWhen(true, 'front.components.tinymce-pembelajaran-en')</div>
+                @error('pembelajaran_en')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
+
+            {{-- Dugaan Permasalahan (ID + EN) --}}
+            <section class="ksect">
+                <div class="cms-eyebrow mb-2">
+                    <span x-show="lang === 'id'">DUGAAN PERMASALAHAN</span>
+                    <span x-show="lang === 'en'">ALLEGED ISSUES</span>
+                </div>
+                <div x-show="lang === 'id'">@includeWhen(true, 'front.components.tinymce-dugaan-permasalahan-id')</div>
+                <div x-show="lang === 'en'">@includeWhen(true, 'front.components.tinymce-dugaan-permasalahan-en')</div>
+                @error('dugaan_permasalahan_en')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
+
+            {{-- Perkembangan Kasus (ID + EN) --}}
+            <section class="ksect">
+                <div class="cms-eyebrow mb-2">
+                    <span x-show="lang === 'id'">PERKEMBANGAN KASUS</span>
+                    <span x-show="lang === 'en'">CASE DEVELOPMENT</span>
+                </div>
+                <div x-show="lang === 'id'">@includeWhen(true, 'front.components.tinymce-perkembangan-id')</div>
+                <div x-show="lang === 'en'">@includeWhen(true, 'front.components.tinymce-perkembangan-en')</div>
+                @error('perkembangan_en')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
+
+            {{-- Sumber (ID only) --}}
+            <section x-show="lang === 'id'" class="ksect">
+                <div class="cms-eyebrow mb-2">SUMBER</div>
+                @include('front.components.sumber')
+                @error('sumber')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </section>
 
         </div>
+    </div>
 
-        <div class="mb-10">
-            <label>Jenis Kelamin</label>
-            <select wire:model="jenis_kelamin" class="w-full border rounded p-2 mt-1">
-                <option value="">Pilih...</option>
-                <option value="L">Laki-laki</option>
-                <option value="P">Perempuan</option>
-                <option value="A">Campuran</option>
-            </select>
+    {{-- ================= BUKTI ================= --}}
+    <div class="cms-panel">
+        <div class="cms-panel-head" style="padding:14px 20px">
+            <div class="cms-panel-title">Bukti Foto / Video</div>
         </div>
-
-        <div class="grid grid-cols-2 gap-4 mb-10">
-            <div>
-                <label for="" class="font-medium">Jumlah Korban</label>
-                <input type="number" wire:model="jumlah_korban" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
-
-            <div>
-                <label for="" class="font-medium">Konflik Dengan</label>
-                <input type="text" wire:model="konflik" class="w-full border  p-2 mt-1 bg-gray-50">
-            </div>
-        </div>
-        --}}
-
-        <!-- ========================= -->
-        <!-- DESKRIPSI -->
-        <!-- ========================= -->
-
-        <div x-show="lang === 'id'" class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span>Instansi</span>
-            </h2>
-
-            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
-            <div class="bg-white border rounded-xl p-4">
-
-                <div>
-                    {{-- editor_id --}}
-                    @include('front.components.instansi')
-                </div>
-            </div>
-
-            @error('instansi')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div x-show="lang === 'id'" class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span>Narasi Status</span>
-            </h2>
-
-            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
-            <div class="bg-white border rounded-xl p-4">
-
-                <div>
-                    {{-- editor_id --}}
-                    @include('front.components.status')
-                </div>
-            </div>
-
-            @error('status')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span x-show="lang === 'id'">Deskripsi Kasus</span>
-                <span x-show="lang === 'en'">Cases Description</span>
-            </h2>
-
-            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
-            <div class="bg-white border rounded-xl p-4">
-                <h3 class="font-semibold mb-3">Content</h3>
-
-                <div x-show="lang === 'id'">
-                    {{-- editor_id --}}
-                    @includeWhen(true, 'front.components.tinymce-content-id')
-                </div>
-
-                <div x-show="lang === 'en'">
-                    {{-- editor_en --}}
-                    @includeWhen(true, 'front.components.tinymce-content-en')
-                </div>
-            </div>
-
-            @error('description')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span x-show="lang === 'id'">Pembelajaran</span>
-                <span x-show="lang === 'en'">Lesson Learning</span>
-            </h2>
-
-            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
-            <div class="bg-white border rounded-xl p-4">
-                <h3 class="font-semibold mb-3">Content</h3>
-
-                <div x-show="lang === 'id'">
-                    {{-- editor_id --}}
-                    @includeWhen(true, 'front.components.tinymce-pembelajaran-id')
-                </div>
-
-                <div x-show="lang === 'en'">
-                    {{-- editor_en --}}
-                    @includeWhen(true, 'front.components.tinymce-pembelajaran-en')
-                </div>
-            </div>
-
-            @error('pembelajaran_en')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-        {{-- Dugaan Permasalahan --}}
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span x-show="lang === 'id'">Dugaan Permasalahan</span>
-                <span x-show="lang === 'en'">Alleged Issues</span>
-            </h2>
-
-            <div class="bg-white border rounded-xl p-4">
-                <h3 class="font-semibold mb-3">Content</h3>
-
-                <div x-show="lang === 'id'">
-                    @includeWhen(true, 'front.components.tinymce-dugaan-permasalahan-id')
-                </div>
-
-                <div x-show="lang === 'en'">
-                    @includeWhen(true, 'front.components.tinymce-dugaan-permasalahan-en')
-                </div>
-            </div>
-
-            @error('dugaan_permasalahan_en')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span x-show="lang === 'id'">Perkembangan Kasus</span>
-                <span x-show="lang === 'en'">Case Development</span>
-            </h2>
-
-            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
-            <div class="bg-white border rounded-xl p-4">
-                <h3 class="font-semibold mb-3">Content</h3>
-
-                <div x-show="lang === 'id'">
-                    {{-- editor_id --}}
-                    @includeWhen(true, 'front.components.tinymce-perkembangan-id')
-                </div>
-
-                <div x-show="lang === 'en'">
-                    {{-- editor_en --}}
-                    @includeWhen(true, 'front.components.tinymce-perkembangan-en')
-                </div>
-            </div>
-
-            @error('perkembangan_en')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div x-show="lang === 'id'" class="bg-gray-50 p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">
-                <span>Sumber</span>
-            </h2>
-
-            {{-- <textarea wire:model="description" class="w-full border rounded p-3 h-32"></textarea> --}}
-            <div class="bg-white border rounded-xl p-4">
-
-                <div>
-                    {{-- editor_id --}}
-                    @include('front.components.sumber')
-                </div>
-            </div>
-
-            @error('sumber')
-                <p class="text-red-600 text-sm">{{ $message }}</p>
-            @enderror
-        </div>
-
-
-        <div class="bg-white p-6 rounded-xl mb-6">
-            <h2 class="text-xl font-semibold mb-4">Bukti Foto / Video</h2>
-
-            <input type="file" wire:model="bukti" multiple>
-
+        <div class="cms-panel-body" style="padding:16px 20px">
+            <input type="file" wire:model="bukti" multiple class="text-sm">
             @if ($existingBukti)
                 <div class="grid grid-cols-4 gap-3 mt-3">
                     @foreach ($existingBukti as $file)
-                        <div class="p-2 rounded bg-white border text-xs text-center">
+                        <div class="p-2 rounded border border-[color:var(--hairline)] text-xs text-center font-mono-c" style="color:var(--muted)">
                             {{ basename($file) }}
                         </div>
                     @endforeach
                 </div>
             @endif
         </div>
+    </div>
 
+    {{-- ================= SUBMIT ================= --}}
+    <div>
         <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save"
             onclick="console.log('[CaseForm] save button clicked')"
-            class="px-6 py-3 bg-black text-white rounded-xl disabled:opacity-50">
+            class="cms-btn cms-btn-leaf">
             <span wire:loading.remove wire:target="save">Kirim Laporan</span>
             <span wire:loading wire:target="save">Menyimpan...</span>
         </button>
-
     </div>
 
-
 </div>
+
+@push('scripts')
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('case-save-debug', (event) => {
@@ -574,8 +382,8 @@
                 try {
                     this.polygon = L.geoJSON(geometry, {
                         style: {
-                            color: '#2563eb',
-                            fillColor: '#3b82f6',
+                            color: '#2F6C14',
+                            fillColor: '#9BDB4D',
                             fillOpacity: 0.15,
                             weight: 2,
                         },
@@ -595,3 +403,4 @@
         }
     }
 </script>
+@endpush

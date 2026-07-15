@@ -8,6 +8,10 @@
     <meta name="robots" content="{{ $robots ?? 'index, follow' }}">
     <meta name="author" content="Auriga CTIS">
     <meta name="theme-color" content="#264c16">
+    @php $gsc = config('services.google_search_console.verification'); @endphp
+    @if ($gsc)
+        <meta name="google-site-verification" content="{{ $gsc }}">
+    @endif
 
     {{-- Favicon --}}
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">

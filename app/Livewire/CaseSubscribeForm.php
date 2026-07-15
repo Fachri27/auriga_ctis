@@ -22,16 +22,27 @@ class CaseSubscribeForm extends Component
 
     public function mount(): void
     {
-        // Cek cookie — apakah visitor ini sudah pernah subscribe ke case ini (atau semua kasus)
-        $subscribedCases = json_decode(Cookie::get('subscribed_cases', '[]'), true) ?? [];
+        // Cookie menyimpan daftar email yang pernah dipakai dari browser ini.
+        // Status "sudah mengikuti" dicek ke DB — bukan sekadar cookie — supaya
+        // baris DB yang dihapus (admin/testing) membuat form muncul kembali, dan
+        // pesan "Anda kini mengikuti kasus ini" hanya muncul pada case yang
+        // benar-benar memiliki baris langganan untuk email browser ini.
+        $emails = $this->subscribedEmails();
 
-        if ($this->caseId !== null && in_array($this->caseId, $subscribedCases)) {
-            $this->subscribed = true;
-        }
-
-        // Juga cek apakah sudah berlangganan semua kasus (caseId null di cookie)
-        if ($this->caseId !== null && in_array('all', $subscribedCases)) {
-            $this->subscribed = true;
+        if ($this->caseId === null) {
+            // form "semua kasus": sembunyi hanya jika email ini sudah berlangganan
+            // semua kasus (baris case_id NULL).
+            $this->subscribed = !empty($emails)
+                && CaseSubscription::whereIn('email', $emails)
+                    ->whereNull('case_id')->exists();
+        } else {
+            // form per-case: sembunyi hanya jika ada baris per-case untuk case ini.
+            // Catatan: baris "semua kasus" (case_id NULL) TIDAK menyembunyikan form
+            // per-case — visitor yang sudah subscribe all-case tetap boleh mengikuti
+            // kasus tertentu secara terpisah.
+            $this->subscribed = !empty($emails)
+                && CaseSubscription::whereIn('email', $emails)
+                    ->where('case_id', $this->caseId)->exists();
         }
     }
 
@@ -64,15 +75,13 @@ class CaseSubscribeForm extends Component
             'case_id' => $this->caseId,
         ]);
 
-        // Simpan cookie agar form tidak muncul lagi di kunjungan berikutnya
-        $subscribedCases = json_decode(Cookie::get('subscribed_cases', '[]'), true) ?? [];
-        $key = $this->caseId ?? 'all';
-
-        if (!in_array($key, $subscribedCases)) {
-            $subscribedCases[] = $key;
+        // Catat email ke cookie agar kunjungan berikutnya tahu visitor ini siapa.
+        // Status tetap dicek ke DB di mount(), jadi cookie hanya penanda email.
+        $emails = $this->subscribedEmails();
+        if (!in_array($this->email, $emails, true)) {
+            $emails[] = $this->email;
         }
-
-        Cookie::queue('subscribed_cases', json_encode($subscribedCases), 60 * 24 * 365); // 1 tahun
+        Cookie::queue('subscribed_emails', json_encode(array_values($emails)), 60 * 24 * 365); // 1 tahun
 
         $this->subscribed = true;
     }
@@ -80,5 +89,15 @@ class CaseSubscribeForm extends Component
     public function render()
     {
         return view('livewire.case-subscribe-form');
+    }
+
+    /**
+     * Daftar email yang pernah dipakai untuk berlangganan dari browser ini.
+     */
+    private function subscribedEmails(): array
+    {
+        $emails = json_decode(Cookie::get('subscribed_emails', '[]'), true) ?? [];
+
+        return array_values(array_filter(array_map('strval', $emails)));
     }
 }

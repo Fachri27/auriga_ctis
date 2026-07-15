@@ -6,306 +6,280 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kasus Baru Dipublikasikan</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: #f0ede8;
-            font-family: 'DM Sans', sans-serif;
-            color: #1a1a1a;
+            background-color: #F5F7F1;
+            font-family: 'Poppins', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+            color: #0B1E07;
             padding: 40px 16px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .wrapper {
-            max-width: 580px;
-            margin: 0 auto;
+        .wrap { max-width: 600px; margin: 0 auto; }
+
+        /* ── Hero (match public header) ── */
+        .hero {
+            background-color: #0B1E07;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 55px, rgba(255,255,255,0.03) 56px),
+                repeating-linear-gradient(90deg, transparent, transparent 55px, rgba(255,255,255,0.03) 56px);
+            background-size: 56px 56px;
+            color: #ffffff;
+            padding: 40px 40px 36px;
+            border-radius: 10px 10px 0 0;
         }
 
-        /* ── Header ── */
-        .header {
-            background-color: #111;
-            border-radius: 16px 16px 0 0;
-            padding: 36px 40px 28px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 30px;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .badge {
-            display: inline-block;
-            background: #e8ff47;
-            color: #111;
+        .eyebrow {
             font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2px;
+            font-weight: 600;
+            letter-spacing: 0.2em;
             text-transform: uppercase;
-            padding: 4px 12px;
-            border-radius: 100px;
-            margin-bottom: 16px;
+            color: #9BDB4D;
+            margin-bottom: 14px;
+            display: block;
+        }
+        .eyebrow .dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #9BDB4D;
+            margin-right: 8px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
         }
 
-        .header h1 {
-            font-family: 'Playfair Display', serif;
+        .hero h1 {
             font-size: 28px;
-            color: #fff;
+            font-weight: 700;
             line-height: 1.2;
-            position: relative;
-            z-index: 1;
+            letter-spacing: -0.2px;
+            color: #ffffff;
         }
 
-        .header p {
-            color: rgba(255, 255, 255, 0.5);
+        .hero .lede {
+            color: rgba(255,255,255,0.7);
             font-size: 13px;
-            margin-top: 8px;
-            position: relative;
-            z-index: 1;
+            font-weight: 300;
+            margin-top: 12px;
         }
+
+        .accent { height: 3px; background: #9BDB4D; }
 
         /* ── Body ── */
         .body {
-            background: #fff;
-            padding: 36px 40px;
+            background: #ffffff;
+            padding: 32px 40px 36px;
+            border-left: 1px solid #E2E6DA;
+            border-right: 1px solid #E2E6DA;
         }
 
-        .label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2px;
+        .metagrid {
+            display: flex;
+            border: 1px solid #E2E6DA;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 26px;
+        }
+        .metagrid .cell {
+            flex: 1;
+            padding: 14px 16px;
+            border-right: 1px solid #E2E6DA;
+        }
+        .metagrid .cell:last-child { border-right: none; }
+        .metagrid .k {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
-            color: #999;
-            margin-bottom: 6px;
+            color: #6b7268;
+            margin-bottom: 5px;
+        }
+        .metagrid .v {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0B1E07;
+        }
+        .metagrid .v .dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #9BDB4D;
+            margin-right: 6px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
         }
 
-        .case-title {
-            font-family: 'Playfair Display', serif;
+        .title {
             font-size: 22px;
-            color: #111;
+            font-weight: 700;
+            color: #0B1E07;
             line-height: 1.3;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #f0f0f0;
+            letter-spacing: -0.2px;
+            margin-bottom: 18px;
         }
 
-        .description {
+        .text {
             font-size: 14px;
             line-height: 1.7;
-            color: #555;
+            color: #374151;
             margin-bottom: 28px;
         }
 
-        /* ── Info strip ── */
-        .info-strip {
-            background: #f7f5f0;
-            border-radius: 10px;
-            padding: 16px 20px;
-            display: flex;
-            gap: 40px;
-            margin-bottom: 32px;
-        }
-
-        .info-item {
-            flex: 1;
-            gap: 4px;
-        }
-
-        .info-item .info-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #aaa;
-            margin-bottom: 3px;
-        }
-
-        .info-item .info-value {
-            font-size: 13px;
-            font-weight: 600;
-            color: #222;
-        }
-
-        /* ── CTA Button ── */
-        .cta-wrap {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .cta-btn {
+        /* ── CTA ── */
+        .cta {
             display: inline-block;
-            background: #111;
-            color: #e8ff47 !important;
+            background: #0B1E07;
+            color: #ffffff !important;
             text-decoration: none;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            padding: 14px 36px;
-            border-radius: 100px;
-        }
-
-        /* ── Divider ── */
-        .divider {
-            height: 1px;
-            background: #f0f0f0;
-            margin: 0 0 24px;
-        }
-
-        /* ── Urgency note ── */
-        .urgency {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: #fff8e1;
-            border-left: 3px solid #f5a623;
-            border-radius: 0 8px 8px 0;
-            padding: 14px 16px;
-            margin-bottom: 0;
-        }
-
-        .urgency-icon {
-            font-size: 18px;
-            flex-shrink: 0;
-            line-height: 1;
-        }
-
-        .urgency-text {
-            font-size: 13px;
-            color: #7a5c00;
-            line-height: 1.5;
-        }
-
-        .urgency-text strong {
-            display: block;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 2px;
-            color: #5c4200;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 15px 30px 15px 28px;
+            border-radius: 6px;
+        }
+        .cta::after {
+            content: '';
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-top: 2px solid #9BDB4D;
+            border-right: 2px solid #9BDB4D;
+            transform: rotate(45deg);
+            margin-left: 12px;
+            vertical-align: middle;
+            position: relative;
+            top: -1px;
+        }
+
+        /* ── Note ── */
+        .note {
+            background: #F5F7F1;
+            border-left: 3px solid #9BDB4D;
+            padding: 14px 18px;
+            border-radius: 0 6px 6px 0;
+            margin-top: 28px;
+        }
+        .note .nk {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #2F6C14;
+            margin-bottom: 5px;
+        }
+        .note .nt {
+            font-size: 13px;
+            line-height: 1.55;
+            color: #374151;
         }
 
         /* ── Footer ── */
         .footer {
-            background: #f7f5f0;
-            border-radius: 0 0 16px 16px;
-            padding: 24px 40px;
-            text-align: center;
-            border-top: 1px solid #ede9e2;
+            background-color: #0B1E07;
+            color: rgba(255,255,255,0.6);
+            border-radius: 0 0 10px 10px;
+            padding: 28px 40px 30px;
         }
-
-        .footer p {
-            font-size: 12px;
-            color: #aaa;
-            line-height: 1.6;
-        }
-
-        .footer a {
-            color: #888;
-            text-decoration: underline;
-        }
-
         .footer .org {
-            font-weight: 700;
-            color: #555;
-            font-size: 13px;
-            margin-bottom: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 3px;
+        }
+        .footer .org-sub {
+            font-size: 9px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 14px;
+        }
+        .footer .fr {
+            height: 1px;
+            background: rgba(255,255,255,0.12);
+            margin: 16px 0;
+        }
+        .footer p {
+            font-size: 11px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.45);
+        }
+        .footer a {
+            color: #9BDB4D;
+            text-decoration: underline;
+            text-underline-offset: 2px;
         }
 
-        /* ── Accent line ── */
-        .accent-line {
-            height: 4px;
-            background: linear-gradient(90deg, #e8ff47 0%, #111 60%);
-            border-radius: 0 0 4px 4px;
-            margin-bottom: 0;
+        @media (max-width: 520px) {
+            .hero, .body, .footer { padding-left: 24px; padding-right: 24px; }
+            .hero h1 { font-size: 24px; }
+            .title { font-size: 20px; }
+            .metagrid { flex-direction: column; }
+            .metagrid .cell { border-right: none; border-bottom: 1px solid #E2E6DA; }
+            .metagrid .cell:last-child { border-bottom: none; }
         }
     </style>
 </head>
 
 <body>
-    <div class="wrapper">
+    <div class="wrap">
 
-        <!-- Header -->
-        <div class="header">
-            <div class="badge">🔔 Notifikasi Sistem</div>
-            <h1>Ada Kasus Baru<br>yang Dipublikasikan</h1>
-            <p>{{ now()->translatedFormat('l, d F Y — H:i') }} WIB</p>
+        <!-- Hero -->
+        <div class="hero">
+            <span class="eyebrow"><span class="dot"></span>Notifikasi Kasus Baru</span>
+            <h1>Kasus Baru Telah Dipublikasikan</h1>
+            <p class="lede">{{ now()->translatedFormat('l, d F Y — H:i') }} WIB</p>
         </div>
-        <div class="accent-line"></div>
+        <div class="accent"></div>
 
         <!-- Body -->
         <div class="body">
 
-            <p class="label">Judul Kasus</p>
-            <div class="case-title">{{ strip_tags($case->title ?? 'Tanpa Judul') }}</div>
+            <div class="metagrid">
+                <div class="cell">
+                    <div class="k">No. Kasus</div>
+                    <div class="v">{{ $case->case_number ?? '—' }}</div>
+                </div>
+                <div class="cell">
+                    <div class="k">Tanggal</div>
+                    <div class="v">{{ now()->format('d M Y') }}</div>
+                </div>
+                <div class="cell">
+                    <div class="k">Status</div>
+                    <div class="v"><span class="dot"></span>Publik</div>
+                </div>
+            </div>
+
+            <div class="title">{{ strip_tags($case->title ?? 'Tanpa Judul') }}</div>
 
             @if(!empty($case->description))
-            <p class="label">Ringkasan</p>
-            <p class="description">
-                {{ \Illuminate\Support\Str::limit(strip_tags($case->description), 280) }}
-            </p>
+            <p class="text">{{ \Illuminate\Support\Str::limit(strip_tags($case->description), 280) }}</p>
             @endif
 
-            <!-- Info strip -->
-            <div class="info-strip">
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value">🟢 Publik</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Tanggal</div>
-                    <div class="info-value">{{ now()->format('d M Y') }}</div>
-                </div>
-            </div>
+            <a href="{{ route('public.verify.case', ['locale' => app()->getLocale(), 'caseNumber' => $case->case_number]) }}" class="cta">
+                Lihat Detail Kasus
+            </a>
 
-            <!-- CTA -->
-            <div class="cta-wrap">
-                <a href="{{ route('public.verify.case', ['locale' => app()->getLocale(), 'caseNumber' => $case->case_number]) }}" class="cta-btn">
-                    Lihat Detail Kasus →
-                </a>
-            </div>
-
-            <div class="divider"></div>
-
-            <!-- Urgency note -->
-            <div class="urgency">
-                <div class="urgency-icon">⚡</div>
-                <div class="urgency-text">
-                    <strong>Tindak lanjuti segera</strong>
-                    Kasus ini sudah dapat dilihat oleh publik. Pastikan semua data sudah lengkap dan akurat.
-                </div>
+            <div class="note">
+                <div class="nk">Tindak lanjuti segera</div>
+                <div class="nt">Kasus ini kini dapat diakses oleh publik. Pastikan seluruh data dan dokumen pendukung telah lengkap serta akurat sebelum ditinjau lebih lanjut.</div>
             </div>
 
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p class="org">CTIS Auriga</p>
+            <div class="org">Auriga CTIS</div>
+            <div class="org-sub">Case Tracking Information System</div>
+            <div class="fr"></div>
             <p>
-                Email ini dikirim otomatis oleh sistem.<br>
-                Jangan balas email ini langsung.<br>
-                <a href="{{ url('/') }}">Kunjungi Website</a>
+                Email ini dikirim otomatis oleh sistem karena Anda berlangganan notifikasi kasus baru.<br>
+                Mohon jangan membalas email ini secara langsung.<br>
+                <a href="{{ url('/') }}">Kunjungi situs</a>
             </p>
         </div>
 

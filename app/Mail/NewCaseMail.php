@@ -17,7 +17,7 @@ class NewCaseMail extends Mailable
     public function build(): self
     {
         return $this
-            ->subject('🔔 Kasus Baru: ' . strip_tags($this->case->title))
+            ->subject('[CTIS] Kasus Baru — ' . strip_tags($this->case->title))
             ->view('emails.new-case-notification');
     }
 

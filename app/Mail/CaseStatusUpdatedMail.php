@@ -21,7 +21,7 @@ class CaseStatusUpdatedMail extends Mailable
         $label = strip_tags($this->case->title ?? $this->case->case_number ?? 'Kasus');
 
         return $this
-            ->subject('🔄 Update Status Kasus: ' . $label)
+            ->subject('[CTIS] Pembaruan Status — ' . $label)
             ->view('emails.case-status-updated');
     }
 }

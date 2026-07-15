@@ -1,50 +1,52 @@
 <div>
-    <div class="max-w-7xl mx-auto px-6 py-8">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6 py-6 space-y-4">
+
+        <div class="cms-panel cms-rise" style="animation-delay:.04s">
 
             <!-- Header -->
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-gray-800">Categories</h2>
-
-                <a href="{{ route('categoris.create') }}"
-                    class="px-4 py-2 bg-black text-white rounded-xl text-sm hover:bg-gray-800 transition">
+            <div class="cms-panel-head">
+                <div>
+                    <div class="cms-eyebrow">Catalog</div>
+                    <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Categories</h1>
+                </div>
+                <a href="{{ route('categoris.create') }}" class="cms-btn cms-btn-leaf">
                     + Add Category
                 </a>
             </div>
 
             <!-- Table Wrapper -->
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
+                <table class="cms-table w-full">
+                    <thead>
                         <tr>
-                            <th class="px-5 py-3.5 text-left font-semibold">ID</th>
-                            <th class="px-5 py-3.5 text-left font-semibold">Name</th>
-                            <th class="px-5 py-3.5 text-left font-semibold">Slug</th>
-                            <th class="px-5 py-3.5 text-left font-semibold">Status</th>
-                            <th class="px-5 py-3.5 text-right font-semibold w-32">Actions</th>
+                            <th class="num">ID</th>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Status</th>
+                            <th class="text-right w-32">Actions</th>
                         </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-gray-50">
+                    <tbody>
                         @foreach ($categories as $index => $category)
-                        <tr class="hover:bg-gray-50/70 transition-colors">
-                            <td class="px-5 py-4 font-semibold text-gray-900">{{ ($categories->currentPage() - 1) *
+                        <tr wire:key="cat-{{ $category->id }}">
+                            <td class="num">{{ ($categories->currentPage() - 1) *
                                 $categories->perPage() + $index + 1 }}</td>
-                            <td class="px-5 py-4 text-gray-800">{{ $category->translation('id')->name }}</td>
-                            <td class="px-5 py-4 text-gray-600">{{ $category->slug }}</td>
-                            <td class="px-5 py-4">
+                            <td>{{ $category->translation('id')->name }}</td>
+                            <td class="font-mono-c text-[color:var(--muted)]">{{ $category->slug }}</td>
+                            <td>
                                 @if ($category->is_active)
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700">Active</span>
+                                <x-internal.badge variant="ok">Active</x-internal.badge>
                                 @else
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">Inactive</span>
+                                <x-internal.badge variant="danger">Inactive</x-internal.badge>
                                 @endif
                             </td>
-                            <td class="px-5 py-4 text-right">
+                            <td class="text-right">
                                 <div class="flex gap-3 justify-end">
                                     <a href="{{ route('categoris.edit', $category->id) }}"
-                                        class="text-xs font-semibold text-blue-600 hover:text-blue-900 transition-colors">Edit</a>
+                                        class="cms-btn cms-btn-ghost">Edit</a>
 
-                                    <button wire:click='destroy({{ $category->id }})' class="text-xs font-semibold text-red-600 hover:text-red-900 transition-colors">
+                                    <button wire:click='destroy({{ $category->id }})' class="cms-btn cms-btn-danger">
                                         Delete
                                     </button>
 
@@ -57,12 +59,13 @@
                 </table>
             </div>
         </div>
+
         <!-- Pagination -->
-        <div class="mt-4">
+        <div class="mt-1">
             {{ $categories->links() }}
         </div>
         @if (session('success'))
-        <p class="mt-4 text-green-600">{{ session('success') }}</p>
+        <p class="text-sm text-[color:var(--leaf-deep)]">{{ session('success') }}</p>
         @endif
     </div>
 </div>

@@ -1,47 +1,57 @@
-<div>
-    <div class="mx-10 px-4 py-10 space-y-8">
+<div class="max-w-7xl mx-auto px-6 py-6 space-y-4 cms-rise" style="animation-delay:.04s">
 
-        {{-- ================= HEADER ================= --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold">
-                    Laporan #{{ $report->report_code }}
-                </h1>
-                <p class="text-sm text-gray-500">
-                    Dibuat {{ $report->created_at->format('d M Y, H:i') }}
-                </p>
-            </div>
-
-            {{-- STATUS BADGE --}}
-            <span class="px-4 py-2 rounded-full text-sm font-medium w-fit
-                @if($report->status?->key === 'open') bg-yellow-100 text-yellow-800
-                @elseif($report->status?->key === 'verified') bg-blue-100 text-blue-800
-                @elseif($report->status?->key === 'rejected') bg-red-100 text-red-800
-                @endif
-            ">
-                {{ $report->status?->name ?? '-' }}
-            </span>
+    {{-- ================= HEADER ================= --}}
+    <div class="cms-panel-head">
+        <div>
+            <div class="cms-eyebrow">LAPORAN</div>
+            <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">
+                Laporan <span class="font-mono-c">#{{ $report->report_code }}</span>
+            </h1>
+            <div class="cms-panel-sub">Dibuat {{ $report->created_at->format('d M Y, H:i') }}</div>
         </div>
 
-        {{-- ================= GRID LAYOUT ================= --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {{-- STATUS BADGE --}}
+        @if($report->status?->key === 'open')
+            <x-internal.badge variant="warn">{{ $report->status?->name ?? '-' }}</x-internal.badge>
+        @elseif($report->status?->key === 'verified')
+            <x-internal.badge variant="ok">{{ $report->status?->name ?? '-' }}</x-internal.badge>
+        @elseif($report->status?->key === 'rejected')
+            <x-internal.badge variant="danger">{{ $report->status?->name ?? '-' }}</x-internal.badge>
+        @else
+            <x-internal.badge variant="default">{{ $report->status?->name ?? '-' }}</x-internal.badge>
+        @endif
+    </div>
 
-            {{-- ================= LEFT CONTENT ================= --}}
-            <div class="lg:col-span-2 space-y-6">
+    {{-- ================= GRID LAYOUT ================= --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-                {{-- REPORT DESCRIPTION --}}
-                <div class="bg-white border rounded-xl p-6">
-                    <h2 class="font-semibold text-lg mb-3">Deskripsi Laporan</h2>
+        {{-- ================= LEFT CONTENT ================= --}}
+        <div class="lg:col-span-2 space-y-4">
 
-                    <p class="text-gray-700 leading-relaxed whitespace-pre-line">
+            {{-- REPORT DESCRIPTION --}}
+            <div class="cms-panel cms-rise" style="animation-delay:.10s">
+                <div class="cms-panel-head">
+                    <div>
+                        <div class="cms-eyebrow">RINGKASAN</div>
+                        <div class="cms-panel-title">Deskripsi Laporan</div>
+                    </div>
+                </div>
+                <div class="cms-panel-body" style="padding:16px 20px">
+                    <p class="text-sm text-[color:var(--ink-2)] leading-relaxed whitespace-pre-line">
                         {{ strip_tags($report->translations->where('locale','id')->first()->description ?? 'Tidak ada deskripsi.') }}
                     </p>
                 </div>
+            </div>
 
-                {{-- EVIDENCE --}}
-                <div class="bg-white border rounded-xl p-6">
-                    <h2 class="font-semibold text-lg mb-4">Bukti / Evidence</h2>
-
+            {{-- EVIDENCE --}}
+            <div class="cms-panel cms-rise" style="animation-delay:.16s">
+                <div class="cms-panel-head">
+                    <div>
+                        <div class="cms-eyebrow">LAMPIRAN</div>
+                        <div class="cms-panel-title">Bukti / Evidence</div>
+                    </div>
+                </div>
+                <div class="cms-panel-body" style="padding:16px 20px">
                     @if ($report->evidence && count($report->evidence))
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         @foreach ($report->evidence as $ev)
@@ -54,109 +64,121 @@
 
                         @if ($isImage)
                         <a href="{{ asset($path) }}" target="_blank"
-                            class="group relative border rounded-lg overflow-hidden">
+                            class="group relative border border-[color:var(--hairline)] rounded-lg overflow-hidden">
                             <img src="{{ asset($path) }}"
                                 class="h-40 w-full object-cover group-hover:scale-105 transition">
                         </a>
 
                         @elseif ($ext === 'pdf')
                         <a href="{{ asset($path) }}" target="_blank"
-                            class="flex flex-col items-center justify-center h-40 border rounded-lg bg-gray-50 hover:bg-gray-100">
-                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
-                            <span class="text-sm mt-2">View PDF</span>
+                            class="flex flex-col items-center justify-center h-40 border border-[color:var(--hairline)] rounded-lg bg-[color:var(--paper)] hover:bg-[color:var(--paper-2)]">
+                            <svg class="w-10 h-10 text-[color:var(--muted)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                            <span class="text-sm mt-2 text-[color:var(--ink-2)]">View PDF</span>
                         </a>
 
                         @else
                         <a href="{{ asset($path) }}" download
-                            class="flex flex-col items-center justify-center h-40 border rounded-lg bg-gray-50 hover:bg-gray-100">
-                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
-                            <span class="text-sm mt-2">{{ strtoupper($ext) }} File</span>
+                            class="flex flex-col items-center justify-center h-40 border border-[color:var(--hairline)] rounded-lg bg-[color:var(--paper)] hover:bg-[color:var(--paper-2)]">
+                            <svg class="w-10 h-10 text-[color:var(--muted)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
+                            <span class="text-sm mt-2 text-[color:var(--ink-2)]">{{ strtoupper($ext) }} File</span>
                         </a>
                         @endif
                         @endforeach
                     </div>
                     @else
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-[color:var(--muted)] py-8 text-center">
                         Tidak ada bukti yang dilampirkan.
                     </p>
                     @endif
                 </div>
-
             </div>
 
-            {{-- ================= RIGHT SIDEBAR ================= --}}
-            <div class="space-y-6">
+        </div>
 
-                {{-- REPORTER INFO --}}
-                <div class="bg-white border rounded-xl p-6">
-                    <h2 class="font-semibold text-lg mb-4">Informasi Pelapor</h2>
+        {{-- ================= RIGHT SIDEBAR ================= --}}
+        <div class="space-y-4">
 
-                    <div class="space-y-3 text-sm">
-                        <div>
-                            <p class="text-gray-500">Nama</p>
-                            <p class="font-medium">{{ $report->nama_lengkap }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500">NIK</p>
-                            <p class="font-medium">{{ $report->nik }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500">Jenis Kelamin</p>
-                            <p class="font-medium">{{ $report->jenis_kelamin }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500">No HP</p>
-                            <p class="font-medium">{{ $report->no_hp }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500">Email</p>
-                            <p class="font-medium break-all">{{ $report->email }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500">Pekerjaan</p>
-                            <p class="font-medium">{{ $report->pekerjaan }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500">Alamat</p>
-                            <p class="font-medium">{{ $report->alamat }}</p>
-                        </div>
+            {{-- REPORTER INFO --}}
+            <div class="cms-panel cms-rise" style="animation-delay:.10s">
+                <div class="cms-panel-head">
+                    <div>
+                        <div class="cms-eyebrow">PELAPOR</div>
+                        <div class="cms-panel-title">Informasi Pelapor</div>
                     </div>
                 </div>
+                <div class="cms-panel-body" style="padding:16px 20px">
+                    <dl class="space-y-3 text-sm">
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">Nama</dt>
+                            <dd class="font-medium text-[color:var(--ink)]">{{ $report->nama_lengkap }}</dd>
+                        </div>
 
-                {{-- ACTION PANEL --}}
-                <div class="bg-white border rounded-xl p-6">
-                    <h2 class="font-semibold text-lg mb-4">Aksi</h2>
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">NIK</dt>
+                            <dd class="font-medium text-[color:var(--ink)] font-mono-c">{{ $report->nik }}</dd>
+                        </div>
 
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">Jenis Kelamin</dt>
+                            <dd class="font-medium text-[color:var(--ink)]">{{ $report->jenis_kelamin }}</dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">No HP</dt>
+                            <dd class="font-medium text-[color:var(--ink)] font-mono-c">{{ $report->no_hp }}</dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">Email</dt>
+                            <dd class="font-medium text-[color:var(--ink)] break-all">{{ $report->email }}</dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">Pekerjaan</dt>
+                            <dd class="font-medium text-[color:var(--ink)]">{{ $report->pekerjaan }}</dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-medium text-[color:var(--muted)] mb-1">Alamat</dt>
+                            <dd class="font-medium text-[color:var(--ink)]">{{ $report->alamat }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            {{-- ACTION PANEL --}}
+            <div class="cms-panel cms-rise" style="animation-delay:.16s">
+                <div class="cms-panel-head">
+                    <div>
+                        <div class="cms-eyebrow">AKSI</div>
+                        <div class="cms-panel-title">Tindakan</div>
+                    </div>
+                </div>
+                <div class="cms-panel-body" style="padding:16px 20px">
                     <div class="space-y-3">
                         @if ($report->status?->key === 'open')
 
                         @can('report.verify', $report)
                         <button wire:click="verify"
                             title="Periksa bukti singkat dan klik untuk memberi tanda laporan terverifikasi"
-                            class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            class="cms-btn cms-btn-leaf w-full justify-center">
                             Verifikasi Laporan
                         </button>
                         @else
                         <button disabled title="Anda tidak memiliki izin untuk memverifikasi laporan"
-                            class="w-full px-4 py-2 bg-green-600 text-white rounded-lg opacity-60 cursor-not-allowed">
+                            class="cms-btn cms-btn-leaf w-full justify-center opacity-60 cursor-not-allowed">
                             Verifikasi Laporan
                         </button>
                         @endcan
 
                         @can('report.reject', $report)
                         <button wire:click="rejected" title="Tandai laporan sebagai ditolak (beri alasan di timeline)"
-                            class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            class="cms-btn cms-btn-danger w-full justify-center">
                             Tolak Laporan
                         </button>
                         @else
                         <button disabled title="Anda tidak memiliki izin untuk menolak laporan"
-                            class="w-full px-4 py-2 bg-red-600 text-white rounded-lg opacity-60 cursor-not-allowed">
+                            class="cms-btn cms-btn-danger w-full justify-center opacity-60 cursor-not-allowed">
                             Tolak Laporan
                         </button>
                         @endcan
@@ -166,24 +188,24 @@
                         @if ($report->status?->key === 'verified')
                         <button wire:click="convertToCase"
                             title="Buat case dari laporan ini dan generate tugas sesuai kategori"
-                            class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            class="cms-btn cms-btn-primary w-full justify-center">
                             Buat Case
                         </button>
 
-                        <p class="text-xs text-gray-500 mt-2">Jika dikonfirmasi: sistem akan membuat case dan
+                        <p class="text-xs text-[color:var(--muted)] mt-2">Jika dikonfirmasi: sistem akan membuat case dan
                             men-generate tugas otomatis berdasarkan template kategori.</p>
                         @endif
                     </div>
 
                     @if (session('success'))
-                    <p class="mt-4 text-green-600 text-sm font-medium">
+                    <p class="mt-4 text-sm font-medium text-[color:var(--ok)]">
                         {{ session('success') }}
                     </p>
                     @endif
                 </div>
-
             </div>
-        </div>
 
+        </div>
     </div>
+
 </div>

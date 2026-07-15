@@ -16,9 +16,15 @@ class EmailVerificationPromptController extends Controller
     {
         if ($request->user()->hasVerifiedEmail()) {
             $role = $request->user()->role ?? 'public';
-            $route = in_array($role, ['admin', 'cso']) ? 'dashboard' : 'dashboard-user';
 
-            return redirect()->route($route);
+            // dashboard admin (route 'dashboard') berada di luar group {locale},
+            // jadi tidak butuh parameter locale. Sedangkan 'dashboard-user' ada
+            // di dalam group {locale} → wajib sertakan locale.
+            if (in_array($role, ['admin', 'cso'])) {
+                return redirect()->route('dashboard');
+            }
+
+            return redirect()->route('dashboard-user', ['locale' => app()->getLocale()]);
         }
 
         return view('auth.verify-email');

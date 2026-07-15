@@ -6,37 +6,44 @@
         <div class="fixed inset-0 bg-black/40" @click="open = false"></div>
 
         <!-- modal -->
-        <div class="bg-white p-6 w-full max-w-lg rounded shadow relative z-50">
-
-            <h2 class="text-lg font-bold mb-4">
-                {{ $mode === 'create' ? 'Upload Timeline' : 'Edit Timeline' }}
-            </h2>
-
-            {{-- title --}}
-            <div class="mb-4">
-                <label class="text-sm">Note</label>
-                <input wire:model="notes" class="border w-full px-3 py-2">
+        <div class="cms-panel w-full max-w-lg relative z-50" @click.away="open = false">
+            <div class="cms-panel-head">
+                <div>
+                    <div class="cms-eyebrow">Linimasa</div>
+                    <h2 class="cms-panel-title">
+                        {{ $mode === 'create' ? 'Tambah Entri' : 'Edit Entri' }}
+                    </h2>
+                </div>
+                <button @click="open=false" class="cms-btn cms-btn-ghost">Tutup</button>
             </div>
 
-            {{-- buttons --}}
-            <div class="flex justify-between mt-6">
+            <div class="cms-panel-body" style="padding:16px 20px">
+                {{-- note --}}
+                <div class="mb-3">
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Catatan</label>
+                    <input wire:model="notes" class="cms-input w-full">
+                </div>
 
-                {{-- delete --}}
-                @if($mode === 'edit')
-                <button wire:click="delete" class="px-4 py-2 bg-red-600 text-white">
-                    Delete
-                </button>
-                @endif
+                {{-- buttons --}}
+                <div class="flex justify-between mt-4">
 
-                <div class="flex gap-3">
-                    <button @click="open=false" class="px-4 py-2 border">Cancel</button>
-
-                    <button wire:click="save" class="px-4 py-2 bg-black text-white">
-                        {{ $mode === 'create' ? 'Upload' : 'Save Changes' }}
+                    {{-- delete --}}
+                    @if($mode === 'edit')
+                    <button wire:click="delete" class="cms-btn cms-btn-danger"
+                        onclick="return confirm('Hapus entri ini?')">
+                        Hapus
                     </button>
+                    @endif
+
+                    <div class="flex gap-2 ml-auto">
+                        <button @click="open=false" class="cms-btn cms-btn-ghost">Batal</button>
+
+                        <button wire:click="save" class="cms-btn cms-btn-leaf">
+                            {{ $mode === 'create' ? 'Unggah' : 'Simpan' }}
+                        </button>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

@@ -39,7 +39,7 @@ class VerifyEmailMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Verifikasi Email Anda',
+            subject: '[CTIS] Verifikasi Email Anda',
         );
     }
 

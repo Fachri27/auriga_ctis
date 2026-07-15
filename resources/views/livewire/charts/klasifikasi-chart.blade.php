@@ -1,10 +1,18 @@
 <div wire:ignore>
-    <div class="max-w-5xl mx-auto py-10">
-        <h1 class="text-2xl font-bold mb-2">Indeksasi Putusan Perkara</h1>
-        <p class="text-gray-500 mb-6">Jumlah perkara berdasarkan klasifikasi</p>
+    <div class="max-w-5xl mx-auto px-6 py-6 space-y-4 cms-rise" style="animation-delay:.04s">
+        <div class="border-b border-[color:var(--hairline)] pb-3">
+            <div class="cms-eyebrow">INDEKSASI</div>
+            <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Indeksasi Putusan Perkara</h1>
+            <p class="text-xs text-[color:var(--muted)] mt-1">Jumlah perkara berdasarkan klasifikasi</p>
+        </div>
 
-        <div class="bg-white border rounded-lg p-6 shadow-sm">
-            <div id="chart" style="height: 500px; width: 100%;"></div>
+        <div class="cms-panel">
+            <div class="cms-panel-head">
+                <div class="cms-panel-title">Grafik</div>
+            </div>
+            <div class="cms-panel-body" style="padding:16px 20px">
+                <div id="chart" style="height: 500px; width: 100%;"></div>
+            </div>
         </div>
     </div>
 </div>

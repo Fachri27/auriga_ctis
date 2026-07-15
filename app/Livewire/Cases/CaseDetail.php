@@ -59,7 +59,34 @@ class CaseDetail extends Component
             abort(404, 'Case not found');
         }
 
-        $this->availableStatuses = Status::pluck('name','key')->toArray();
+        $this->availableStatuses = (function () {
+            $all = Status::pluck('name', 'key')->toArray();
+
+            // Urutan mengikuti lifecycle bar status (progress bar) di case-detail:
+            // open → verified → published → penyelidikan/investigation → penuntutan
+            // → persidangan → dijalankan → selesai → ditutup → ditolak → dikonversi.
+            // Status baru yang tidak ada di daftar tetap ditampilkan di akhir.
+            $barOrder = [
+                'open', 'verified', 'published', 'penyelidikan', 'investigation',
+                'penyidikan', 'prosecution', 'trial', 'vonis',
+                'berkekuatan-hukum-tetap', 'executed', 'completed',
+                'closed', 'rejected', 'converted',
+            ];
+
+            $ordered = [];
+            foreach ($barOrder as $key) {
+                if (isset($all[$key])) {
+                    $ordered[$key] = $all[$key];
+                }
+            }
+            foreach ($all as $key => $label) {
+                if (! isset($ordered[$key])) {
+                    $ordered[$key] = $label;
+                }
+            }
+
+            return $ordered;
+        })();
 
         if ($this->case->latitude && $this->case->longitude) {
             $this->location = app(ReverseGeocoder::class)

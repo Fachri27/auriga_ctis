@@ -6,77 +6,91 @@
         <div class="fixed inset-0 bg-black/40" @click="open = false"></div>
 
         <!-- modal -->
-        <div class="bg-white p-6 w-full max-w-lg rounded shadow relative z-50">
+        <div class="cms-panel relative z-50 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
 
-            <h2 class="text-lg font-bold mb-4">
-                {{ $mode === 'create' ? 'Upload Document' : 'Edit Document' }}
-            </h2>
-
-            {{-- select process --}}
-            <div class="mb-4">
-                <label class="text-sm">Related Process (optional)</label>
-                <select wire:model="process_id" class="w-full border px-3 py-2">
-                    <option value="">General Document</option>
-
-                    @foreach($processes as $p)
-                    <option value="{{ $p->id }}" @selected($process_id==$p->id)
-                        >
-                        {{ $p->id }} — Order {{ $p->order_no }}
-                    </option>
-
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- title --}}
-            <div class="mb-4">
-                <label class="text-sm">Title (optional)</label>
-                <input wire:model="title" class="border w-full px-3 py-2">
-            </div>
-
-            {{-- EXISTING FILE PREVIEW --}}
-            @if($mode === 'edit' && $existing_file)
-            <div class="mb-4 border p-3 rounded bg-gray-50">
-                <p class="font-semibold mb-2">Current File:</p>
-
-                @if(Str::contains($existing_mime, 'image'))
-                <img src="{{ asset($existing_file) }}" class="max-w-full rounded">
-                @else
-                <a href="{{ asset($existing_file) }}" target="_blank" class="text-blue-600 underline">
-                    Open File
-                </a>
-                @endif
-            </div>
-            @endif
-
-            {{-- upload new file --}}
-            <div class="mb-4">
-                <label class="text-sm">
-                    {{ $mode === 'edit' ? 'Replace File (optional)' : 'Choose File' }}
-                </label>
-                <input type="file" wire:model="file" class="border w-full px-3 py-2">
-                @error('file') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
-            </div>
-
-            {{-- buttons --}}
-            <div class="flex justify-between mt-6">
-
-                {{-- delete --}}
-                @if($mode === 'edit')
-                @can('case.document.delete')
-                <button wire:click="delete" class="px-4 py-2 bg-red-600 text-white">
-                    Delete
-                </button>
-                @endcan
-                @endif
-
-                <div class="flex gap-3">
-                    <button @click="open=false" class="px-4 py-2 border">Cancel</button>
-
-                    <button wire:click="save" class="px-4 py-2 bg-black text-white">
-                        {{ $mode === 'create' ? 'Upload' : 'Save Changes' }}
-                    </button>
+            <!-- HEADER -->
+            <div class="cms-panel-head">
+                <div>
+                    <div class="cms-eyebrow">DOCUMENTS</div>
+                    <h2 class="cms-panel-title">
+                        {{ $mode === 'create' ? 'Upload Document' : 'Edit Document' }}
+                    </h2>
                 </div>
+                <button class="cms-btn cms-btn-ghost" @click="open = false">Close</button>
+            </div>
+
+            <!-- BODY -->
+            <div class="cms-panel-body space-y-4" style="padding:20px">
+
+                {{-- select process --}}
+                <div>
+                    <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">Related Process (optional)</label>
+                    <select wire:model="process_id" class="cms-input w-full">
+                        <option value="">General Document</option>
+
+                        @foreach($processes as $p)
+                        <option value="{{ $p->id }}" @selected($process_id==$p->id)
+                            >
+                            {{ $p->id }} — Order {{ $p->order_no }}
+                        </option>
+
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- title --}}
+                <div>
+                    <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">Title (optional)</label>
+                    <input wire:model="title" class="cms-input w-full">
+                </div>
+
+                {{-- EXISTING FILE PREVIEW --}}
+                @if($mode === 'edit' && $existing_file)
+                <div class="border border-[color:var(--hairline)] rounded-[10px] p-3 bg-[color:var(--paper)]">
+                    <p class="text-xs font-medium text-[color:var(--ink)] mb-2">Current File</p>
+
+                    @if(Str::contains($existing_mime, 'image'))
+                    <img src="{{ asset($existing_file) }}" class="max-w-full rounded">
+                    @else
+                    <a href="{{ asset($existing_file) }}" target="_blank" class="text-[color:var(--leaf-deep)] underline">
+                        Open File
+                    </a>
+                    @endif
+                </div>
+                @endif
+
+                {{-- upload new file --}}
+                <div>
+                    <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">
+                        {{ $mode === 'edit' ? 'Replace File (optional)' : 'Choose File' }}
+                    </label>
+                    <input type="file" wire:model="file" class="cms-input w-full">
+                    @error('file') <p class="text-sm text-[color:var(--danger)]">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- buttons --}}
+                <div class="flex justify-between items-center pt-2 border-t border-[color:var(--hairline)]">
+
+                    {{-- delete --}}
+                    <div>
+                        @if($mode === 'edit')
+                        @can('case.document.delete')
+                        <button wire:click="delete" class="cms-btn cms-btn-danger">
+                            Delete
+                        </button>
+                        @endcan
+                        @endif
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button @click="open=false" class="cms-btn cms-btn-ghost">Cancel</button>
+
+                        <button wire:click="save" class="cms-btn cms-btn-leaf">
+                            {{ $mode === 'create' ? 'Upload' : 'Save Changes' }}
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
         </div>

@@ -1,244 +1,194 @@
-@php
-$breadcrumbs = [
-['label' => 'Dashboard', 'url' => route('dashboard')]
-];
-$pageTitle = 'Dashboard Overview';
-$pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
-@endphp
-
 <x-internal-layout>
 
-    {{-- ================= SUMMARY CARDS ================= --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 max-w-7xl mx-auto mt-10">
-        {{-- Total Cases Card --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-            <div class="p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Cases</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($totalCases) }}</p>
-                        <p class="mt-1 text-xs text-gray-500">All cases in system</p>
-                    </div>
-                    <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                    </div>
+    {{-- ================= COMMAND STRIP ================= --}}
+    <section class="console-grid text-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="cms-rise flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                <div>
+                    <div class="cms-eyebrow on-ink">Command Overview</div>
+                    <h1 class="font-display text-[34px] leading-[1.1] font-bold tracking-tight mt-2">
+                        Case Tracking Console
+                    </h1>
+                    <p class="text-white/65 text-sm mt-2 max-w-xl">
+                        Operasional harian Auriga CTIS — pantau kasus, laporan masuk, dan distribusi publikasi.
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('charts.sync') }}" class="cms-btn cms-btn-ghost" style="border-color:rgba(255,255,255,0.22);color:#fff;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Sync Charts
+                    </a>
+                    <a href="{{ route('dashboard.export.csv') }}" class="cms-btn" style="background:var(--leaf);color:var(--ink);border:1px solid var(--leaf);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Export CSV
+                    </a>
+                    <a href="{{ route('dashboard.export.excel') }}" class="cms-btn cms-btn-ghost" style="border-color:rgba(255,255,255,0.22);color:#fff;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Excel
+                    </a>
                 </div>
             </div>
         </div>
+    </section>
 
-        {{-- New Reports Today Card --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-            <div class="p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">New Reports Today</p>
-                        <p class="mt-2 text-3xl font-bold text-green-600">{{ number_format($newReportsToday) }}</p>
-                        <p class="mt-1 text-xs text-gray-500">Created today</p>
-                    </div>
-                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                            </path>
-                        </svg>
-                    </div>
+    {{-- ================= STAT TILES ================= --}}
+    <div class="max-w-7xl mx-auto px-6 -mt-5 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="cms-tile cms-rise" style="animation-delay:.04s">
+                <div class="cms-tile-glyph">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
+                <div class="cms-tile-meta">Total Cases</div>
+                <div class="cms-tile-num">{{ number_format($totalCases) }}</div>
+                <div class="cms-tile-foot">All cases in system</div>
             </div>
-        </div>
 
-        {{-- Published Cases Card --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-            <div class="p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Published</p>
-                        <p class="mt-2 text-3xl font-bold text-purple-600">{{ number_format($publishedCases) }}</p>
-                        <p class="mt-1 text-xs text-gray-500">Public cases</p>
-                    </div>
-                    <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                            </path>
-                        </svg>
-                    </div>
+            <div class="cms-tile is-ok cms-rise" style="animation-delay:.10s">
+                <div class="cms-tile-glyph">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 </div>
+                <div class="cms-tile-meta">New Reports · Today</div>
+                <div class="cms-tile-num">{{ number_format($newReportsToday) }}</div>
+                <div class="cms-tile-foot">Created today</div>
             </div>
-        </div>
 
-        {{-- Unpublished Cases Card --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-            <div class="p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Unpublished</p>
-                        <p class="mt-2 text-3xl font-bold text-orange-600">{{ number_format($unpublishedCases) }}</p>
-                        <p class="mt-1 text-xs text-gray-500">Private cases</p>
-                    </div>
-                    <div class="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
-                            </path>
-                        </svg>
-                    </div>
+            <div class="cms-tile is-ok cms-rise" style="animation-delay:.16s">
+                <div class="cms-tile-glyph">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 </div>
+                <div class="cms-tile-meta">Published</div>
+                <div class="cms-tile-num">{{ number_format($publishedCases) }}</div>
+                <div class="cms-tile-foot">Public cases</div>
+            </div>
+
+            <div class="cms-tile is-warn cms-rise" style="animation-delay:.22s">
+                <div class="cms-tile-glyph">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59"/></svg>
+                </div>
+                <div class="cms-tile-meta">Unpublished</div>
+                <div class="cms-tile-num">{{ number_format($unpublishedCases) }}</div>
+                <div class="cms-tile-foot">Private cases</div>
             </div>
         </div>
     </div>
 
-    {{-- ================= CHARTS SECTION ================= --}}
-    {{-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"> --}}
-        {{-- Bar Chart: Cases per Category --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 max-w-7xl mx-auto">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Cases per Category</h3>
-                <div style="position: relative; height: 300px;">
+    {{-- ================= CHARTS ================= --}}
+    <div class="max-w-7xl mx-auto px-6 mt-8 space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="cms-panel cms-rise" style="animation-delay:.28s">
+                <div class="cms-panel-head">
+                    <div>
+                        <div class="cms-eyebrow">Distribution</div>
+                        <h3 class="cms-panel-title mt-1">Cases per Category</h3>
+                    </div>
+                </div>
+                <div class="cms-panel-body" style="position:relative;height:300px;">
                     <canvas id="categoryChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        {{-- Pie Chart: Case Status Distribution --}}
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 max-w-7xl mx-auto">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Case Status Distribution</h3>
-                <div style="position: relative; height: 300px;">
+            <div class="cms-panel cms-rise" style="animation-delay:.34s">
+                <div class="cms-panel-head">
+                    <div>
+                        <div class="cms-eyebrow">Composition</div>
+                        <h3 class="cms-panel-title mt-1">Case Status Distribution</h3>
+                    </div>
+                </div>
+                <div class="cms-panel-body" style="position:relative;height:300px;">
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
         </div>
-        {{--
-    </div> --}}
 
-    {{-- Line Chart: Reports Over Time --}}
-    {{-- <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8"> --}}
-        <div class="p-6 max-w-7xl mx-auto">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Reports Over Time (Last 30 Days)</h3>
-            <div style="position: relative; height: 300px;">
+        <div class="cms-panel cms-rise" style="animation-delay:.40s">
+            <div class="cms-panel-head">
+                <div>
+                    <div class="cms-eyebrow">Inflow · Last 30 Days</div>
+                    <h3 class="cms-panel-title mt-1">Reports Over Time</h3>
+                </div>
+            </div>
+            <div class="cms-panel-body" style="position:relative;height:300px;">
                 <canvas id="timeChart"></canvas>
             </div>
         </div>
-        {{--
-    </div> --}}
-
-    {{-- ================= MAP SECTION ================= --}}
-    <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200 mb-8 max-w-7xl mx-auto">
-        <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Case Locations</h3>
-            <p class="text-sm text-gray-500 mt-1">All cases with location data (published and unpublished)</p>
-        </div>
-        <div id="caseMap" class="w-full" style="height: 500px;"></div>
     </div>
 
-    {{-- ================= LATEST CASES TABLE ================= --}}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-7xl mx-auto mb-20">
-        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900">Latest Cases</h3>
-                <p class="text-sm text-gray-500 mt-0.5">Most recently created cases</p>
+    {{-- ================= MAP ================= --}}
+    <div class="max-w-7xl mx-auto px-6 mt-4">
+        <div class="cms-panel cms-rise" style="animation-delay:.46s">
+            <div class="cms-panel-head">
+                <div>
+                    <div class="cms-eyebrow">Geospatial</div>
+                    <h3 class="cms-panel-title mt-1">Case Locations</h3>
+                    <p class="cms-panel-sub">All cases with location data (published and unpublished)</p>
+                </div>
             </div>
-            <div class="flex gap-2">
-                <a href="{{ route('charts.sync') }}"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider bg-[#264c16] text-white rounded-lg hover:bg-[#034454] transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    Sync Charts
-                </a>
-                <a href="{{ route('dashboard.export.csv') }}"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    CSV
-                </a>
-                <a href="{{ route('dashboard.export.excel') }}"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Excel
-                </a>
-            </div>
+            <div id="caseMap" class="w-full" style="height:500px;"></div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-                    <tr>
-                        <th class="px-5 py-3.5 text-left font-semibold">Case Number</th>
-                        <th class="px-5 py-3.5 text-left font-semibold">Category</th>
-                        <th class="px-5 py-3.5 text-left font-semibold">Status</th>
-                        <th class="px-5 py-3.5 text-left font-semibold">Event Date</th>
-                        <th class="px-5 py-3.5 text-left font-semibold">Public?</th>
-                        <th class="px-5 py-3.5 text-right font-semibold">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($latestCases as $case)
-                    <tr class="hover:bg-gray-50/70 transition-colors">
-                        <td class="px-5 py-4 whitespace-nowrap font-semibold text-gray-900">
-                            {{ $case->case_number }}
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $case->category?->translation('id')?->name ?? $case->category?->slug ?? 'Uncategorized' }}
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap">
-                            <x-internal.badge
-                                variant="{{ $case->status?->key === 'new' || $case->status?->key === 'unverified' ? 'new' : ($case->status?->key === 'investigation' || $case->status?->key === 'in_progress' ? 'investigation' : ($case->is_public ? 'published' : 'default')) }}">
-                                {{ $case->status?->name ?? 'Unknown' }}
-                            </x-internal.badge>
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ $case->event_date ? \Carbon\Carbon::parse($case->event_date)->format('M d, Y') : 'N/A' }}
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap text-sm">
-                            @if($case->is_public)
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-700">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></span>
-                                Publik
-                            </span>
-                            @else
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500">
-                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
-                                Privat
-                            </span>
-                            @endif
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end items-center gap-2">
-                                <a href="{{ route('case.detail', $case->id) }}"
-                                    class="text-xs font-semibold text-blue-600 hover:text-blue-900 transition-colors">
-                                    View
-                                </a>
-                                @can('case.update', $case)
-                                @if(!$case->is_public)
-                                <a href="{{ route('case.detail', $case->id) }}"
-                                    class="text-xs font-semibold text-purple-600 hover:text-purple-900 transition-colors">
-                                    Publish
-                                </a>
+    </div>
+
+    {{-- ================= LATEST CASES ================= --}}
+    <div class="max-w-7xl mx-auto px-6 mt-4 mb-20">
+        <div class="cms-panel cms-rise" style="animation-delay:.52s">
+            <div class="cms-panel-head">
+                <div>
+                    <div class="cms-eyebrow">Recent Activity</div>
+                    <h3 class="cms-panel-title mt-1">Latest Cases</h3>
+                    <p class="cms-panel-sub">Most recently created cases</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="cms-table">
+                    <thead>
+                        <tr>
+                            <th>Case Number</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Event Date</th>
+                            <th>Public?</th>
+                            <th class="text-right" style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($latestCases as $case)
+                        <tr>
+                            <td class="num">{{ $case->case_number }}</td>
+                            <td>{{ $case->category?->translation('id')?->name ?? $case->category?->slug ?? 'Uncategorized' }}</td>
+                            <td>
+                                <x-internal.badge
+                                    variant="{{ $case->status?->key === 'new' || $case->status?->key === 'unverified' ? 'new' : ($case->status?->key === 'investigation' || $case->status?->key === 'in_progress' ? 'investigation' : ($case->is_public ? 'published' : 'default')) }}">
+                                    {{ $case->status?->name ?? 'Unknown' }}
+                                </x-internal.badge>
+                            </td>
+                            <td>{{ $case->event_date ? \Carbon\Carbon::parse($case->event_date)->format('M d, Y') : 'N/A' }}</td>
+                            <td>
+                                @if($case->is_public)
+                                    <span class="cms-pill cms-pill-ok"><span class="dot"></span>Publik</span>
                                 @else
-                                <a href="{{ route('case.detail', $case->id) }}"
-                                    class="text-xs font-semibold text-orange-600 hover:text-orange-900 transition-colors">
-                                    Unpublish
-                                </a>
+                                    <span class="cms-pill cms-pill-default"><span class="dot"></span>Privat</span>
                                 @endif
-                                @endcan
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="px-5 py-8 text-center text-sm text-gray-400">
-                            No cases found.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </td>
+                            <td style="text-align:right;">
+                                <div class="flex justify-end items-center gap-4">
+                                    <a href="{{ route('case.detail', $case->id) }}" class="text-xs font-semibold link">Review</a>
+                                    @can('case.update', $case)
+                                    @if(!$case->is_public)
+                                    <a href="{{ route('case.detail', $case->id) }}" class="text-xs font-semibold" style="color:var(--ok);">Publish</a>
+                                    @else
+                                    <a href="{{ route('case.detail', $case->id) }}" class="text-xs font-semibold" style="color:var(--warn);">Unpublish</a>
+                                    @endif
+                                    @endcan
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:var(--muted);padding:40px;">No cases found.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -249,92 +199,70 @@ $pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
     @push('scripts')
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const INK   = '#0B1E07';
+            const LEAF  = '#9BDB4D';
+            const DEEP  = '#2F6C14';
+            const BRAND = '#264c16';
+            const WARN  = '#B5761A';
+            const DANGER= '#B23A3A';
+            const MUTED = '#8a9082';
+
             // ================= BAR CHART: Cases per Category =================
             const categoryData = @json($casesByCategory);
-            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-            new Chart(categoryCtx, {
+            new Chart(document.getElementById('categoryChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: categoryData.map(item => item.category_name),
                     datasets: [{
                         label: 'Number of Cases',
                         data: categoryData.map(item => item.count),
-                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        borderWidth: 1
+                        backgroundColor: DEEP,
+                        hoverBackgroundColor: LEAF,
+                        borderRadius: 5,
+                        borderSkipped: false,
+                        maxBarThickness: 38
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: MUTED, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(11,30,7,0.06)' } },
+                        x: { ticks: { color: '#6b7268', font: { size: 11 } }, grid: { display: false } }
                     }
                 }
             });
 
             // ================= PIE CHART: Case Status Distribution =================
             const statusData = @json($casesByStatus);
-            const statusCtx = document.getElementById('statusChart').getContext('2d');
-            new Chart(statusCtx, {
-                type: 'pie',
+            new Chart(document.getElementById('statusChart').getContext('2d'), {
+                type: 'doughnut',
                 data: {
                     labels: statusData.map(item => item.status_name),
                     datasets: [{
                         data: statusData.map(item => item.count),
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.6)',  // red
-                            'rgba(234, 179, 8, 0.6)',  // yellow
-                            'rgba(34, 197, 94, 0.6)',  // green
-                            'rgba(59, 130, 246, 0.6)', // blue
-                            'rgba(168, 85, 247, 0.6)', // purple
-                            'rgba(251, 146, 60, 0.6)', // orange
-                            'rgba(107, 114, 128, 0.6)' // gray
-                        ],
-                        borderColor: [
-                            'rgba(239, 68, 68, 1)',
-                            'rgba(234, 179, 8, 1)',
-                            'rgba(34, 197, 94, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(168, 85, 247, 1)',
-                            'rgba(251, 146, 60, 1)',
-                            'rgba(107, 114, 128, 1)'
-                        ],
-                        borderWidth: 1
+                        backgroundColor: [INK, LEAF, DEEP, BRAND, WARN, DANGER, MUTED],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 3,
+                        hoverOffset: 6
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false, cutout: '58%',
                     plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+                        legend: { position: 'bottom', labels: { color: '#6b7268', font: { size: 11 }, boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', padding: 14 } }
                     }
                 }
             });
 
             // ================= LINE CHART: Reports Over Time =================
             const timeData = @json($reportsOverTime);
-            // Create date range for last 30 days
-            const dates = [];
-            const counts = [];
+            const dates = [], counts = [];
             const today = new Date();
             for (let i = 29; i >= 0; i--) {
                 const date = new Date(today);
@@ -344,126 +272,82 @@ $pageSubtitle = 'Case Tracking Information System - Internal Dashboard';
                 const dataPoint = timeData.find(d => d.date === dateStr);
                 counts.push(dataPoint ? dataPoint.count : 0);
             }
-
-            const timeCtx = document.getElementById('timeChart').getContext('2d');
-            new Chart(timeCtx, {
+            new Chart(document.getElementById('timeChart').getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: dates.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
                     datasets: [{
                         label: 'Cases Created',
                         data: counts,
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: DEEP,
+                        backgroundColor: 'rgba(155,219,77,0.16)',
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: LEAF
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: MUTED, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(11,30,7,0.06)' } },
+                        x: { ticks: { color: '#6b7268', font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false } }
                     }
                 }
             });
 
             // ================= LEAFLET MAP =================
-            // Initialize map centered on Indonesia
-            const map = L.map('caseMap', {
-                center: [-2.5, 118],
-                zoom: 5,
-                scrollWheelZoom: true
-            });
-
-            // Add OpenStreetMap tile layer
+            const map = L.map('caseMap', { center: [-2.5, 118], zoom: 5, scrollWheelZoom: true });
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 19
+                attribution: '© OpenStreetMap contributors', maxZoom: 19
             }).addTo(map);
 
-            // Get cases data from Blade
             const casesWithLocation = @json($casesWithLocation);
 
-            // Helper function to get marker icon color
             function getMarkerIcon(color) {
                 return L.divIcon({
                     className: 'custom-marker',
-                    html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
+                    html: `<div style="background-color:${color};width:16px;height:16px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(11,30,7,0.35);"></div>`,
+                    iconSize: [16, 16], iconAnchor: [8, 8]
                 });
             }
 
-            // Add markers for each case
             casesWithLocation.forEach(function(caseItem) {
-                if (!caseItem.latitude || !caseItem.longitude) {
-                    return;
-                }
-
+                if (!caseItem.latitude || !caseItem.longitude) return;
                 const lat = parseFloat(caseItem.latitude);
                 const lng = parseFloat(caseItem.longitude);
+                if (isNaN(lat) || isNaN(lng)) return;
 
-                if (isNaN(lat) || isNaN(lng)) {
-                    return;
-                }
-
-                // Determine color
-                const colors = {
-                    'red': '#ef4444',
-                    'yellow': '#eab308',
-                    'green': '#22c55e',
-                    'gray': '#6b7280'
-                };
+                const colors = { red: DANGER, yellow: WARN, green: DEEP, gray: MUTED };
                 const markerColor = colors[caseItem.color] || colors.gray;
 
-                // Create marker
-                const marker = L.marker([lat, lng], {
-                    icon: getMarkerIcon(markerColor)
-                });
+                const marker = L.marker([lat, lng], { icon: getMarkerIcon(markerColor) });
 
-                // Build popup content
-                let popupContent = '<div class="p-3" style="min-width: 200px;">';
-                popupContent += '<div class="font-semibold text-gray-900 mb-2">' + escapeHtml(caseItem.case_number) + '</div>';
-                popupContent += '<div class="text-sm mb-1"><span class="text-gray-500">Status:</span> <span class="font-medium">' + escapeHtml(caseItem.status_name) + '</span></div>';
-                popupContent += '<div class="text-sm mb-2"><span class="text-gray-500">Category:</span> <span class="font-medium">' + escapeHtml(caseItem.category_name) + '</span></div>';
-                popupContent += '<a href="/cms/cases/' + caseItem.id + '/detail" class="inline-block mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition">Review Case</a>';
+                let popupContent = '<div class="p-3" style="min-width:210px;font-family:Poppins,sans-serif;">';
+                popupContent += '<div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a9082;font-family:JetBrains Mono,monospace;">No. Kasus</div>';
+                popupContent += '<div style="font-weight:700;color:#0B1E07;margin-bottom:10px;">' + escapeHtml(caseItem.case_number) + '</div>';
+                popupContent += '<div style="font-size:13px;margin-bottom:2px;color:#6b7268">Status: <span style="color:#0B1E07;font-weight:600">' + escapeHtml(caseItem.status_name) + '</span></div>';
+                popupContent += '<div style="font-size:13px;margin-bottom:12px;color:#6b7268">Category: <span style="color:#0B1E07;font-weight:600">' + escapeHtml(caseItem.category_name) + '</span></div>';
+                popupContent += '<a href="/cms/cases/' + caseItem.id + '/detail" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:#0B1E07;color:#fff;border-radius:8px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;">Review Case</a>';
                 popupContent += '</div>';
 
                 marker.bindPopup(popupContent);
                 marker.addTo(map);
             });
 
-            // Helper function to escape HTML (prevent XSS)
             function escapeHtml(text) {
-                const map = {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                };
+                const map = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' };
                 return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
             }
         });
     </script>
 
     <style>
-        .custom-marker {
-            background: transparent !important;
-            border: none !important;
-        }
+        .custom-marker { background: transparent !important; border: none !important; }
     </style>
     @endpush
+
 </x-internal-layout>

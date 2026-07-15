@@ -1,33 +1,46 @@
 <div wire:ignore>
-    <div class="max-w-5xl mx-auto py-10">
-        <h1 class="text-2xl font-bold mb-2">Putusan Perkara per Tahun</h1>
-        <p class="text-gray-500 mb-6">Total perkara berdasarkan tahun</p>
-
-        <div class="flex items-center gap-4 mb-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tampilan</label>
-                <select wire:model.live="view" wire:change="$refresh"
-                    class="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="tahunan">Total per Tahun</option>
-                    <option value="klasifikasi">per Klasifikasi</option>
-                </select>
-            </div>
-
-            @if ($view === 'klasifikasi' && count($years) > 0)
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Tahun</label>
-                <select wire:model.live="selectedYear" wire:change="$refresh"
-                    class="border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    @foreach ($years as $y)
-                        <option value="{{ $y }}">{{ $y }}</option>
-                    @endforeach
-                </select>
-            </div>
-            @endif
+    <div class="max-w-5xl mx-auto px-6 py-6 space-y-4 cms-rise" style="animation-delay:.04s">
+        <div class="border-b border-[color:var(--hairline)] pb-3">
+            <div class="cms-eyebrow">TAHUNAN</div>
+            <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Putusan Perkara per Tahun</h1>
+            <p class="text-xs text-[color:var(--muted)] mt-1">Total perkara berdasarkan tahun</p>
         </div>
 
-        <div class="bg-white border rounded-lg p-6 shadow-sm">
-            <div id="tahunanChart" style="height: 500px; width: 100%;"></div>
+        <div class="cms-panel">
+            <div class="cms-panel-head">
+                <div class="cms-panel-title">Filter</div>
+            </div>
+            <div class="cms-panel-body" style="padding:16px 20px">
+                <div class="flex items-end gap-4 flex-wrap">
+                    <div>
+                        <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">Tampilan</label>
+                        <select wire:model.live="view" wire:change="$refresh" class="cms-input">
+                            <option value="tahunan">Total per Tahun</option>
+                            <option value="klasifikasi">per Klasifikasi</option>
+                        </select>
+                    </div>
+
+                    @if ($view === 'klasifikasi' && count($years) > 0)
+                    <div>
+                        <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">Filter Tahun</label>
+                        <select wire:model.live="selectedYear" wire:change="$refresh" class="cms-input">
+                            @foreach ($years as $y)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="cms-panel">
+            <div class="cms-panel-head">
+                <div class="cms-panel-title">Grafik</div>
+            </div>
+            <div class="cms-panel-body" style="padding:16px 20px">
+                <div id="tahunanChart" style="height: 500px; width: 100%;"></div>
+            </div>
         </div>
     </div>
 </div>
