@@ -50,11 +50,30 @@
         type="text/css">
 
     <style>
+        :root {
+            --ink: #0B1E07;
+            --ink-2: #143009;
+            --brand: #264c16;
+            --leaf: #9BDB4D;
+            --leaf-deep: #2F6C14;
+            --paper: #F5F7F1;
+            --hairline: #E2E6DA;
+        }
         body {
             font-family: 'Poppins', sans-serif;
             line-height: 24px;
         }
         [x-cloak] { display: none !important; }
+        .font-display { font-family: 'Poppins', sans-serif; }
+        .font-data    { font-family: 'Poppins', sans-serif; }
+        /* Make every public page wrapper (id ending in -page) fill the available main height */
+        main > div[id$="-page"], main > section[id$="-page"] { flex: 1 1 auto; }
+        .console-grid {
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 55px, rgba(255,255,255,0.03) 56px),
+                repeating-linear-gradient(90deg, transparent, transparent 55px, rgba(255,255,255,0.03) 56px);
+            background-size: 56px 56px;
+        }
     </style>
 
     {{-- Scripts --}}
@@ -93,7 +112,7 @@
 
 
     <!-- Page Content -->
-    <main class="flex-grow">
+    <main class="flex-grow flex flex-col">
         @yield('content')
         {{ $slot ?? '' }}
     </main>

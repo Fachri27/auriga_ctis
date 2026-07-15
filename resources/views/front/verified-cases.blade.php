@@ -6,29 +6,39 @@
 @endphp
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 py-10 mt-16 poppins-regular">
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">Kasus Terverifikasi & Dipublikasikan</h1>
-            <p class="text-gray-600">Daftar lengkap kasus yang telah diverifikasi dan dipublikasikan untuk transparansi
-                publik.</p>
-        </div>
+    <div id="verified-cases-page" class="mt-16">
+        {{-- Hero --}}
+        <section class="bg-[#0B1E07] console-grid text-white">
+            <div class="max-w-7xl mx-auto px-4 py-16 md:py-20">
+                <p class="font-data text-xs uppercase tracking-[0.2em] text-[#9BDB4D] mb-3">Monitoring Console</p>
+                <h1 class="font-display text-3xl md:text-4xl font-bold leading-tight mb-4">Kasus Terverifikasi & Dipublikasikan</h1>
+                <p class="max-w-2xl text-white/80 text-sm md:text-base leading-relaxed">
+                    Daftar lengkap kasus yang telah diverifikasi dan dipublikasikan untuk transparansi publik.
+                </p>
+            </div>
+        </section>
 
-        <div id="case-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            @forelse($cases as $case)
-                @include('front.verified-case-card')
-            @empty
-                <div class="col-span-3 text-center text-gray-400 py-16 text-base">
-                    Belum ada kasus terverifikasi &amp; dipublikasikan.
+        {{-- ponytail: infinite-scroll JS retained unchanged to preserve AJAX contract --}}
+        <section class="bg-[#F5F7F1] py-12 md:py-16">
+            <div class="max-w-7xl mx-auto px-4">
+                <div id="case-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    @forelse($cases as $case)
+                        @include('front.verified-case-card')
+                    @empty
+                        <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-[#6b7268] py-16 text-base">
+                            Belum ada kasus terverifikasi &amp; dipublikasikan.
+                        </div>
+                    @endforelse
                 </div>
-            @endforelse
-        </div>
 
-        @if ($cases->hasMorePages())
-        <div id="load-more-sentinel" class="w-full h-1"></div>
-        <div id="loading-spinner" class="w-full flex justify-center py-8">
-            <div class="w-8 h-8 border-2 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
-        </div>
-        @endif
+                @if ($cases->hasMorePages())
+                    <div id="load-more-sentinel" class="w-full h-1"></div>
+                    <div id="loading-spinner" class="w-full flex justify-center py-8">
+                        <div class="w-8 h-8 border-2 border-[#E2E6DA] border-t-[#0B1E07] rounded-full animate-spin"></div>
+                    </div>
+                @endif
+            </div>
+        </section>
     </div>
 
     @push('scripts')

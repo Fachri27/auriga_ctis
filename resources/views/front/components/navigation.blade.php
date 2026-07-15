@@ -1,130 +1,66 @@
 @php
-    app()->getLocale();
+    $navLinks = [
+        ['label' => __('messages.about'), 'href' => route('about-user', ['locale' => app()->getLocale()]), 'active' => request()->routeIs('about-user')],
+        ['label' => 'Dashboard', 'href' => route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']), 'active' => request()->routeIs('public.dashboard')],
+        ['label' => __('messages.artikel'), 'href' => route('public.artikel.list', ['locale' => app()->getLocale()]), 'active' => request()->routeIs('public.artikel.*')],
+        ['label' => __('messages.verified_cases'), 'href' => route('front.verified-cases', ['locale' => app()->getLocale()]), 'active' => request()->routeIs('front.verified-cases')],
+    ];
+    $localeUrl = fn($loc) => route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => $loc]));
 @endphp
-<nav x-data="{ scrolled: false, open: false, navOpen: false }" x-init="
-        window.addEventListener('scroll', () => {
-            scrolled = window.scrollY > 10;
-        });
-    " :class="scrolled ? 'border-transparent'"
-    class="bg-[#264c16] fixed top-0 left-0 z-[9999] w-full transition-colors duration-300 poppins-regular">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 
-        <!-- LEFT: Hamburger (mobile) + Logo -->
-        <div class="flex items-center space-x-3 cursor-pointer">
+<nav x-data="{ open: false }"
+    class="fixed top-0 left-0 z-[9999] w-full bg-[#0B1E07] border-b border-white/10 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-            <!-- HAMBUGER (LEFT SIDE) -->
-            <button @click="open = !open" class="lg:hidden text-white text-xl">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        {{-- LEFT: hamburger (mobile) + logo --}}
+        <div class="flex items-center gap-3">
+            <button @click="open = !open" class="lg:hidden p-1 -ml-1" aria-label="Menu" :aria-expanded="open">
+                <svg x-show="!open" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
+                <svg x-show="open" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/>
+                </svg>
             </button>
+            <a href="{{ route('dashboard-user', ['locale' => app()->getLocale()]) }}" class="flex items-center gap-3">
+                <img src="/img/image.png" class="h-8 sm:h-9 w-auto object-contain" alt="Auriga CTIS">
+                <span class="hidden md:flex items-center gap-3">
+                    <span class="h-6 border-r border-white/20"></span>
+                    <span class="font-data text-[10px] tracking-[0.24em] uppercase text-white/60 leading-tight">Case Tracking<br>Information System</span>
+                </span>
+            </a>
+        </div>
 
-            <!-- LOGO -->
-            <div class="flex items-center space-x-2">
-                <a href="{{ route('dashboard-user') }}">
-                    <img src="/img/image.png" class="h-8 sm:h-9 lg:h-10 w-auto object-contain" alt="Logo">
+        {{-- CENTER: links (desktop) --}}
+        <div class="hidden lg:flex items-center gap-8 font-data text-[11px] uppercase tracking-[0.2em]">
+            @foreach ($navLinks as $link)
+                <a href="{{ $link['href'] }}"
+                    class="flex items-center gap-2 py-1 transition-colors {{ $link['active'] ? 'text-[#9BDB4D]' : 'text-white/75 hover:text-white' }}">
+                    @if ($link['active'])<span class="w-1.5 h-1.5 rounded-full bg-[#9BDB4D]"></span>@endif
+                    {{ $link['label'] }}
                 </a>
-            </div>
+            @endforeach
         </div>
 
-        <!-- MIDDLE MENU (DESKTOP) -->
-        <div
-            class="hidden lg:flex flex-1 items-center justify-center gap-8 text-white text-[11px] uppercase tracking-wide leading-1.5 cursor-pointer">
-            <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.about') }}</a>
-
-            <!-- Public dashboard filters -->
-            <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']) }}"
-                class="hover:text-gray-300 {{ request('filter') === 'active' ? 'font-semibold' : '' }}">Dashboard</a>
-            <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">Artikel</a>
-            <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}" class="hover:text-gray-300">{{ __('messages.verified_cases') }}</a>
-            {{-- <a href="#" class="hover:text-gray-300">Documentation</a> --}}
-        </div>
-
-        <!-- RIGHT SIDE -->
-        <div class="flex items-center space-x-6 text-white text-xs cursor-pointer">
-            <!-- Only show this on mobile -->
-            <div class="lg:hidden md:flex justify-end items-center max-w-7xl mx-auto px-5 py-2 text-xs">
-                <div class="flex space-x-1 text-gray-400">
-                    <a href="{{ route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => 'en'])) }}"
-                        class="hover:text-green-900 {{ app()->getLocale() === 'en' ? 'font-bold text-white' : '' }}">EN</a>
-                    <span>|</span>
-                    <a href="{{ route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => 'id'])) }}"
-                        class="hover:text-green-900 {{ app()->getLocale() === 'id' ? 'font-bold text-white' : '' }}">ID</a>
-                </div>
-            </div>
-
-            <!-- Desktop version -->
-            <div class="hidden lg:flex items-center space-x-6 cursor-pointer leading-1.5">
-                <div class="h-10 border-r border-white/30"></div>
-
-                <div x-data="{ open:false }" class="relative">
-                    <!-- Button -->
-                    <button @click="open = !open"
-                        class="flex items-center gap-2 text-sm cursor-pointer text-white hover:text-gray-300 transition">
-
-                        <!-- Current Language -->
-                        <span class="uppercase font-semibold tracking-wide">
-                            {{ app()->getLocale() === 'id' ? 'Indonesia' : 'English' }}
-                        </span>
-
-                        <!-- Arrow -->
-                        <svg class="w-4 h-4 transition-transform duration-300" :class="open ? 'rotate-180' : ''"
-                            fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06L10 14.59 5.23 8.27z" />
-                        </svg>
-                    </button>
-
-                    <!-- Dropdown -->
-                    <div x-show="open" @click.outside="open = false"
-                        x-transition:enter="transition ease-out duration-200"
-                        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                        x-transition:leave="transition ease-in duration-150"
-                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                        class="absolute left-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-gray-100 z-50 py-2"
-                        style="display: none !important">
-                        <ul class="text-sm">
-
-                            <!-- Indonesia -->
-                            <li>
-                                <a href="{{ route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => 'id'])) }}"
-                                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-gray-700 font-medium transition">
-                                    Indonesia
-                                </a>
-                            </li>
-
-                            <!-- English -->
-                            <li>
-                                <a href="{{ route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => 'en'])) }}"
-                                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-gray-700 transition">
-                                    English
-                                </a>
-                            </li>
-
-                        </ul>
-                    </div>
-                </div>
-
-                @guest
-                {{-- Login, Register & User dropdown disembunyikan di halaman publik --}}
-                @endguest
-            </div>
+        {{-- RIGHT: locale toggle --}}
+        <div class="flex items-center gap-2 font-data text-[11px] tracking-[0.2em] uppercase">
+            <a href="{{ $localeUrl('id') }}"
+                class="{{ app()->getLocale() === 'id' ? 'text-[#9BDB4D] font-semibold' : 'text-white/50 hover:text-white' }}">ID</a>
+            <span class="text-white/25">/</span>
+            <a href="{{ $localeUrl('en') }}"
+                class="{{ app()->getLocale() === 'en' ? 'text-[#9BDB4D] font-semibold' : 'text-white/50 hover:text-white' }}">EN</a>
         </div>
     </div>
 
-    <!-- MOBILE MENU (opens below logo) -->
-    <div x-show="open" class="lg:hidden bg-[#264c16] text-white text-sm px-6 pb-4 space-y-4"
-        style="display: none !important;">
-        <a href="{{ route('about-user', ['locale' => app()->getLocale()]) }}" class="block text-xs uppercase tracking-wide hover:text-gray-300">About</a>
-        <a href="{{ route('public.dashboard', ['locale' => app()->getLocale(), 'filter' => 'active']) }}"
-            class="block text-xs uppercase tracking-wide hover:text-gray-300">Dashboard</a>
-        <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}"
-            class="block text-xs uppercase tracking-wide hover:text-gray-300">Artikel</a>
-        <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}"
-            class="block text-xs uppercase tracking-wide hover:text-gray-300">{{ __('messages.verified_cases') }}</a>
-
-        <div class="pt-3 border-t border-white/20">
-            {{-- User dropdown disembunyikan di halaman publik --}}
-        </div>
+    {{-- MOBILE MENU --}}
+    <div x-show="open" x-cloak @click.outside="open = false"
+        class="lg:hidden bg-[#0B1E07] border-t border-white/10 px-4 sm:px-6 py-3 font-data text-[11px] uppercase tracking-[0.2em]">
+        @foreach ($navLinks as $link)
+            <a href="{{ $link['href'] }}"
+                class="flex items-center gap-2 py-3 border-b border-white/5 last:border-0 {{ $link['active'] ? 'text-[#9BDB4D]' : 'text-white/75' }}">
+                @if ($link['active'])<span class="w-1.5 h-1.5 rounded-full bg-[#9BDB4D]"></span>@endif
+                {{ $link['label'] }}
+            </a>
+        @endforeach
     </div>
 </nav>
