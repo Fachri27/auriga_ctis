@@ -3,13 +3,13 @@
 @section('structured-data')
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
+    "@@context": "https://schema.org",
+    "@@type": "WebSite",
     "name": "Auriga CTIS",
     "url": "{{ url('/') }}",
     "description": "Platform transparansi kasus hukum lingkungan hidup di Indonesia.",
     "potentialAction": {
-        "@type": "SearchAction",
+        "@@type": "SearchAction",
         "target": "{{ url('/') }}/id/verified-cases?q={search_term_string}",
         "query-input": "required name=search_term_string"
     }

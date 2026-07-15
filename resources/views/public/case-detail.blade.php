@@ -1,49 +1,41 @@
 @extends('layouts.main')
 
 @php
-    $seoTitle = strip_tags($trans?->title ?? 'Detail Kasus') . ' — Auriga CTIS';
-    $seoDescription = 'Kasus #' . ($case->case_number ?? '') . ' — ' . strip_tags($trans?->title ?? '') . '. Status: ' . ($case->status->name ?? '-') . '. Lokasi: ' . ($location['province'] ?? '-') . '. Lacak perkembangan kasus hukum lingkungan ini.';
-    $seoImage = $case->bukti && is_array($case->bukti) && count($case->bukti) > 0 ? asset('storage/' . $case->bukti[0]) : asset('img/image.png');
+    $trans = $case->translations->firstWhere('locale', app()->getLocale()) ?? $case->translations->first();
+    $pageTitle = strip_tags($trans?->title ?? 'Detail Kasus') . ' — Auriga CTIS';
+    $pageDescription = 'Kasus #' . ($case->case_number ?? '') . ' — ' . strip_tags($trans?->title ?? '') . '. Status: ' . ($case->status->name ?? '-') . '. Lokasi: ' . ($location['province'] ?? '-') . '. Lacak perkembangan kasus hukum lingkungan ini.';
+    $ogTitle = $pageTitle;
+    $ogDescription = $pageDescription;
+    $ogImage = $case->bukti && is_array($case->bukti) && count($case->bukti) > 0 ? asset('storage/' . $case->bukti[0]) : asset('img/image.png');
+    $ogType = 'article';
 @endphp
-
-@push('meta')
-    <title>{{ $seoTitle }}</title>
-    <meta name="description" content="{{ $seoDescription }}">
-    <meta property="og:title" content="{{ $seoTitle }}">
-    <meta property="og:description" content="{{ $seoDescription }}">
-    <meta property="og:image" content="{{ $seoImage }}">
-    <meta property="og:type" content="article">
-    <meta name="twitter:title" content="{{ $seoTitle }}">
-    <meta name="twitter:description" content="{{ $seoDescription }}">
-    <meta name="twitter:image" content="{{ $seoImage }}">
-@endpush
 
 @section('structured-data')
 <script type="application/ld+json">
 {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
+    "@@context": "https://schema.org",
+    "@@type": "NewsArticle",
     "headline": {!! json_encode(strip_tags($trans?->title ?? 'Detail Kasus')) !!},
-    "description": {!! json_encode($seoDescription) !!},
-    "image": "{{ $seoImage }}",
+    "description": {!! json_encode($pageDescription) !!},
+    "image": "{{ $ogImage }}",
     "datePublished": "{{ optional($case->published_at)->toIso8601String() }}",
     "dateModified": "{{ optional($case->updated_at)->toIso8601String() }}",
     "author": {
-        "@type": "Organization",
+        "@@type": "Organization",
         "name": "Auriga CTIS",
         "url": "{{ url('/') }}"
     },
     "publisher": {
-        "@type": "Organization",
+        "@@type": "Organization",
         "name": "Auriga CTIS",
         "logo": {
-            "@type": "ImageObject",
+            "@@type": "ImageObject",
             "url": "{{ asset('img/image.png') }}"
         }
     },
     "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "{{ url()->current() }}"
+        "@@type": "WebPage",
+        "@@id": "{{ url()->current() }}"
     },
     "articleSection": "Hukum Lingkungan",
     "keywords": "kasus lingkungan, hukum lingkungan, {{ $case->case_number ?? '' }}, {{ $location['province'] ?? '' }}"
