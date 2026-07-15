@@ -80,6 +80,7 @@ class CaseForm extends Component
         "event_date" => "required|date",
         "category_ids" => "required|array|min:1",
         "category_ids.*" => "integer|exists:categories,id",
+        "bukti.*" => "file|max:10240|mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,mp4,mov,avi,zip,rar",
     ];
 
     public function mount($caseId = null)
@@ -462,28 +463,27 @@ class CaseForm extends Component
                 "bukti" => $existing,
             ]);
 
-            // ✉️ Kirim notifikasi ke semua admin ketika case baru dibuat
-            if (!$this->caseId) {
-                // Hanya untuk case baru, bukan edit
+            // ✉️ Kirim notifikasi ke subscriber ketika case baru dibuat & sudah publish:
+            //    1. case_id IS NULL = berlangganan semua kasus baru
+            //    2. case_id = case ini = mengikuti kasus spesifik ini
+            if (!$this->caseId && ($case->is_public ?? false)) {
+                // Hanya untuk case baru yang sudah publish, bukan edit
                 try {
-                    // Temporary disabled - causing 500 error in production
-                    // TODO: Fix email view caching issue and restart queue worker
-                    /*
-                    $admins = \App\Models\User::role("admin")->get();
-                    foreach ($admins as $admin) {
-                        $admin->notify(
-                            new \App\Notifications\NewCaseNotification(
-                                (object) [
-                                    "id" => $case->id,
-                                    "title" =>
-                                        $case->title ??
-                                        "Case " . $case->case_number,
-                                    "description" => $this->desc_id ?? "",
-                                ],
-                            ),
-                        );
+                    $emails = \App\Models\CaseSubscription::whereNull('case_id')
+                        ->orWhere('case_id', $case->id)
+                        ->pluck('email');
+
+                    foreach ($emails as $email) {
+                        \Mail::to($email)->queue(new \App\Mail\NewCaseMail(
+                            (object) [
+                                "id" => $case->id,
+                                "title" =>
+                                    $case->title ??
+                                    "Case " . $case->case_number,
+                                "description" => $this->desc_id ?? "",
+                            ],
+                        ));
                     }
-                    */
                 } catch (\Throwable $e) {
                     Log::error(
                         "Failed to send case creation notification: " .

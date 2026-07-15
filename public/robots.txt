@@ -1,2 +1,16 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Block CMS & internal pages
+Disallow: /cms/
+Disallow: /dashboard
+Disallow: /verification/
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Sitemap
+Sitemap: /sitemap.xml

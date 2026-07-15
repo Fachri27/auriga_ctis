@@ -121,7 +121,7 @@ class UploadDocumentCase extends Component
         $this->validate([
             // 'process_id' => 'required|integer',
             'title' => 'required|string|max:255',
-            'file' => 'required|file|max:10240', // max 10MB
+            'file' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,mp4,mov,avi,zip,rar', // max 10MB
         ]);
 
         // store file
@@ -149,7 +149,7 @@ class UploadDocumentCase extends Component
         $this->validate([
             'process_id' => 'required|integer',
             'title' => 'required|string|max:255',
-            'file' => 'nullable|file|max:10240', // max 10MB
+            'file' => 'nullable|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,mp4,mov,avi,zip,rar', // max 10MB
         ]);
 
         $data = [
@@ -160,7 +160,7 @@ class UploadDocumentCase extends Component
 
         if ($this->file) {
             $this->validate([
-                'file' => 'file|max:10240',
+                'file' => 'file|max:10240|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,mp4,mov,avi,zip,rar',
             ]);
             // store new file
             $filePath = $this->file->store('storage/'.'case_documents', 'public');

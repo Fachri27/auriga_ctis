@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CaseModel;
+use App\Models\CaseSubscription;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -219,6 +220,21 @@ class CaseStatusService
 
             Log::info("Case {$caseId} status changed from '{$oldStatusKey}' to '{$newStatusKey}' by user {$finalActorId}");
 
+            // ✉️ Kirim notifikasi ke subscriber (case_id IS NULL + case_id = case ini)
+            $oldStatusName = DB::table('statuses')->where('key', $oldStatusKey)->value('name') ?? $oldStatusKey ?? '—';
+            $newStatusName = DB::table('statuses')->where('key', $newStatusKey)->value('name') ?? $newStatusKey;
+
+            CaseSubscription::notifyStatusUpdate(
+                (object) [
+                    'id'          => $caseId,
+                    'case_number' => $case->case_number ?? null,
+                    'title'       => $case->title ?? null,
+                    'description' => $case->description ?? null,
+                ],
+                $oldStatusName,
+                $newStatusName,
+            );
+
             return true;
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -263,6 +279,7 @@ class CaseStatusService
             return false;
         }
 
+        $oldStatusKey = $case->status?->key;
         $finalActorId = $actorId ?? auth()->id();
         $actorName = auth()->user()->name ?? 'System';
 
@@ -284,6 +301,21 @@ class CaseStatusService
             DB::commit();
 
             Log::warning("Case {$caseId} force-changed to '{$newStatusKey}' by user {$finalActorId}");
+
+            // ✉️ Kirim notifikasi ke subscriber (case_id IS NULL + case_id = case ini)
+            $oldStatusName = DB::table('statuses')->where('key', $oldStatusKey)->value('name') ?? $oldStatusKey ?? '—';
+            $newStatusName = DB::table('statuses')->where('key', $newStatusKey)->value('name') ?? $newStatusKey;
+
+            CaseSubscription::notifyStatusUpdate(
+                (object) [
+                    'id'          => $caseId,
+                    'case_number' => $case->case_number ?? null,
+                    'title'       => $case->title ?? null,
+                    'description' => $case->description ?? null,
+                ],
+                $oldStatusName,
+                $newStatusName,
+            );
 
             return true;
         } catch (\Throwable $th) {

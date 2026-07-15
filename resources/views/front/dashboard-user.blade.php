@@ -1,5 +1,22 @@
 @extends('layouts.main')
 
+@section('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Auriga CTIS",
+    "url": "{{ url('/') }}",
+    "description": "Platform transparansi kasus hukum lingkungan hidup di Indonesia.",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ url('/') }}/id/verified-cases?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
+@endsection
+
 @section('content')
     @include('front.components.peta')
     @include('front.components.card', ['limit' => 3, 'offset' => 0])

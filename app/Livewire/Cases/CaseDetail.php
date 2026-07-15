@@ -307,13 +307,15 @@ class CaseDetail extends Component
             //     ]);
             // }
 
-            // ✉️ Kirim notifikasi ke semua user SETIAP publish
-            $users = \App\Models\User::whereNotNull('email')
-                ->where('email', '!=', '')
-                ->get();
+            // ✉️ Kirim notifikasi ke subscriber saat publish:
+            //    1. case_id IS NULL = berlangganan semua kasus baru
+            //    2. case_id = case ini = mengikuti kasus spesifik ini
+            $emails = CaseSubscription::whereNull('case_id')
+                ->orWhere('case_id', $this->case_id)
+                ->pluck('email');
 
-            foreach ($users as $user) {
-                \Mail::to($user->email)->queue(new \App\Mail\NewCaseMail((object)[
+            foreach ($emails as $email) {
+                \Mail::to($email)->queue(new \App\Mail\NewCaseMail((object)[
                     'id'          => $this->case_id,
                     'case_number' => $case->case_number,
                     'title'       => $case->title,

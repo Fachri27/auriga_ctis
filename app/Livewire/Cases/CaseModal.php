@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\{DB, Log};
 use Illuminate\Support\Str;
 
 use App\Services\CaseTaskGenerator;
-use App\Models\{Category, User};
+use App\Models\{Category, User, CaseSubscription};
+use App\Mail\NewCaseMail;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class CaseModal extends Component
@@ -421,13 +423,18 @@ class CaseModal extends Component
                 'created_at' => now(),
             ]);
 
-            // Kirim notifikasi ke semua admin HANYA jika case sudah publish
+            // Kirim notifikasi ke subscriber saat case publish:
+            //    1. case_id IS NULL = berlangganan semua kasus baru
+            //    2. case_id = case ini = mengikuti kasus spesifik ini
             if ($this->is_public) {
-                $admins = User::role('admin')->get();
-                foreach ($admins as $admin) {
-                    $admin->notify(new NewCaseNotification((object)[
-                        'id' => $caseId,
-                        'title' => $this->title_id,
+                $emails = CaseSubscription::whereNull('case_id')
+                    ->orWhere('case_id', $caseId)
+                    ->pluck('email');
+
+                foreach ($emails as $email) {
+                    Mail::to($email)->queue(new NewCaseMail((object)[
+                        'id'          => $caseId,
+                        'title'       => $this->title_id,
                         'description' => $this->desc_id,
                     ]));
                 }

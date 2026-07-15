@@ -1,5 +1,56 @@
 @extends('layouts.main')
 
+@php
+    $seoTitle = strip_tags($trans?->title ?? 'Detail Kasus') . ' — Auriga CTIS';
+    $seoDescription = 'Kasus #' . ($case->case_number ?? '') . ' — ' . strip_tags($trans?->title ?? '') . '. Status: ' . ($case->status->name ?? '-') . '. Lokasi: ' . ($location['province'] ?? '-') . '. Lacak perkembangan kasus hukum lingkungan ini.';
+    $seoImage = $case->bukti && is_array($case->bukti) && count($case->bukti) > 0 ? asset('storage/' . $case->bukti[0]) : asset('img/image.png');
+@endphp
+
+@push('meta')
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:image" content="{{ $seoImage }}">
+    <meta property="og:type" content="article">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $seoImage }}">
+@endpush
+
+@section('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": {!! json_encode(strip_tags($trans?->title ?? 'Detail Kasus')) !!},
+    "description": {!! json_encode($seoDescription) !!},
+    "image": "{{ $seoImage }}",
+    "datePublished": "{{ optional($case->published_at)->toIso8601String() }}",
+    "dateModified": "{{ optional($case->updated_at)->toIso8601String() }}",
+    "author": {
+        "@type": "Organization",
+        "name": "Auriga CTIS",
+        "url": "{{ url('/') }}"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Auriga CTIS",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ asset('img/image.png') }}"
+        }
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ url()->current() }}"
+    },
+    "articleSection": "Hukum Lingkungan",
+    "keywords": "kasus lingkungan, hukum lingkungan, {{ $case->case_number ?? '' }}, {{ $location['province'] ?? '' }}"
+}
+</script>
+@endsection
+
 @section('content')
 
 <style>
@@ -35,7 +86,7 @@
 }
 </style>
 
-    <div class="bg-gray-50 mt-20">
+    <div class="bg-gray-50 mt-16">
 
         @php
             $trans = $case->translations->firstWhere('locale', app()->getLocale()) ?? $case->translations->first();
@@ -258,45 +309,6 @@
                     Diperbarui {{ optional($case->updated_at)->format('d M Y, H:i') }} WIB
                 </p>
 
-                {{-- ===== STATUS EXPLAINER (gabungan badge + narasi + durasi) ===== --}}
-                @if ($explainer)
-                    @php
-                        $daysSinceUpdate = $case->updated_at ? $case->updated_at->diffInDays(now()) : null;
-                        $durationText = null;
-                        if (!is_null($daysSinceUpdate)) {
-                            if ($daysSinceUpdate < 1) {
-                                $durationText = 'Diperbarui hari ini.';
-                            } elseif ($daysSinceUpdate < 30) {
-                                $durationText = "Sudah {$daysSinceUpdate} hari berada di tahap ini.";
-                            } else {
-                                $months = intdiv($daysSinceUpdate, 30);
-                                $durationText = "Sudah sekitar {$months} bulan berada di tahap ini.";
-                            }
-                        }
-                    @endphp
-                    <div
-                        class="mt-6 flex items-start gap-3 px-4 py-3 rounded-xl border {{ $explainerColor[$explainer['color']] ?? 'bg-gray-50 border-gray-200 text-gray-700' }} max-w-3xl">
-                        <span class="w-5 h-5 mt-0.5 flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $explainer['icon'] }}" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm font-semibold mb-0.5">
-                                Apa artinya status "{{ $case->status->name ?? '' }}"?
-                            </p>
-                            <p class="text-sm leading-relaxed">{{ $explainer['text'] }}</p>
-                            @if ($durationText)
-                                <p class="text-xs mt-1.5 opacity-75 font-medium flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    {{ $durationText }}
-                                </p>
-                            @endif
-                        </div>
-                    </div>
-                @endif
 
                 {{-- ===== SHARE BUTTONS ===== --}}
                 <div class="mt-6 flex items-center gap-3 flex-wrap">

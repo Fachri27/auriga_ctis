@@ -1,7 +1,12 @@
 @extends('layouts.main')
 
+@php
+    $pageTitle = 'Dashboard Kasus Lingkungan — Auriga CTIS';
+    $pageDescription = 'Jelajahi semua kasus hukum lingkungan hidup di Indonesia. Filter berdasarkan provinsi, status, dan kategori. Data transparan dan terverifikasi.';
+@endphp
+
 @section('content')
-<div class="bg-gray-50 mt-20 poppins-regular">
+<div class="bg-gray-50 mt-16 poppins-regular">
 
     {{-- ===================== HEADER ===================== --}}
     <section class="bg-white border-b">
@@ -287,8 +292,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ========================
     // MAP INIT
     // ========================
-    var map = L.map('map', { center: [-2.5, 118], zoom: 5, scrollWheelZoom: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    var map = L.map('map', { center: [-2.5, 118], zoom: 4.5, scrollWheelZoom: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap contributors', maxZoom: 19
     }).addTo(map);
 

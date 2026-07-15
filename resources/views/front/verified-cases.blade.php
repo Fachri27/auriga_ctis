@@ -1,7 +1,12 @@
 @extends('layouts.main')
 
+@php
+    $pageTitle = 'Kasus Terverifikasi — Auriga CTIS';
+    $pageDescription = 'Daftar kasus hukum lingkungan yang telah diverifikasi dan dipublikasikan. Lacak perkembangan dari penyelidikan hingga putusan pengadilan.';
+@endphp
+
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 py-10 mt-20 poppins-regular">
+    <div class="max-w-7xl mx-auto px-4 py-10 mt-16 poppins-regular">
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900 mb-2">Kasus Terverifikasi & Dipublikasikan</h1>
             <p class="text-gray-600">Daftar lengkap kasus yang telah diverifikasi dan dipublikasikan untuk transparansi

@@ -1,5 +1,10 @@
 @extends('layouts.main')
 
+@php
+    $pageTitle = 'Tentang Kami — Auriga CTIS';
+    $pageDescription = 'Auriga CTIS adalah platform transparansi kasus hukum lingkungan hidup di Indonesia. Pelajari misi dan komitmen kami untuk penegakan hukum lingkungan.';
+@endphp
+
 @section('content')
 
 <style>

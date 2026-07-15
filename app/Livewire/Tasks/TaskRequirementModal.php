@@ -4,6 +4,7 @@ namespace App\Livewire\Tasks;
 
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class TaskRequirementModal extends Component
@@ -80,7 +81,8 @@ class TaskRequirementModal extends Component
             session()->flash('success', 'Requirement saved.');
 
         } catch (\Throwable $e) {
-            dd($e->getMessage());
+            Log::error('TaskRequirementModal save failed: ' . $e->getMessage());
+            session()->flash('error', 'Gagal menyimpan requirement. Silakan coba lagi.');
         }
     }
 

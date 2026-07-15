@@ -4,6 +4,7 @@ namespace App\Livewire\Tasks;
 
 use App\Models\Task;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class TaskRequirementForm extends Component
@@ -75,8 +76,8 @@ class TaskRequirementForm extends Component
             return redirect()->route('taskreq.index');
 
         } catch (\Throwable $e) {
-            // session()->flash('error', 'Failed to update: ' . $e->getMessage());
-            dd($e->getMessage());
+            Log::error('TaskRequirementForm update failed: ' . $e->getMessage());
+            session()->flash('error', 'Gagal menyimpan requirement. Silakan coba lagi.');
         }
     }
 

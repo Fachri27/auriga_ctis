@@ -37,8 +37,7 @@ class AuthenticatedSessionController extends Controller
             // Use intended() to redirect back to originally requested internal route if available
             return redirect()->intended(route('dashboard', absolute: false));
         } else {
-            // Public users always go to public homepage
-            // Don't use intended() to avoid redirecting to internal routes they shouldn't access
+            // Public users go to public homepage
             return redirect('/');
         }
     }

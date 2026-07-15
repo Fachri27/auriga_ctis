@@ -1,5 +1,10 @@
 @extends('layouts.main')
 
+@php
+    $pageTitle = 'Artikel & Berita Lingkungan — Auriga CTIS';
+    $pageDescription = 'Baca artikel dan berita terbaru seputar penegakan hukum lingkungan hidup di Indonesia.';
+@endphp
+
 @section('content')
     <div class="max-w-7xl mx-auto mt-30 px-4 mb-20">
 

@@ -14,7 +14,7 @@
             }
         }
     </style>
-    <div class="w-full bg-[#00323C] py-10 mt-25 px-4 text-white">
+    <div class="w-full bg-[#00323C] py-10 mt-16 px-4 text-white">
 
         <!-- MAP -->
         <div class="max-w-7xl mx-auto mb-8 sm:mb-10">

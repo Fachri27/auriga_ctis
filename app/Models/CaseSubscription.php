@@ -16,14 +16,16 @@ class CaseSubscription extends Model
     }
 
     /**
-     * Kirim email update status ke subscriber yang mengikuti kasus ini.
-     * Hanya subscriber dengan case_id terisi (kasus spesifik);
-     * case_id null = langganan kasus baru, tidak ikut notifikasi update status.
+     * Kirim email update status ke subscriber:
+     * 1. case_id terisi = mengikuti kasus spesifik ini
+     * 2. case_id NULL = berlangganan semua kasus (juga dapat notifikasi status update)
      */
     public static function notifyStatusUpdate(object $case, string $oldStatus, string $newStatus): void
     {
-        static::where('case_id', $case->id)
+        static::whereNull('case_id')
+            ->orWhere('case_id', $case->id)
             ->pluck('email')
+            ->unique()
             ->each(fn ($email) => Mail::to($email)->queue(
                 new CaseStatusUpdatedMail($case, $oldStatus, $newStatus)
             ));

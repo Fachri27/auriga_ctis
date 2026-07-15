@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\CaseSubscription;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -18,6 +19,21 @@ class CaseSubscribeForm extends Component
     public ?string $turnstileToken = null;
 
     public bool $subscribed = false;
+
+    public function mount(): void
+    {
+        // Cek cookie — apakah visitor ini sudah pernah subscribe ke case ini (atau semua kasus)
+        $subscribedCases = json_decode(Cookie::get('subscribed_cases', '[]'), true) ?? [];
+
+        if ($this->caseId !== null && in_array($this->caseId, $subscribedCases)) {
+            $this->subscribed = true;
+        }
+
+        // Juga cek apakah sudah berlangganan semua kasus (caseId null di cookie)
+        if ($this->caseId !== null && in_array('all', $subscribedCases)) {
+            $this->subscribed = true;
+        }
+    }
 
     public function subscribe()
     {
@@ -47,6 +63,16 @@ class CaseSubscribeForm extends Component
             'email' => $this->email,
             'case_id' => $this->caseId,
         ]);
+
+        // Simpan cookie agar form tidak muncul lagi di kunjungan berikutnya
+        $subscribedCases = json_decode(Cookie::get('subscribed_cases', '[]'), true) ?? [];
+        $key = $this->caseId ?? 'all';
+
+        if (!in_array($key, $subscribedCases)) {
+            $subscribedCases[] = $key;
+        }
+
+        Cookie::queue('subscribed_cases', json_encode($subscribedCases), 60 * 24 * 365); // 1 tahun
 
         $this->subscribed = true;
     }

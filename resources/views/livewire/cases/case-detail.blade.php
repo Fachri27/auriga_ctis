@@ -24,6 +24,62 @@
     $legalFlow   = ['open', 'investigation', 'prosecution', 'trial', 'executed', 'closed'];
     $flowLabels  = ['open' => 'Terbuka', 'investigation' => 'Investigasi', 'prosecution' => 'Penuntutan', 'trial' => 'Persidangan', 'executed' => 'Putusan', 'closed' => 'Ditutup'];
     $currentIdx  = array_search($case->status_key, $legalFlow);
+
+    // Progress bar steps (sama dengan public case detail)
+    $statusSteps = [
+        'open' => ['label' => 'Terbuka', 'step' => 1],
+        'verified' => ['label' => 'Terverifikasi', 'step' => 2],
+        'published' => ['label' => 'Dipublikasikan', 'step' => 3],
+        'penyelidikan' => ['label' => 'Penyelidikan', 'step' => 4],
+        'investigation' => ['label' => 'Investigasi', 'step' => 4],
+        'penyidikan' => ['label' => 'Penyidikan', 'step' => 5],
+        'prosecution' => ['label' => 'Penuntutan', 'step' => 6],
+        'trial' => ['label' => 'Persidangan', 'step' => 7],
+        'vonis' => ['label' => 'Vonis', 'step' => 8],
+        'Berkekuatan hukum tetap' => ['label' => 'Berkekuatan Hukum', 'step' => 9],
+        'executed' => ['label' => 'Putusan Dijalankan', 'step' => 10],
+        'completed' => ['label' => 'Selesai', 'step' => 11],
+        'closed' => ['label' => 'Ditutup', 'step' => 12],
+        'rejected' => ['label' => 'Ditolak', 'step' => 12],
+        'converted' => ['label' => 'Dikonversi', 'step' => 12],
+    ];
+
+    $currentKey = $case->status_key ?? '';
+    $currentStep = $statusSteps[$currentKey]['step'] ?? 0;
+
+    $visibleSteps = [
+        1 => ['label' => 'Terbuka', 'tooltip' => 'Laporan atau kasus baru masuk dan telah didaftarkan ke sistem.'],
+        3 => ['label' => 'Dipublikasikan', 'tooltip' => 'Informasi kasus telah dipublikasikan dan dapat diakses oleh publik.'],
+        4 => ['label' => 'Penyelidikan', 'tooltip' => 'Penegak hukum sedang mengumpulkan bukti awal untuk menentukan apakah ada tindak pidana.'],
+        5 => ['label' => 'Penyidikan', 'tooltip' => 'Bukti sudah cukup. Penyidik resmi mengusut tersangka dan mengumpulkan alat bukti.'],
+        6 => ['label' => 'Penuntutan', 'tooltip' => 'Jaksa menyusun surat dakwaan dan mempersiapkan kasus untuk dibawa ke pengadilan.'],
+        7 => ['label' => 'Persidangan', 'tooltip' => 'Kasus sedang disidangkan di pengadilan. Hakim memeriksa bukti dan keterangan saksi.'],
+        8 => ['label' => 'Vonis', 'tooltip' => 'Hakim telah menjatuhkan putusan bersalah atau tidak bersalah kepada terdakwa.'],
+        9 => ['label' => 'Hukum Tetap', 'tooltip' => 'Putusan telah berkekuatan hukum tetap (inkracht) — tidak bisa digugat lagi.'],
+        10 => ['label' => 'Dijalankan', 'tooltip' => 'Terpidana sedang menjalani hukuman sesuai putusan pengadilan.'],
+        11 => ['label' => 'Selesai', 'tooltip' => 'Seluruh proses hukum telah selesai.'],
+    ];
+
+    // Status explainer
+    $statusExplainer = [
+        'open' => ['icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'color' => 'blue', 'text' => 'Kasus ini baru saja masuk dan sedang menunggu proses lebih lanjut dari penegak hukum.'],
+        'investigation' => ['icon' => 'M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z', 'color' => 'yellow', 'text' => 'Penegak hukum sedang mengumpulkan bukti awal untuk menentukan apakah ada tindak pidana.'],
+        'prosecution' => ['icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'blue', 'text' => 'Jaksa menyusun surat dakwaan dan mempersiapkan kasus untuk dibawa ke pengadilan.'],
+        'trial' => ['icon' => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3', 'color' => 'purple', 'text' => 'Kasus sedang disidangkan di pengadilan. Hakim memeriksa bukti dan keterangan saksi.'],
+        'executed' => ['icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'color' => 'orange', 'text' => 'Terpidana sedang menjalani hukuman sesuai putusan pengadilan.'],
+        'closed' => ['icon' => 'M5 13l4 4L19 7', 'color' => 'green', 'text' => 'Seluruh proses hukum telah selesai. Kasus ditutup.'],
+        'rejected' => ['icon' => 'M6 18L18 6M6 6l12 12', 'color' => 'red', 'text' => 'Kasus ini ditolak dan tidak dapat diproses lebih lanjut.'],
+    ];
+    $explainer = $statusExplainer[$currentKey] ?? null;
+    $explainerColor = [
+        'blue' => 'bg-blue-50 border-blue-200 text-blue-800',
+        'yellow' => 'bg-yellow-50 border-yellow-200 text-yellow-800',
+        'orange' => 'bg-orange-50 border-orange-200 text-orange-800',
+        'purple' => 'bg-purple-50 border-purple-200 text-purple-800',
+        'red' => 'bg-red-50 border-red-200 text-red-800',
+        'green' => 'bg-green-50 border-green-200 text-green-800',
+        'gray' => 'bg-gray-50 border-gray-200 text-gray-700',
+    ];
 @endphp
 
 <div class="min-h-screen bg-slate-50">
@@ -44,7 +100,7 @@
         @endif
 
         {{-- ===== MASTHEAD ===== --}}
-        <header class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <header class="bg-white border border-slate-200 rounded-xl overflow-visible">
             {{-- identity + status --}}
             <div class="px-5 pt-5 flex items-start justify-between gap-4">
                 <div class="min-w-0">
@@ -69,7 +125,7 @@
                 </div>
             </div>
 
-            {{-- SIGNATURE: lifecycle rail --}}
+            {{-- SIGNATURE: progress bar (sama dengan public case detail) --}}
             <div class="px-5 py-4 mt-4 border-y border-slate-100 bg-slate-50/60">
                 @if ($case->status_key === 'rejected')
                     <div class="flex items-center gap-2 text-xs text-red-700">
@@ -78,28 +134,67 @@
                         <span class="text-red-400">— status akhir, tidak ada lanjutan.</span>
                     </div>
                 @else
-                    <div class="flex items-center">
-                        @foreach ($legalFlow as $i => $key)
-                            @php $done = is_int($currentIdx) && $i < $currentIdx; $current = $i === $currentIdx; @endphp
-                            <div class="flex flex-col items-center gap-1.5 z-10">
-                                <span class="w-2.5 h-2.5 rounded-full ring-4 ring-slate-50
-                                    {{ $current ? 'bg-blue-600 ring-blue-100' : ($done ? 'bg-slate-900' : 'bg-slate-300') }}"></span>
-                                <span class="text-[9px] font-medium tracking-wide hidden sm:block
-                                    {{ $current ? 'text-slate-900' : ($done ? 'text-slate-500' : 'text-slate-300') }}">{{ $flowLabels[$key] }}</span>
-                            </div>
-                            @if (!$loop->last)
-                                <div class="flex-1 h-px mx-1 {{ is_int($currentIdx) && $i < $currentIdx ? 'bg-slate-900' : 'bg-slate-200' }}"></div>
-                            @endif
+                    {{-- Ringkasan progres --}}
+                    @php
+                        $totalSteps = 11;
+                        $currentLabel = $visibleSteps[$currentStep]['label'] ?? null;
+                    @endphp
+                    @if ($currentLabel)
+                        <p class="text-xs text-slate-500 mb-4">
+                            Kasus ini berada pada tahap <strong class="text-slate-700">{{ $currentLabel }}</strong>
+                            (tahap {{ $currentStep }} dari {{ $totalSteps }}).
+                        </p>
+                    @endif
+
+                    {{-- Mobile --}}
+                    <div class="flex md:hidden flex-wrap gap-2">
+                        @foreach ($visibleSteps as $step => $info)
+                            @php $done = $currentStep >= $step; $active = $currentStep === $step; @endphp
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                {{ $active ? 'bg-green-600 text-white' : ($done ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-400') }}">
+                                {{ $info['label'] }}
+                            </span>
                         @endforeach
-                        {{-- completeness, tucked at the end of the rail row --}}
-                        <div class="flex items-center gap-2 pl-4 ml-2 border-l border-slate-200">
-                            <div class="w-20 sm:w-28 h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                                <div class="h-full rounded-full transition-all duration-500
-                                    {{ $completePct >= 80 ? 'bg-green-500' : ($completePct >= 50 ? 'bg-yellow-400' : 'bg-red-400') }}"
-                                    style="width: {{ $completePct }}%"></div>
+                    </div>
+
+                    {{-- Desktop with tooltips --}}
+                    <div class="hidden md:flex items-start relative">
+                        <div class="absolute top-4 left-0 right-0 h-0.5 bg-slate-200 z-0"></div>
+                        @foreach ($visibleSteps as $step => $info)
+                            @php $done = $currentStep >= $step; $active = $currentStep === $step; @endphp
+                            <div class="flex-1 flex flex-col items-center relative z-10 group/step">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all cursor-default
+                                    {{ $active ? 'bg-green-600 border-green-600 shadow-lg shadow-green-200 ring-4 ring-green-100' : ($done ? 'bg-green-500 border-green-500' : 'bg-white border-slate-300') }}">
+                                    @if ($done)
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    @else
+                                        <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                                    @endif
+                                </div>
+                                <p class="mt-2 text-center text-[10px] leading-tight font-medium max-w-[70px]
+                                    {{ $active ? 'text-green-700 font-bold' : ($done ? 'text-green-600' : 'text-slate-400') }}">
+                                    {{ $info['label'] }}
+                                </p>
+                                <div class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-48 bg-slate-900 text-white text-xs rounded-lg px-3 py-2 leading-snug
+                                    opacity-0 group-hover/step:opacity-100 pointer-events-none transition-opacity duration-200 z-20 shadow-xl text-center">
+                                    {{ $info['tooltip'] }}
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                                </div>
                             </div>
-                            <span class="text-[11px] font-bold tabular-nums {{ $completePct >= 80 ? 'text-green-600' : ($completePct >= 50 ? 'text-yellow-600' : 'text-red-500') }}">{{ $completePct }}%</span>
+                        @endforeach
+                    </div>
+
+                    {{-- Completeness bar --}}
+                    <div class="flex items-center gap-2 mt-4 pt-3 border-t border-slate-200">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400">Kelengkapan</span>
+                        <div class="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-500
+                                {{ $completePct >= 80 ? 'bg-green-500' : ($completePct >= 50 ? 'bg-yellow-400' : 'bg-red-400') }}"
+                                style="width: {{ $completePct }}%"></div>
                         </div>
+                        <span class="text-[11px] font-bold tabular-nums {{ $completePct >= 80 ? 'text-green-600' : ($completePct >= 50 ? 'text-yellow-600' : 'text-red-500') }}">{{ $completePct }}%</span>
                     </div>
                 @endif
             </div>

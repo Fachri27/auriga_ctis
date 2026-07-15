@@ -21,6 +21,7 @@
             font-family: 'Poppins', sans-serif;
             line-height: 24px;
         }
+        [x-cloak] { display: none !important; }
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

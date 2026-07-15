@@ -5,27 +5,39 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="robots" content="{{ $robots ?? 'index, follow' }}">
+    <meta name="author" content="Auriga CTIS">
+    <meta name="theme-color" content="#264c16">
 
+    {{-- Favicon --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
-    <title>{{ $pageTitle ?? 'Auriga - Environmental Defender' }}</title>
-    <meta name="description" content="{{ $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
-    <meta name="keywords" content="kasus lingkungan, hukum lingkungan, transparansi publik, environmental defender, Indonesia">
+    {{-- Primary SEO --}}
+    <title>{{ $pageTitle ?? 'Auriga CTIS — Transparansi Kasus Hukum Lingkungan' }}</title>
+    <meta name="description" content="{{ $pageDescription ?? 'Auriga CTIS: Platform transparansi kasus hukum lingkungan hidup di Indonesia. Lacak perkembangan kasus dari penyelidikan hingga putusan pengadilan.' }}">
+    <meta name="keywords" content="kasus lingkungan, hukum lingkungan, transparansi publik, environmental defender, Auriga, CTIS, Indonesia, kasus korupsi lingkungan, ekologi, penegakan hukum">
+    <link rel="canonical" href="{{ url()->current() }}">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="{{ $ogTitle ?? 'Auriga - Environmental Defender' }}">
-    <meta property="og:description" content="{{ $ogDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
+    {{-- Open Graph / Facebook --}}
+    <meta property="og:site_name" content="Auriga CTIS">
+    <meta property="og:title" content="{{ $ogTitle ?? $pageTitle ?? 'Auriga CTIS — Transparansi Kasus Hukum Lingkungan' }}">
+    <meta property="og:description" content="{{ $ogDescription ?? $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
     <meta property="og:image" content="{{ $ogImage ?? asset('img/image.png') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
-    <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) == 'id' ? 'id_ID' : 'en_US' }}">
 
-    <!-- Twitter Card -->
+    {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $ogTitle ?? 'Auriga - Environmental Defender' }}">
-    <meta name="twitter:description" content="{{ $ogDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
+    <meta name="twitter:site" content="@auriga_id">
+    <meta name="twitter:title" content="{{ $ogTitle ?? $pageTitle ?? 'Auriga CTIS' }}">
+    <meta name="twitter:description" content="{{ $ogDescription ?? $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
     <meta name="twitter:image" content="{{ $ogImage ?? asset('img/image.png') }}">
 
-    <!-- Fonts -->
+    {{-- JSON-LD Structured Data --}}
+    @yield('structured-data')
+
+    {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +49,6 @@
         href="https://unpkg.com/@raruto/leaflet-gesture-handling@latest/dist/leaflet-gesture-handling.min.css"
         type="text/css">
 
-
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -46,8 +57,7 @@
         [x-cloak] { display: none !important; }
     </style>
 
-
-    <!-- Scripts -->
+    {{-- Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>

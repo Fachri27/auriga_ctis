@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{AdminDashboardController, ArtikelController, CaseGeometryController, HomeController, ProfileController, PublicCaseController, PublicDashboardController};
 use App\Livewire\About\AboutForm;
@@ -56,6 +57,75 @@ Route::group([
 
 // public GeoJSON for case geometries
 Route::get('/case-geometries', [CaseGeometryController::class, 'index']);
+
+// Sitemap XML untuk SEO
+Route::get('/sitemap.xml', function () {
+    $items = [];
+
+    // Homepage
+    $items[] = ['url' => url('/id'), 'lastmod' => now(), 'priority' => '1.0', 'changefreq' => 'daily'];
+
+    // Static pages
+    $items[] = ['url' => url('/id/about'), 'lastmod' => now(), 'priority' => '0.8', 'changefreq' => 'monthly'];
+    $items[] = ['url' => url('/id/verified-cases'), 'lastmod' => now(), 'priority' => '0.9', 'changefreq' => 'daily'];
+    $items[] = ['url' => url('/id/dashboard'), 'lastmod' => now(), 'priority' => '0.9', 'changefreq' => 'daily'];
+    $items[] = ['url' => url('/id/artikels'), 'lastmod' => now(), 'priority' => '0.7', 'changefreq' => 'weekly'];
+
+    // Published cases
+    $cases = DB::table('cases')
+        ->leftJoin('case_translations', function ($q) {
+            $q->on('case_translations.case_id', '=', 'cases.id')
+              ->where('case_translations.locale', 'id');
+        })
+        ->where('cases.is_public', true)
+        ->whereNotNull('cases.published_at')
+        ->select('cases.id', 'cases.case_number', 'cases.updated_at', 'case_translations.title')
+        ->orderBy('cases.updated_at', 'desc')
+        ->limit(500)
+        ->get();
+
+    foreach ($cases as $case) {
+        $items[] = [
+            'url' => url('/id/detail-case/' . $case->case_number),
+            'lastmod' => $case->updated_at ?? now(),
+            'priority' => '0.8',
+            'changefreq' => 'weekly',
+        ];
+    }
+
+    // Published articles
+    $artikels = DB::table('artikels')
+        ->whereNotNull('published_at')
+        ->select('slug', 'updated_at')
+        ->orderBy('updated_at', 'desc')
+        ->limit(200)
+        ->get();
+
+    foreach ($artikels as $art) {
+        $items[] = [
+            'url' => url('/id/artikel/' . $art->slug),
+            'lastmod' => $art->updated_at ?? now(),
+            'priority' => '0.6',
+            'changefreq' => 'monthly',
+        ];
+    }
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+    foreach ($items as $item) {
+        $xml .= "  <url>\n";
+        $xml .= "    <loc>" . htmlspecialchars($item['url']) . "</loc>\n";
+        $xml .= "    <lastmod>" . ($item['lastmod'] instanceof \DateTime ? $item['lastmod']->format('Y-m-d') : date('Y-m-d')) . "</lastmod>\n";
+        $xml .= "    <changefreq>" . $item['changefreq'] . "</changefreq>\n";
+        $xml .= "    <priority>" . $item['priority'] . "</priority>\n";
+        $xml .= "  </url>\n";
+    }
+
+    $xml .= '</urlset>';
+
+    return response($xml)->header('Content-Type', 'application/xml');
+})->name('sitemap.xml');
 
 Route::get('/dashboard', [AdminDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'internal.access'])
@@ -138,7 +208,6 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
         \Illuminate\Support\Facades\Artisan::queue('chart:sync');
         return redirect()->route('charts.dashboard')->with('success', 'Sync dijadwalkan, data akan diperbarui di background.');
     })->name('charts.sync');
-    
 
 
 });

@@ -1,5 +1,12 @@
 @extends('layouts.main')
 
+@php
+    $pageTitle = ($case->title ?? $case->slug ?? 'Artikel') . ' — Auriga CTIS';
+    $pageDescription = 'Artikel dari Auriga CTIS tentang penegakan hukum lingkungan hidup di Indonesia.';
+    $ogImage = $case->image ? asset('storage/' . $case->image) : asset('img/image.png');
+    $ogType = 'article';
+@endphp
+
 @section('content')
 
 

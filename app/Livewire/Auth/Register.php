@@ -88,13 +88,13 @@ class Register extends Component
             // Login user so they can access verification notice page
             Auth::login($user);
 
-            // Send email verification notification manually
+            // Send email verification notification
             $user->sendEmailVerificationNotification();
 
             // Flash success message
-            session()->flash('success', 'Pendaftaran berhasil! Email verifikasi telah dikirim ke ' . $user->email);
+            session()->flash('success', 'Pendaftaran berhasil! Cek email Anda untuk verifikasi sebelum login.');
 
-            // Redirect to email verification notice page
+            // Redirect ke halaman verifikasi — user harus verify email dulu, baru login
             return redirect()->route('verification.notice');
         } catch (\Exception $e) {
             $this->dispatch('notify', type: 'error', message: 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
