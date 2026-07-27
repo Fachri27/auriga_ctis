@@ -8,7 +8,14 @@
     <meta name="robots" content="{{ $robots ?? 'index, follow' }}">
     <meta name="author" content="greendefender">
     <meta name="theme-color" content="#264c16">
-    @php $gsc = config('services.google_search_console.verification'); @endphp
+    @php
+        // Verifikasi Google Search Console. Fallback hardcoded agar meta tag selalu
+        // ter-render walau config:cache stale atau GOOGLE_SITE_VERIFICATION belum
+        // ada di .env server. Kode ini publik (bukan rahasia).
+        $gsc = config('services.google_search_console.verification')
+            ?: env('GOOGLE_SITE_VERIFICATION')
+            ?: 'mT-qCKq2bk-V0tVNX8jUjigGd0y3uEW_CCfzXY5X_LQ';
+    @endphp
     @if ($gsc)
         <meta name="google-site-verification" content="{{ $gsc }}">
     @endif
@@ -37,6 +44,15 @@
     <meta name="twitter:title" content="{{ $ogTitle ?? $pageTitle ?? 'greendefender' }}">
     <meta name="twitter:description" content="{{ $ogDescription ?? $pageDescription ?? 'Platform transparansi kasus hukum lingkungan hidup di Indonesia.' }}">
     <meta name="twitter:image" content="{{ asset('img/image.png') }}">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M1HMVJ0KDK"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-M1HMVJ0KDK');
+    </script>
 
     {{-- JSON-LD Structured Data --}}
     @yield('structured-data')
