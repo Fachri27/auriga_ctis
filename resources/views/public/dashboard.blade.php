@@ -172,8 +172,17 @@
             <div id="mobileCardList" class="divide-y divide-[#E2E6DA] sm:hidden"></div>
 
             {{-- Desktop: table --}}
-            <div class="hidden sm:block overflow-x-auto">
-                <table class="w-full text-sm">
+            <div class="hidden sm:block">
+                <table class="w-full text-sm table-fixed">
+                    <colgroup>
+                        <col class="w-[130px]">
+                        <col class="w-[22%]">
+                        <col class="w-[210px]">
+                        <col class="w-[120px]">
+                        <col class="w-[16%]">
+                        <col class="w-[110px]">
+                        <col class="w-[80px]">
+                    </colgroup>
                     <thead class="bg-[#F5F7F1] text-[10px] uppercase tracking-widest text-[#6b7268] font-data">
                         <tr>
                             <th class="text-left px-5 py-3 font-semibold">No. Kasus</th>
@@ -262,9 +271,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // ========================
     // MAP INIT
     // ========================
-    var map = L.map('map', { center: [-2.5, 118], zoom: 4.5, scrollWheelZoom: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors', maxZoom: 19
+    var map = L.map('map', { center: [-2.5, 118], zoom: 4.5, maxZoom: 16, scrollWheelZoom: true });
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ', maxZoom: 16
+    }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16
     }).addTo(map);
 
     var clusterGroup = L.markerClusterGroup({
@@ -353,6 +365,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // ========================
     // TABLE RENDER
     // ========================
+
+    // Kategori bisa banyak; render sebagai chip dan sisanya diringkas jadi "+N"
+    // supaya kolom tidak melebar / menabrak kolom Status.
+    function categoryList(c) {
+        if (Array.isArray(c.categories) && c.categories.length) return c.categories;
+        const name = c.category?.name ?? '';
+        return name ? name.split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+
+    function categoryChips(c, max = 2) {
+        const cats = categoryList(c);
+        if (!cats.length) return '<span class="text-xs text-[#6b7268] font-data">-</span>';
+        const shown = cats.slice(0, max);
+        const rest  = cats.length - shown.length;
+        const chips = shown.map(name => `<span class="inline-block max-w-full truncate px-2 py-0.5 rounded-full bg-[#F5F7F1] border border-[#E2E6DA] text-[10px] text-[#374151] font-data" title="${escapeHtml(name)}">${escapeHtml(name)}</span>`);
+        if (rest > 0) {
+            chips.push(`<span class="inline-block px-2 py-0.5 rounded-full bg-[#F5F7F1] border border-[#E2E6DA] text-[10px] text-[#6b7268] font-data" title="${escapeHtml(cats.join(', '))}">+${rest}</span>`);
+        }
+        return `<div class="flex flex-wrap gap-1">${chips.join('')}</div>`;
+    }
+
     function renderTable(data) {
         const start  = (currentPage - 1) * perPage;
         const paged  = data.slice(start, start + perPage);
@@ -368,19 +401,19 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('caseTableBody').innerHTML = paged.map(c => {
             const color = getStatusColorHex(c.status?.key ?? '');
             const detailUrl = c.detail_url ?? '#';
-            return `<tr class="hover:bg-[#F5F7F1] transition-colors">
-                <td class="px-5 py-3 font-data text-xs text-[#6b7268] whitespace-nowrap">${escapeHtml(c.case_number ?? '-')}</td>
-                <td class="px-5 py-3 max-w-[200px]">
-                    <p class="font-medium text-[#0B1E07] truncate text-xs">${escapeHtml(c.title ?? '-')}</p>
+            return `<tr class="hover:bg-[#F5F7F1] transition-colors align-top">
+                <td class="px-5 py-3 font-data text-xs text-[#6b7268] truncate">${escapeHtml(c.case_number ?? '-')}</td>
+                <td class="px-5 py-3">
+                    <p class="font-medium text-[#0B1E07] truncate text-xs" title="${escapeHtml(c.title ?? '')}">${escapeHtml(c.title ?? '-')}</p>
                 </td>
-                <td class="px-5 py-3 text-xs text-[#6b7268] whitespace-nowrap font-data">${escapeHtml(c.category?.name ?? '-')}</td>
-                <td class="px-5 py-3 whitespace-nowrap">
-                    <span style="background:${color}22;color:${color}" class="px-2.5 py-1 rounded-full text-[10px] font-bold font-data">
+                <td class="px-5 py-3">${categoryChips(c)}</td>
+                <td class="px-5 py-3">
+                    <span style="background:${color}22;color:${color}" class="inline-block max-w-full truncate px-2.5 py-1 rounded-full text-[10px] font-bold font-data align-middle" title="${escapeHtml(c.status?.name ?? '')}">
                         ${escapeHtml(c.status?.name ?? '-')}
                     </span>
                 </td>
-                <td class="px-5 py-3 text-xs text-[#6b7268] whitespace-nowrap">${escapeHtml(locText(c) || '-')}</td>
-                <td class="px-5 py-3 text-xs text-[#6b7268] whitespace-nowrap font-data">${escapeHtml(c.event_date ?? '-')}</td>
+                <td class="px-5 py-3 text-xs text-[#6b7268] truncate" title="${escapeHtml(locText(c) || '')}">${escapeHtml(locText(c) || '-')}</td>
+                <td class="px-5 py-3 text-xs text-[#6b7268] truncate font-data">${escapeHtml(c.event_date ?? '-')}</td>
                 <td class="px-5 py-3 text-right">
                     <a href="${detailUrl}" class="text-xs text-[#0B1E07] hover:text-[#9BDB4D] font-medium whitespace-nowrap transition-colors">Lihat →</a>
                 </td>
@@ -401,8 +434,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         ${escapeHtml(c.status?.name ?? '-')}
                     </span>
                 </div>
+                <div class="mt-2">${categoryChips(c, 3)}</div>
                 <div class="flex items-center gap-3 mt-2 text-xs text-[#6b7268] font-data">
-                    <span>${escapeHtml(c.category?.name ?? '-')}</span>
                     ${locText(c) ? `<span>${escapeHtml(locText(c))}</span>` : ''}
                     ${c.event_date ? `<span>${escapeHtml(c.event_date)}</span>` : ''}
                 </div>

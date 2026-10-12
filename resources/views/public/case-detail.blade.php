@@ -408,14 +408,14 @@
                     </section>
 
                     {{-- Dugaan Permasalahan --}}
-                    <section id="permasalahan">
+                    {{-- <section id="permasalahan">
                         <h2 class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 pb-3 border-b border-gray-900 mb-5">Dugaan Permasalahan</h2>
                         @if ($trans?->dugaan_permasalahan)
                             <div class="collapsible prose-content text-gray-700 leading-relaxed text-sm case-summary">{!! $trans->dugaan_permasalahan !!}</div>
                         @else
                             <p class="text-sm text-gray-400 italic">Dugaan permasalahan belum tersedia.</p>
                         @endif
-                    </section>
+                    </section> --}}
 
                     {{-- Pembelajaran --}}
                     <section id="pembelajaran">

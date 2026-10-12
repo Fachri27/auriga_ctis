@@ -46,10 +46,11 @@ class PublicDashboardController extends Controller
                 ?? $c->translations->first();
 
             $categoryIds = is_array($c->category_ids) ? $c->category_ids : [];
-            $categoryNames = collect($categoryIds)
+            $categoryList = collect($categoryIds)
                 ->map(fn($id) => $allCategoryNames->get($id))
                 ->filter()
-                ->implode(', ');
+                ->values();
+            $categoryNames = $categoryList->implode(', ');
 
             $loc = $geo->getLocation((float) $c->latitude, (float) $c->longitude);
 
@@ -57,6 +58,7 @@ class PublicDashboardController extends Controller
                 'case_number' => $c->case_number,
                 'title' => $translation?->title ?? $c->case_number,
                 'category' => $categoryNames ? ['name' => $categoryNames] : null,
+                'categories' => $categoryList->all(),
                 'status' => $c->status ? ['name' => $c->status->name, 'key' => $c->status->key] : null,
                 'province' => $c->province?->name,
                 'regency' => $loc['district'] ?? null,
