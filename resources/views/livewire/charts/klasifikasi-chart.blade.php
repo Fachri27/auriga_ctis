@@ -2,7 +2,7 @@
     <div class="max-w-5xl mx-auto px-6 py-6 space-y-4 cms-rise" style="animation-delay:.04s">
         <div class="border-b border-[color:var(--hairline)] pb-3">
             <div class="cms-eyebrow">INDEKSASI</div>
-            <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Indeksasi Putusan Perkara</h1>
+            <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Indeksasi putusan Pidana Sektor Sumber Daya Alam dan Lingkungan Hidup</h1>
             <p class="text-xs text-[color:var(--muted)] mt-1">Jumlah perkara berdasarkan klasifikasi</p>
         </div>
 

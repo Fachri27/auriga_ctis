@@ -201,7 +201,7 @@
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <p class="font-data text-[11px] tracking-[0.28em] uppercase text-[#2F6C14] mb-2">{{ __('messages.case_statistics') }}</p>
-                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Indeksasi Putusan Perkara</h2>
+                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Indeksasi putusan Pidana Sektor<br> Sumber Daya Alam dan Lingkungan Hidup</h2>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">

@@ -4,7 +4,7 @@
             <div>
                 <div class="cms-eyebrow">DASHBOARD</div>
                 <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Dashboard Chart</h1>
-                <div class="cms-panel-sub mt-0.5">Indeksasi Putusan Perkara</div>
+                <div class="cms-panel-sub mt-0.5">Indeksasi putusan Pidana Sektor Sumber Daya Alam dan Lingkungan Hidup</div>
             </div>
             <div class="flex items-center gap-3">
                 <div class="flex bg-[color:var(--paper-2)] rounded-md p-1 border border-[color:var(--hairline)]">
