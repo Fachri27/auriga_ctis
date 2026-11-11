@@ -48,6 +48,18 @@ return [
         'credentials' => storage_path(env('GOOGLE_SERVICE_ACCOUNT_JSON', 'app/google-service-account.json')),
     ],
 
+    'google_drive' => [
+        // API key cukup untuk folder "Siapa saja yang memiliki link"; tanpa key, dipakai service account
+        'api_key' => env('GOOGLE_DRIVE_API_KEY'),
+        'credentials' => storage_path(env('GOOGLE_SERVICE_ACCOUNT_JSON', 'app/google-service-account.json')),
+    ],
+
+    'deepl' => [
+        // Key Free API (berakhiran ":fx") otomatis memakai api-free.deepl.com
+        'key' => env('DEEPL_API_KEY'),
+        'target_lang' => env('DEEPL_TARGET_LANG', 'EN-US'),
+    ],
+
     'google_search_console' => [
         // Kode verifikasi meta tag Google Search Console.
         // Render hanya jika diisi (lihat layouts/main.blade.php).

@@ -2,14 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Status;
 use Illuminate\Support\Facades\Cache;
 use App\Models\CaseModel;
-use App\Services\ReverseGeocoder;
+use App\Services\{PerkaraStatistics, ReverseGeocoder};
 
 class PublicDashboardController extends Controller
 {
     public function index(\Illuminate\Http\Request $request)
     {
+        // Mode Perkara: statistik indeksasi putusan (raw_cases). Data kasus tidak dihitung di mode ini.
+        if ($request->query('mode') === 'perkara') {
+            $stats = app(PerkaraStatistics::class);
+            $perkaraFilters = PerkaraStatistics::filtersFrom($request);
+
+            return view('public.dashboard', [
+                'mode' => 'perkara',
+                'perkaraFilters' => $perkaraFilters,
+                'filterOptions' => $stats->filterOptions(),
+                'kpiData' => $stats->kpis($perkaraFilters),
+                'classifications' => $stats->classifications($perkaraFilters),
+                'regencies' => $stats->regencies($perkaraFilters),
+                'yearlyCharts' => $stats->yearlyCharts($perkaraFilters),
+            ]);
+        }
+
+        $mode = 'kasus';
         $filter = $request->get('filter', null);
         $locale = app()->getLocale();
 
@@ -59,14 +77,14 @@ class PublicDashboardController extends Controller
                 'title' => $translation?->title ?? $c->case_number,
                 'category' => $categoryNames ? ['name' => $categoryNames] : null,
                 'categories' => $categoryList->all(),
-                'status' => $c->status ? ['name' => $c->status->name, 'key' => $c->status->key] : null,
+                'status' => $c->status ? ['name' => $c->status->name, 'key' => $c->status->key, 'group' => Status::group($c->status->key)] : null,
                 'province' => $c->province?->name,
                 'regency' => $loc['district'] ?? null,
                 'village' => $loc['village'] ?? null,
                 'latitude' => $c->latitude,
                 'longitude' => $c->longitude,
                 'event_date' => $c->event_date,
-                'detail_url' => route('public.verify.case', ['locale' => $locale, 'caseNumber' => $c->case_number]),
+                'detail_url' => $c->publicUrl($locale),
             ];
         })->values();
 
@@ -116,6 +134,6 @@ class PublicDashboardController extends Controller
             ->sortBy(fn ($s) => ($idx = array_search($s['key'] ?? '', $barOrder)) === false ? 999 : $idx)
             ->values();
 
-        return view('public.dashboard', compact('cases', 'totalCases', 'activeCases', 'closedCases', 'regencyCount', 'statusOptions', 'filter'));
+        return view('public.dashboard', compact('mode', 'cases', 'totalCases', 'activeCases', 'closedCases', 'regencyCount', 'statusOptions', 'filter'));
     }
 }

@@ -3,9 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Status extends Model
 {
+    /** Status kasus yang dihitung "Selesai" (warna titik di peta publik); selain ini dihitung "Aktif". */
+    public const FINISHED_KEYS = ['berkekuatan-hukum-tetap', 'executed', 'completed', 'closed', 'rejected'];
+
+    /**
+     * "selesai" atau "aktif". Key dinormalkan karena ada data lama berbentuk "Berkekuatan hukum tetap".
+     */
+    public static function group(?string $key): string
+    {
+        return in_array(Str::slug((string) $key), self::FINISHED_KEYS, true) ? 'selesai' : 'aktif';
+    }
+
     protected $fillable = [
         'key',
         'name'

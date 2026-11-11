@@ -5,10 +5,13 @@ namespace App\Livewire\Tasks;
 use App\Models\Process;
 use App\Models\Task;
 use App\Models\TaskTranslation;
+use App\Livewire\Concerns\AutoTranslates;
 use Livewire\Component;
 
 class TaskForm extends Component
 {
+    use AutoTranslates;
+
     public $taskId;
     public $task;
     public $processes;
@@ -62,6 +65,14 @@ class TaskForm extends Component
 
         session()->flash('success', 'Task updated successfully');
         return redirect()->route('task.index');
+    }
+
+    protected function translatableFields(): array
+    {
+        return [
+            'name_id' => 'name_en',
+            'desc_id' => 'desc_en',
+        ];
     }
 
     public function render()

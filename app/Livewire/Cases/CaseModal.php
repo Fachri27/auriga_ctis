@@ -434,6 +434,7 @@ class CaseModal extends Component
                 foreach ($emails as $email) {
                     Mail::to($email)->queue(new NewCaseMail((object)[
                         'id'          => $caseId,
+                        'case_number' => $caseNumber,
                         'title'       => $this->title_id,
                         'description' => $this->desc_id,
                     ]));

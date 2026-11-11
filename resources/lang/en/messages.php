@@ -4,6 +4,7 @@ return [
     'about' => "About",
     'report_case' => "Report a Case",
     'verified_cases' => "Verified Cases",
+    'protocol' => 'Content & Security Protocol',
     'login' => "Login",
     'register' => "Sign Up",
     'search' => 'Search',

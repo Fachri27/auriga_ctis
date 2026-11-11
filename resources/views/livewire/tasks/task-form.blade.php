@@ -9,6 +9,7 @@
                     {{ $taskId ? 'Edit Task' : 'Create Task' }}
                 </h1>
             </div>
+            <x-internal.translate-button />
         </div>
 
         {{-- SUCCESS ALERT --}}

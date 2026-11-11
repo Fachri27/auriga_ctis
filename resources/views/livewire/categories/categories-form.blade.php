@@ -9,6 +9,7 @@
                     {{ $categoryId ? 'Edit Category' : 'Create Category' }}
                 </h1>
             </div>
+            <x-internal.translate-button />
         </div>
 
         <div class="cms-panel cms-rise" style="animation-delay:.04s">

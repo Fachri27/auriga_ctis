@@ -5,7 +5,8 @@
         ['label' => __('messages.artikel'), 'href' => route('public.artikel.list', ['locale' => app()->getLocale()]), 'active' => request()->routeIs('public.artikel.*')],
         ['label' => __('messages.verified_cases'), 'href' => route('front.verified-cases', ['locale' => app()->getLocale()]), 'active' => request()->routeIs('front.verified-cases')],
     ];
-    $localeUrl = fn($loc) => route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => $loc]));
+    // Halaman bisa memberi alamat per bahasa sendiri ($localeUrls), mis. detail kasus yang judul di URL-nya ikut bahasa.
+    $localeUrl = fn($loc) => $localeUrls[$loc] ?? route(Route::currentRouteName(), array_merge(Route::current()->parameters(), ['locale' => $loc]));
 @endphp
 
 <nav x-data="{ open: false }"

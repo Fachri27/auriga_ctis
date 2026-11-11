@@ -11,6 +11,11 @@
             {{ session('success') }}
         </div>
         @endif
+        @if(session('error'))
+        <div class="p-3 text-sm border rounded-lg" style="color:var(--danger);border-color:var(--danger)">
+            {{ session('error') }}
+        </div>
+        @endif
 
         {{-- ===== HEADER ===== --}}
         <div class="flex items-center justify-between gap-4 border-b border-[color:var(--hairline)] pb-3">
@@ -19,12 +24,15 @@
                 <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Daftar Kasus</h1>
             </div>
             @can('case.create')
-            <a href="{{ route('case.create') }}" class="cms-btn cms-btn-leaf">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah Kasus
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('case.import') }}" class="cms-btn cms-btn-ghost">Impor dari Drive</a>
+                <a href="{{ route('case.create') }}" class="cms-btn cms-btn-leaf">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Tambah Kasus
+                </a>
+            </div>
             @endcan
         </div>
 
@@ -48,6 +56,7 @@
                             <option value="">Semua Status</option>
                             <option value="investigation">Penyidikan</option>
                             <option value="published">Dipublikasikan</option>
+                            <option value="draft">Belum dipublikasikan</option>
                             <option value="closed">Ditutup</option>
                         </select>
 
@@ -73,6 +82,9 @@
                 <div class="mt-3 text-xs text-[color:var(--muted)]">
                     Menampilkan <strong class="text-[color:var(--ink-2)]">{{ $cases->firstItem() ?? 0 }}–{{ $cases->lastItem() ?? 0 }}</strong>
                     dari <strong class="text-[color:var(--ink-2)]">{{ $cases->total() }}</strong> kasus
+                    @can('case.publish')
+                        · Centang kasus untuk mempublikasikan beberapa sekaligus.
+                    @endcan
                 </div>
             </div>
         </div>
@@ -93,6 +105,44 @@
         ];
         @endphp
 
+        @php
+            $pageIds = $cases->getCollection()->pluck('id')->map(fn ($id) => (string) $id)->all();
+            $pageAllSelected = $selectAllMatching || ($pageIds && ! array_diff($pageIds, $selected));
+        @endphp
+
+        {{-- ===== AKSI MASSAL (publikasi beberapa kasus sekaligus) ===== --}}
+        @can('case.publish')
+        @if ($selectedCount > 0)
+        <div class="cms-panel sticky top-20 z-20" style="border-color:var(--leaf-deep)">
+            <div class="cms-panel-body flex flex-wrap items-center gap-x-4 gap-y-2" style="padding:12px 20px">
+                <span class="text-sm font-semibold text-[color:var(--ink)]">{{ $selectedCount }} kasus dipilih</span>
+                @if (! $selectAllMatching && $cases->total() > count($selected))
+                    <button type="button" wire:click="selectAllMatching" class="link text-xs">Pilih semua {{ $cases->total() }} kasus sesuai filter</button>
+                @endif
+                <button type="button" wire:click="clearSelection" class="text-xs text-[color:var(--muted)] hover:text-[color:var(--ink)]">Batal pilih</button>
+
+                <div class="flex flex-wrap items-center gap-3 ml-auto">
+                    <label class="flex items-center gap-2 text-xs text-[color:var(--ink-2)]">
+                        <input type="checkbox" wire:model="notify" class="h-4 w-4">
+                        Kirim email ke subscriber (1 email ringkasan)
+                    </label>
+                    <button type="button" wire:click="bulkUnpublish" wire:loading.attr="disabled" wire:target="bulkUnpublish,bulkPublish"
+                        wire:confirm="Batalkan publikasi {{ $selectedCount }} kasus terpilih? Kasus akan disembunyikan dari situs dan peta publik."
+                        class="cms-btn cms-btn-ghost disabled:opacity-60">
+                        Batalkan publikasi
+                    </button>
+                    <button type="button" wire:click="bulkPublish" wire:loading.attr="disabled" wire:target="bulkUnpublish,bulkPublish"
+                        wire:confirm="Publikasikan {{ $selectedCount }} kasus terpilih ke situs publik?"
+                        class="cms-btn cms-btn-leaf disabled:opacity-60">
+                        <span wire:loading.remove wire:target="bulkPublish">Publikasikan</span>
+                        <span wire:loading wire:target="bulkPublish">Memproses…</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
+        @endcan
+
         {{-- ===== TABLE CARD ===== --}}
         <div class="cms-panel cms-rise" style="animation-delay:.10s">
 
@@ -101,6 +151,13 @@
                 <table class="cms-table">
                     <thead>
                         <tr>
+                            @can('case.publish')
+                            <th class="w-8">
+                                <input type="checkbox" class="h-4 w-4" title="Pilih semua di halaman ini"
+                                    @checked($pageAllSelected) @disabled($selectAllMatching || ! $pageIds)
+                                    x-on:change="$wire.togglePage(@js($pageIds), $event.target.checked)">
+                            </th>
+                            @endcan
                             <th>No. Kasus</th>
                             <th>Status</th>
                             <th>Perkembangan</th>
@@ -129,7 +186,16 @@
                         }
                         $hasPerk     = $perkembangan !== '-' && !empty(strip_tags($perkembangan));
                         @endphp
-                        <tr>
+                        <tr wire:key="case-row-{{ $c->id }}">
+                            @can('case.publish')
+                            <td>
+                                @if ($selectAllMatching)
+                                    <input type="checkbox" class="h-4 w-4" checked disabled>
+                                @else
+                                    <input type="checkbox" class="h-4 w-4" value="{{ $c->id }}" wire:model.live="selected">
+                                @endif
+                            </td>
+                            @endcan
 
                             {{-- No. Kasus --}}
                             <td>
@@ -225,7 +291,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="py-12 text-center text-sm text-[color:var(--muted)]">
+                            <td colspan="9" class="py-12 text-center text-sm text-[color:var(--muted)]">
                                 Tidak ada kasus ditemukan. Coba ubah filter atau kata kunci pencarian.
                             </td>
                         </tr>
@@ -253,11 +319,18 @@
                 }
                 $hasPerk     = $perkembangan !== '-' && !empty(strip_tags($perkembangan));
                 @endphp
-                <div class="p-4 space-y-2.5">
+                <div class="p-4 space-y-2.5" wire:key="case-card-{{ $c->id }}">
 
                     {{-- Top row: nomor + badges --}}
                     <div class="flex items-start justify-between gap-2">
-                        <div class="min-w-0">
+                        @can('case.publish')
+                            @if ($selectAllMatching)
+                                <input type="checkbox" class="h-4 w-4 mt-0.5 flex-shrink-0" checked disabled>
+                            @else
+                                <input type="checkbox" class="h-4 w-4 mt-0.5 flex-shrink-0" value="{{ $c->id }}" wire:model.live="selected">
+                            @endif
+                        @endcan
+                        <div class="min-w-0 flex-1">
                             <p class="num text-sm leading-snug">{{ $c->case_number }}</p>
                             @if($title !== '-')
                             <p class="text-xs text-[color:var(--muted)] mt-0.5 leading-snug line-clamp-1">{{ $title }}</p>

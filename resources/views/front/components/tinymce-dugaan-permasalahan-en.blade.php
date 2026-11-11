@@ -44,6 +44,10 @@
                             setup(editor) {
                                 editor.on('init', () => {
                                     editor.setContent(self.dugaan_permasalahan_en || '');
+                                    // sinkronkan editor saat nilai diubah dari server (mis. tombol auto translate)
+                                    self.$watch('dugaan_permasalahan_en', (value) => {
+                                        if ((value || '') !== editor.getContent()) editor.setContent(value || '');
+                                    });
                                 });
                                 editor.on('change keyup', () => {
                                     self.dugaan_permasalahan_en = editor.getContent();

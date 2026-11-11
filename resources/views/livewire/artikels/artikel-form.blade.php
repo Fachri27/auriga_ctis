@@ -9,7 +9,10 @@
                     {{ $artikel ? 'Edit Artikel' : 'Tambah Artikel' }}
                 </h1>
             </div>
-            <a href="" class="cms-btn cms-btn-ghost">Artikel</a>
+            <div class="flex items-center gap-2">
+                <x-internal.translate-button />
+                <a href="" class="cms-btn cms-btn-ghost">Artikel</a>
+            </div>
         </div>
 
         <form wire:submit.prevent="save">
@@ -173,12 +176,12 @@
                         <div class="cms-panel-body" style="padding:16px 20px">
                             <div x-show="lang === 'id'">
                                 {{-- editor_id --}}
-                                @includeWhen(true,'front.components.tinymce-content-id')
+                                @includeWhen(true,'front.components.tinymce-content-id', ['tinymceModel' => 'content_id'])
                             </div>
 
                             <div x-show="lang === 'en'">
                                 {{-- editor_en --}}
-                                @includeWhen(true,'front.components.tinymce-content-en')
+                                @includeWhen(true,'front.components.tinymce-content-en', ['tinymceModel' => 'content_en'])
                             </div>
                         </div>
                     </div>

@@ -1,30 +1,52 @@
 <div>
-    @if ($subscribed)
-        <p class="text-sm font-semibold {{ $caseId ? 'text-green-700' : 'text-green-300 text-center' }}">
-            ✓ {{ $caseId ? 'Anda kini mengikuti kasus ini. Terima kasih!' : 'Berhasil berlangganan. Terima kasih!' }}
-        </p>
+    @if ($subscribed && $caseId)
+        <div class="flex items-start gap-2.5 bg-green-50 border border-green-200 p-3 text-sm text-green-800">
+            <svg class="flex-shrink-0 mt-0.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <p class="leading-relaxed"><strong>{{ __('Terima kasih sudah ikut mengawal!') }}</strong> {{ __('Kami akan mengabari Anda saat status kasus ini berubah.') }}</p>
+        </div>
+    @elseif ($subscribed)
+        <div class="flex items-start gap-2.5 border border-white/15 p-4 text-sm text-white">
+            <svg class="flex-shrink-0 mt-0.5 text-[#9BDB4D]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <p class="leading-relaxed"><strong>{{ __('Terima kasih sudah ikut mengawal!') }}</strong> <span class="text-white/70">{{ __('Kabar kasus berikutnya akan langsung masuk ke email Anda.') }}</span></p>
+        </div>
     @else
         {{-- submit → tampilkan captcha Cloudflare → token valid → kirim via Livewire --}}
         {{-- pakai vanilla JS (bukan Alpine x-on), karena layout ini memuat Alpine
              dua kali (CDN + bundel Livewire) sehingga $wire magic Alpine tidak
              selalu terpasang di instance yang menang --}}
         <form id="tsform-{{ $this->getId() }}" class="flex flex-col gap-2">
-            <div class="flex flex-col sm:flex-row gap-2">
-                <input type="email" wire:model="email" required placeholder="Alamat email Anda"
+            {{-- Per kasus (sidebar sempit): kolom email & tombol bertumpuk; form umum di Beranda boleh sebaris. --}}
+            <div class="flex flex-col gap-2 {{ $caseId ? '' : 'sm:flex-row' }}">
+                <input type="email" wire:model="email" required placeholder="{{ __('Alamat email Anda') }}" aria-label="{{ __('Alamat email Anda') }}"
                     @if ($caseId)
-                        class="flex-1 border border-gray-300 rounded-sm px-3 py-2 text-sm focus:border-[#032A36] focus:ring-[#032A36]"
+                        class="w-full border border-gray-300 rounded-sm px-3 py-2.5 text-sm focus:border-[#032A36] focus:ring-[#032A36]"
                     @else
                         class="flex-1 border border-transparent rounded-sm px-3 py-2 text-sm bg-white focus:border-white focus:ring-white"
                     @endif>
                 <button type="submit" wire:loading.attr="disabled"
                     @if ($caseId)
-                        class="px-4 py-2 bg-[#032A36] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#264c16] transition-colors disabled:opacity-50"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#032A36] text-white text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-[#264c16] transition-colors disabled:opacity-50"
                     @else
                         class="px-5 py-2 bg-white text-[#032A36] text-xs font-bold uppercase tracking-widest rounded-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
                     @endif>
-                    {{ $caseId ? 'Ikuti Kasus' : 'Berlangganan' }}
+                    {{ $caseId ? __('Kawal Kasus Ini') : __('Ikut Mengawal') }}
+                    @if ($caseId)
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    @endif
                 </button>
             </div>
+
+            @if ($caseId)
+                <p class="text-[11px] text-gray-400 leading-relaxed">{{ __('Gratis. Email hanya dikirim saat status kasus berubah.') }}</p>
+                @if ($followers >= 3)
+                    <p class="text-xs text-gray-600">{{ __(':count orang sudah mengawal kasus ini.', ['count' => number_format($followers)]) }}</p>
+                @endif
+            @else
+                <p class="text-[11px] text-white/50 leading-relaxed">{{ __('Email hanya dikirim saat ada kasus baru atau status kasus berubah.') }}</p>
+                @if ($followers >= 10)
+                    <p class="text-xs text-white/70">{{ __('Bergabung bersama :count orang yang sudah ikut mengawal.', ['count' => number_format($followers)]) }}</p>
+                @endif
+            @endif
 
             {{-- widget muncul saat submit (execution=execute), tersembunyi sebelumnya --}}
             <div wire:ignore id="ts-{{ $this->getId() }}" class="cf-turnstile"

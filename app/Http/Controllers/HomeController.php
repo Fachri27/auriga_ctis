@@ -171,7 +171,7 @@ class HomeController extends Controller
             ->latest()
             ->get();
 
-        $kasus = CaseModel::with(['category', 'status'])
+        $kasus = CaseModel::with(['category', 'status', 'translations'])
             ->whereNotNull('published_at')
             ->where('is_public', true)
             ->latest('published_at')
@@ -548,6 +548,11 @@ class HomeController extends Controller
             )
             ->first();
 
+        // Berita eksternal tidak punya isi di situs ini; arahkan ke berita aslinya.
+        if ($case && $case->type === 'eksternal' && $case->link) {
+            return redirect()->away($case->link);
+        }
+
         return view('front.preview-artikel', compact('case'));
     }
 
@@ -558,5 +563,15 @@ class HomeController extends Controller
         $about = AboutPage::with('translations')->first();
 
         return view('front.about', compact('about'));
+    }
+
+    /**
+     * Protokol modernisasi konten, keamanan informasi, dan integritas konten (ringkasan publik).
+     */
+    public function protocol($locale)
+    {
+        app()->setLocale($locale);
+
+        return view('front.protocol');
     }
 }

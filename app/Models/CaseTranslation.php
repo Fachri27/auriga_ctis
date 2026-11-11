@@ -10,6 +10,7 @@ class CaseTranslation extends Model
         'case_id',
         'locale',
         'title',
+        'cover_caption',
         'summary',
         'description',
         'perkembangan',

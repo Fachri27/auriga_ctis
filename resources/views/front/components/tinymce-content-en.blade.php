@@ -1,5 +1,5 @@
 <div x-show="lang === 'en'" x-data="{
-    desc_en: @entangle('desc_en'),
+    desc_en: @entangle($tinymceModel ?? 'desc_en'),
     initEditor() {
         let self = this;
         if (tinymce.get('editor_en')) tinymce.get('editor_en').remove();
@@ -45,6 +45,10 @@
             setup(editor) {
                 editor.on('init', () => {
                     editor.setContent(self.desc_en || '');
+                    // sinkronkan editor saat nilai diubah dari server (mis. tombol auto translate)
+                    self.$watch('desc_en', (value) => {
+                        if ((value || '') !== editor.getContent()) editor.setContent(value || '');
+                    });
                 });
                 editor.on('change keyup', () => {
                     self.desc_en = editor.getContent();

@@ -5,9 +5,12 @@ namespace App\Livewire\Categories;
 use App\Models\{Category, CategoryTranslation};
 use Str;
 use Livewire\Component;
+use App\Livewire\Concerns\AutoTranslates;
 
 class CategoriesForm extends Component
 {
+    use AutoTranslates;
+
     public $category;
 
     public $categoryId;
@@ -82,6 +85,14 @@ class CategoriesForm extends Component
         session()->flash('success', 'Category saved successfully!');
 
         return redirect()->route('categoris.index');
+    }
+
+    protected function translatableFields(): array
+    {
+        return [
+            'name_id' => 'name_en',
+            'desc_id' => 'desc_en',
+        ];
     }
 
     public function render()

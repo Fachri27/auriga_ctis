@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use DB;
 use Str;
 use Livewire\{Component, WithFileUploads};
+use App\Livewire\Concerns\AutoTranslates;
 
 
 class ArtikelForm extends Component
 {
     use WithFileUploads;
+    use AutoTranslates;
     public $artikel;
 
     public $titleId;
@@ -142,6 +144,15 @@ class ArtikelForm extends Component
 
         return redirect()->route('artikel.index');
         
+    }
+
+    protected function translatableFields(): array
+    {
+        return [
+            'titleId' => 'titleEn',
+            'excerpt_id' => 'excerpt_en',
+            'content_id' => 'content_en',
+        ];
     }
 
     public function render()

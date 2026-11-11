@@ -7,9 +7,12 @@
                 <div class="cms-eyebrow">PROCESS</div>
                 <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Process Form</h1>
             </div>
-            <button wire:click="save" class="cms-btn cms-btn-leaf">
-                Save
-            </button>
+            <div class="flex items-center gap-2">
+                <x-internal.translate-button />
+                <button wire:click="save" class="cms-btn cms-btn-leaf">
+                    Save
+                </button>
+            </div>
         </div>
 
         <!-- Card -->

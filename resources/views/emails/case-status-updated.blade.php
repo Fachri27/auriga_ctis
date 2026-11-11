@@ -284,7 +284,7 @@
                 </div>
             </div>
 
-            <a href="{{ route('public.verify.case', ['locale' => app()->getLocale(), 'caseNumber' => $case->case_number]) }}" class="cta">
+            <a href="{{ \App\Models\CaseModel::publicUrlFor($case->case_number, $case->case_title ?? $case->title ?? null, app()->getLocale()) }}" class="cta">
                 Lihat Detail Kasus
             </a>
 

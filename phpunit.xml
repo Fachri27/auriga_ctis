@@ -31,5 +31,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Jangan pernah memakai key layanan sungguhan saat test (kuota DeepL / blokir Google) -->
+        <env name="DEEPL_API_KEY" value=""/>
+        <env name="GOOGLE_DRIVE_API_KEY" value=""/>
     </php>
 </phpunit>

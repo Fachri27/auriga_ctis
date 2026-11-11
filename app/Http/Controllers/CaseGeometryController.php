@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Status;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,6 +110,7 @@ class CaseGeometryController extends Controller
                     'event_date'       => $eventDate,
                     'case_description' => $r->case_description ?? null,
                     'status_key'       => $r->status_key ?? null,
+                    'status_group'     => Status::group($r->status_key),
                 ],
             ];
         });

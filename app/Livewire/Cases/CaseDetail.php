@@ -4,7 +4,7 @@ namespace App\Livewire\Cases;
 
 use Illuminate\Support\Facades\{DB, Log};
 use App\Models\{CaseModel, CaseSubscription, Status};
-use App\Services\{CaseActionService, CaseStatusService, ReverseGeocoder};
+use App\Services\{CaseActionService, CasePublisher, CaseStatusService, ReverseGeocoder};
 use Livewire\{Component, WithFileUploads};
 
 
@@ -290,206 +290,42 @@ class CaseDetail extends Component
             return;
         }
 
-        if($this->case->is_public) {
+        if ($this->case->is_public) {
             $this->unpublishCase();
+
             return;
         }
 
-        DB::beginTransaction();
-
         try {
-            $case = DB::table('cases')
-                ->leftJoin('case_translations', function ($q) {
-                    $q->on('case_translations.case_id', '=', 'cases.id')
-                        ->where('case_translations.locale', 'id');
-                })
-                ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
-                ->where('cases.id', $this->case_id)
-                ->select('cases.*', 'case_translations.title', 'case_translations.description', 'categories.slug as category_name')
-                ->lockForUpdate()
-                ->first();
-
-            if (! $case) {
-                throw new \Exception('Case not found.');
-            }
-
-            $firstPublish = is_null($case->published_at);
-
-            DB::table('cases')
-                ->where('id', $this->case_id)
-                ->update([
-                    'is_public'    => true,
-                    'published_at' => $case->published_at ?? now(),
-                    'updated_at'   => now(),
-                ]);
-
-            // 📝 Timeline hanya dicatat saat pertama kali publish
-            // if ($firstPublish) {
-            //     DB::table('case_timelines')->insert([
-            //         'case_id'    => $this->case_id,
-            //         'actor_id'   => auth()->id(),
-            //         'notes'      => 'Case published (made public) by ' . auth()->user()->name . '.',
-            //         'created_at' => now(),
-            //         'updated_at' => now(),
-            //     ]);
-            // }
+            $publisher = app(CasePublisher::class);
+            $publisher->publish($this->case_id);
 
             // ✉️ Kirim notifikasi ke subscriber saat publish:
             //    1. case_id IS NULL = berlangganan semua kasus baru
             //    2. case_id = case ini = mengikuti kasus spesifik ini
-            $emails = CaseSubscription::whereNull('case_id')
-                ->orWhere('case_id', $this->case_id)
-                ->pluck('email');
-
-            foreach ($emails as $email) {
-                \Mail::to($email)->queue(new \App\Mail\NewCaseMail((object)[
-                    'id'          => $this->case_id,
-                    'case_number' => $case->case_number,
-                    'title'       => $case->title,
-                    'description' => $case->description,
-                    'locale'     => app()->getLocale(),
-                ]));
-            }
-
-            // 🔄 Ambil ulang case SETELAH update
-            $case = DB::table('cases')
-                ->leftJoin('case_translations', function ($q) {
-                    $q->on('case_translations.case_id', '=', 'cases.id')
-                        ->where('case_translations.locale', 'id');
-                })
-                ->leftJoin('categories', 'categories.id', '=', 'cases.category_id')
-                ->where('cases.id', $this->case_id)
-                ->select('cases.*', 'case_translations.title', 'categories.slug as category_name')
-                ->first();
-
-            $this->syncGeometry($case);
-
-            DB::commit();
+            $publisher->notifySubscribers([$this->case_id]);
 
             $this->loadCase();
             $this->dispatch('refresh-case-detail');
 
             session()->flash('success', 'Case published successfully.');
-
         } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("Publish case error {$this->case_id}: " . $th->getMessage());
+            Log::error("Publish case error {$this->case_id}: ".$th->getMessage());
             session()->flash('error', $th->getMessage());
         }
     }
 
-    protected function syncGeometry(object $case): void
-{
-    if (is_null($case->latitude) || is_null($case->longitude)) {
-        return;
-    }
-
-    $lat = (float) $case->latitude;
-    $lon = (float) $case->longitude;
-
-    if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
-        throw new \InvalidArgumentException('Invalid latitude / longitude.');
-    }
-
-    $wkt = sprintf('POINT(%.15f %.15f)', $lat, $lon);
-
-    // Ambil semua translations — prioritas id, fallback ke yang pertama ada
-    $translations = DB::table('case_translations')
-        ->where('case_id', $this->case_id)
-        ->get();
-
-    $trans = $translations->firstWhere('locale', 'id')
-          ?? $translations->first();
-
-    $title     = $trans?->title ?? ('Case ' . $case->case_number);
-    $plainDesc = $trans ? strip_tags($trans->description ?? '') : null;
-
-    $exists = DB::table('case_geometries')
-        ->where('case_id', $this->case_id)
-        ->exists();
-
-    if ($exists) {
-        DB::statement(
-            'UPDATE case_geometries
-             SET geom             = ST_GeomFromText(?, 4326),
-                 title            = ?,
-                 category         = ?,
-                 case_description = ?,
-                 is_public        = 1,
-                 updated_at       = ?
-             WHERE case_id        = ?',
-            [
-                $wkt,
-                $title,
-                $case->category_name ?? null,
-                $plainDesc,
-                now(),
-                $this->case_id,
-            ]
-        );
-    } else {
-        DB::statement(
-            'INSERT INTO case_geometries
-             (case_id, geom, title, category, case_description, status, is_public, created_at, updated_at)
-             VALUES (?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?, ?)',
-            [
-                $this->case_id,
-                $wkt,
-                $title,
-                $case->category_name ?? null,
-                $plainDesc,
-                'published',
-                1,
-                now(),
-                now(),
-            ]
-        );
-    }
-}
-
     // unpublish case (for admins only, does NOT delete geometry)
     protected function unpublishCase()
     {
-        if (! auth()->user()->can('case.publish')) {
-            session()->flash('error', 'You do not have permission to unpublish cases.');
-            return;
-        }
-
-        DB::beginTransaction();
-
         try {
-            DB::table('cases')
-                ->where('id', $this->case_id)
-                ->update([
-                    'is_public'  => 0,
-                    'updated_at' => now(),
-                ]);
-
-            // Sembunyikan geometry dari peta (tidak dihapus)
-            DB::table('case_geometries')
-                ->where('case_id', $this->case_id)
-                ->update([
-                    'is_public'  => 0,
-                    'updated_at' => now(),
-                ]);
-
-            DB::table('case_timelines')->insert([
-                'case_id'    => $this->case_id,
-                'actor_id'   => auth()->id(),
-                'notes'      => 'Case unpublished (removed from public view) by ' . auth()->user()->name . '.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::commit();
+            app(CasePublisher::class)->unpublish($this->case_id);
 
             $this->loadCase();
             $this->dispatch('refresh-case-detail');
             session()->flash('success', 'Case unpublished successfully.');
-
         } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("Unpublish case error {$this->case_id}: " . $th->getMessage());
+            Log::error("Unpublish case error {$this->case_id}: ".$th->getMessage());
             session()->flash('error', $th->getMessage());
         }
     }

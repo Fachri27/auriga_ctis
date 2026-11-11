@@ -7,11 +7,18 @@
                 <div class="cms-eyebrow">CMS / ARTIKEL</div>
                 <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Daftar Halaman</h1>
             </div>
-            <a href="{{ route('artikel.create') }}">
-                <button class="cms-btn cms-btn-primary">
-                    + Create
+            <div class="flex items-center gap-2">
+                <button type="button" wire:click="pullNews" wire:loading.attr="disabled" wire:target="pullNews" class="cms-btn cms-btn-ghost disabled:opacity-60"
+                    title="Tarik berita penegakan hukum lingkungan & SDA dari Google News dan RSS media (otomatis tiap jam)">
+                    <span wire:loading.remove wire:target="pullNews">Tarik berita sekarang</span>
+                    <span wire:loading wire:target="pullNews">Menarik berita…</span>
                 </button>
-            </a>
+                <a href="{{ route('artikel.create') }}">
+                    <button class="cms-btn cms-btn-primary">
+                        + Create
+                    </button>
+                </a>
+            </div>
         </div>
 
         {{-- Filters --}}
@@ -25,8 +32,8 @@
             </select>
             <select id="userFilter" wire:model.live.debounce.100ms="type" class="cms-input">
                 <option value="">Semua Type</option>
-                <option value="internal">Internal</option>
-                <option value="eksternal">Eksternal</option>
+                <option value="internal">Internal (Analisis Auriga)</option>
+                <option value="eksternal">Eksternal (Berita)</option>
             </select>
         </div>
 
@@ -57,6 +64,9 @@
                             <x-internal.badge variant="ok">internal</x-internal.badge>
                             @else
                             <x-internal.badge variant="default">eksternal</x-internal.badge>
+                            @if ($data->external_id)
+                                <div class="text-[10px] text-[color:var(--muted)] mt-0.5">berita otomatis</div>
+                            @endif
                             @endif
                         </td>
                         <td class="num">{{ $data->published_at }}</td>
@@ -69,10 +79,17 @@
                             @else
                             <x-internal.badge variant="default">inactive</x-internal.badge>
                             @endif
+                            {{-- Halaman publik hanya menampilkan berita bergambar (config news.require_image). --}}
+                            @if ($data->type === 'eksternal' && blank($data->image) && config('news.require_image', true))
+                            <x-internal.badge variant="warning" title="Tampil di situs setelah gambarnya ditemukan">menunggu gambar</x-internal.badge>
+                            @endif
                         </td>
-                        <td>{{ auth()->user()->name }}</td>
+                        <td>{{ $data->type === 'eksternal' ? ($data->source_name ?? '-') : ($data->user?->name ?? '-') }}</td>
                         <td class="text-right">
                             <div class="flex justify-end gap-2">
+                                <button wire:click="toggleActive({{ $data->id }})" class="cms-btn cms-btn-ghost">
+                                    {{ $data->status === 'active' ? 'Sembunyikan' : 'Tampilkan' }}
+                                </button>
                                 <a href="{{ route('artikel.edit', $data->id) }}"
                                     class="cms-btn cms-btn-ghost">Edit</a>
                                 <button wire:click='delete({{ $data->id }})'

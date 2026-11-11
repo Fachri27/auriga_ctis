@@ -33,6 +33,10 @@
                             setup(editor) {
                                 editor.on('init', () => {
                                     editor.setContent(self.excerpt_en || '');
+                                    // sinkronkan editor saat nilai diubah dari server (mis. tombol auto translate)
+                                    self.$watch('excerpt_en', (value) => {
+                                        if ((value || '') !== editor.getContent()) editor.setContent(value || '');
+                                    });
                                 });
                                 editor.on('change keyup', () => {
                                     self.excerpt_en = editor.getContent();

@@ -5,10 +5,13 @@ namespace App\Livewire\Process;
 use App\Models\Category;
 use App\Models\Process;
 use App\Models\ProcessTranslation;
+use App\Livewire\Concerns\AutoTranslates;
 use Livewire\Component;
 
 class ProcessForm extends Component
 {
+    use AutoTranslates;
+
     public $processId;
     public $process;
     public $category_id;
@@ -73,6 +76,13 @@ class ProcessForm extends Component
         session()->flash('success', 'Process saved successfully!');
 
         return redirect()->route('process.index');
+    }
+
+    protected function translatableFields(): array
+    {
+        return [
+            'name_id' => 'name_en',
+        ];
     }
 
     public function render()

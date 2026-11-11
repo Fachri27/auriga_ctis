@@ -4,6 +4,7 @@ return [
     'about' => "Tentang",
     'report_case' => "Laporkan Kasus",
     'verified_cases' => "Kasus Terverifikasi",
+    'protocol' => 'Protokol Konten & Keamanan',
     'login' => "Masuk",
     'register' => "Daftar",
     'search' => 'Cari',

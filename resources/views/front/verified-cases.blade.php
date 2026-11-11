@@ -1,22 +1,14 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = 'Kasus Terverifikasi — greendefender';
-    $pageDescription = 'Daftar kasus hukum lingkungan yang telah diverifikasi dan dipublikasikan. Lacak perkembangan dari penyelidikan hingga putusan pengadilan.';
+    $pageTitle = __('Kasus Terverifikasi') . ' — greendefender';
+    $pageDescription = __('Daftar kasus hukum lingkungan yang telah diverifikasi dan dipublikasikan. Lacak perkembangan dari penyelidikan hingga putusan pengadilan.');
 @endphp
 
 @section('content')
     <div id="verified-cases-page" class="mt-16">
-        {{-- Hero --}}
-        <section class="bg-[#0B1E07] console-grid text-white">
-            <div class="max-w-7xl mx-auto px-4 py-16 md:py-20">
-                <p class="font-data text-xs uppercase tracking-[0.2em] text-[#9BDB4D] mb-3">Monitoring Console</p>
-                <h1 class="font-display text-3xl md:text-4xl font-bold leading-tight mb-4">Kasus Terverifikasi & Dipublikasikan</h1>
-                <p class="max-w-2xl text-white/80 text-sm md:text-base leading-relaxed">
-                    Daftar lengkap kasus yang telah diverifikasi dan dipublikasikan untuk transparansi publik.
-                </p>
-            </div>
-        </section>
+        <x-front.page-hero label="Monitoring Console" :title="__('Kasus Terverifikasi & Dipublikasikan')"
+            :description="__('Daftar lengkap kasus yang telah diverifikasi dan dipublikasikan untuk transparansi publik.')" />
 
         {{-- ponytail: infinite-scroll JS retained unchanged to preserve AJAX contract --}}
         <section class="bg-[#F5F7F1] py-12 md:py-16">
@@ -26,7 +18,7 @@
                         @include('front.verified-case-card')
                     @empty
                         <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-[#6b7268] py-16 text-base">
-                            Belum ada kasus terverifikasi &amp; dipublikasikan.
+                            {{ __('Belum ada kasus terverifikasi & dipublikasikan.') }}
                         </div>
                     @endforelse
                 </div>

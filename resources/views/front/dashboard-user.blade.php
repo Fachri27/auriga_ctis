@@ -7,7 +7,7 @@
     "@@type": "WebSite",
     "name": "greendefender",
     "url": "{{ url('/') }}",
-    "description": "Platform transparansi kasus hukum lingkungan hidup di Indonesia.",
+    "description": "{{ __('Platform transparansi kasus hukum lingkungan hidup di Indonesia.') }}",
     "potentialAction": {
         "@@type": "SearchAction",
         "target": "{{ url('/') }}/id/verified-cases?q={search_term_string}",
@@ -21,7 +21,7 @@
     "@@type": "Organization",
     "name": "greendefender",
     "url": "{{ url('/') }}",
-    "description": "Platform transparansi kasus hukum lingkungan hidup di Indonesia — pelacakan kasus dari penyelidikan hingga putusan pengadilan.",
+    "description": "{{ __('Platform transparansi kasus hukum lingkungan hidup di Indonesia — pelacakan kasus dari penyelidikan hingga putusan pengadilan.') }}",
     "logo": "{{ asset('img/image.png') }}",
     "sameAs": [
         "https://twitter.com/auriga_id"
@@ -68,11 +68,11 @@
             {{-- Copy --}}
             <div class="lg:col-span-6">
                 <p class="font-data text-[11px] tracking-[0.28em] uppercase text-[#9BDB4D] mb-5">
-                    {{ __('messages.public_transparency') }} — Hukum Lingkungan
+                    {{ __('messages.public_transparency') }} — {{ __('Hukum Lingkungan') }}
                 </p>
                 <h1 class="font-display font-bold leading-[1.05] tracking-tight text-[clamp(2.1rem,4.5vw,3.5rem)]">
-                    Pantau perkara lingkungan Indonesia,<br class="hidden sm:block">
-                    dari laporan hingga <span class="text-[#9BDB4D]">putusan.</span>
+                    {{ __('Pantau perkara lingkungan Indonesia,') }}<br class="hidden sm:block">
+                    {{ __('dari laporan hingga') }} <span class="text-[#9BDB4D]">{{ __('putusan.') }}</span>
                 </h1>
                 <p class="mt-6 max-w-xl text-sm sm:text-base text-white/70 leading-relaxed">
                     {{ __('messages.explore') }}
@@ -85,7 +85,7 @@
                     </a>
                     <a href="{{ route('public.dashboard', ['locale' => app()->getLocale()]) }}"
                         class="inline-flex items-center px-6 py-3 border border-white/25 text-white text-xs font-bold uppercase tracking-widest hover:border-white/60 hover:bg-white/5 transition-colors">
-                        Dashboard Data
+                        {{ __('Dashboard Data') }}
                     </a>
                 </div>
             </div>
@@ -94,29 +94,29 @@
             <div class="lg:col-span-6">
                 <div class="border border-white/15 bg-[#0B1E07]/60 backdrop-blur-sm">
                     <div class="px-5 py-3 border-b border-white/15 flex items-center justify-between font-data text-[10px] tracking-[0.22em] uppercase text-white/50">
-                        <span>Kasus dalam angka</span>
+                        <span>{{ __('Kasus dalam angka') }}</span>
                         <span>Real-time</span>
                     </div>
                     <dl class="grid grid-cols-2 divide-x divide-y divide-white/10">
                         <div class="p-5 sm:p-6">
                             <dd class="font-data text-3xl sm:text-4xl font-semibold text-white">{{ $totalCases ?? '—' }}</dd>
-                            <dt class="mt-2 text-xs font-semibold text-white/80">Total Kasus Terdaftar</dt>
-                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">Sejak sistem diluncurkan</p>
+                            <dt class="mt-2 text-xs font-semibold text-white/80">{{ __('Total Kasus Terdaftar') }}</dt>
+                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">{{ __('Sejak sistem diluncurkan') }}</p>
                         </div>
                         <div class="p-5 sm:p-6">
                             <dd class="font-data text-3xl sm:text-4xl font-semibold text-[#9BDB4D]">{{ $activeCases ?? '—' }}</dd>
-                            <dt class="mt-2 text-xs font-semibold text-white/80">Kasus Aktif</dt>
-                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">Dalam proses hukum</p>
+                            <dt class="mt-2 text-xs font-semibold text-white/80">{{ __('Kasus Aktif') }}</dt>
+                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">{{ __('Dalam proses hukum') }}</p>
                         </div>
                         <div class="p-5 sm:p-6">
                             <dd class="font-data text-3xl sm:text-4xl font-semibold text-white">{{ $completedCases ?? '—' }}</dd>
-                            <dt class="mt-2 text-xs font-semibold text-white/80">Kasus Selesai / Divonis</dt>
-                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">Proses hukum final</p>
+                            <dt class="mt-2 text-xs font-semibold text-white/80">{{ __('Kasus Selesai / Divonis') }}</dt>
+                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">{{ __('Proses hukum final') }}</p>
                         </div>
                         <div class="p-5 sm:p-6">
                             <dd class="font-data text-3xl sm:text-4xl font-semibold text-white">{{ $regencyCovered ?? '—' }}</dd>
-                            <dt class="mt-2 text-xs font-semibold text-white/80">Kabupaten Terdampak</dt>
-                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">Di seluruh Indonesia</p>
+                            <dt class="mt-2 text-xs font-semibold text-white/80">{{ __('Kabupaten Terdampak') }}</dt>
+                            <p class="font-data text-[10px] tracking-[0.14em] uppercase text-white/40 mt-1">{{ __('Di seluruh Indonesia') }}</p>
                         </div>
                     </dl>
                 </div>
@@ -134,7 +134,7 @@
                 </div>
                 <a href="{{ route('front.verified-cases', ['locale' => app()->getLocale()]) }}"
                     class="font-data text-[11px] font-semibold uppercase tracking-[0.18em] text-[#2F6C14] hover:text-[#0B1E07] transition-colors after:content-['_→']">
-                    Lihat semua kasus
+                    {{ __('Lihat semua kasus') }}
                 </a>
             </div>
 
@@ -184,7 +184,7 @@
                     </article>
                 @empty
                     <div class="md:col-span-3 border border-dashed border-[#E2E6DA] bg-white text-center text-gray-400 py-16 text-sm">
-                        Belum ada kasus terverifikasi &amp; dipublikasikan.
+                        {{ __('Belum ada kasus terverifikasi & dipublikasikan.') }}
                     </div>
                 @endforelse
             </div>
@@ -193,146 +193,79 @@
 
     {{-- ===================== STATISTIK PERKARA ===================== --}}
     @if (!empty($publicCharts))
-    <section id="statistik" class="scroll-mt-24 bg-white"
-        x-data="{ view: 'chart', switchView(v) { this.view = v; if (v === 'chart') setTimeout(() => pubResizeAll(), 100); } }">
+    <section id="statistik" class="scroll-mt-24 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
 
             {{-- Header + toolbar --}}
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <p class="font-data text-[11px] tracking-[0.28em] uppercase text-[#2F6C14] mb-2">{{ __('messages.case_statistics') }}</p>
-                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Indeksasi putusan Pidana Sektor<br> Sumber Daya Alam dan Lingkungan Hidup</h2>
+                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{{ __('Indeksasi putusan Pidana Sektor') }}<br> {{ __('Sumber Daya Alam dan Lingkungan Hidup') }}</h2>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3">
+                <div class="gd-filter-toolbar-wrap flex flex-wrap items-center gap-3">
                     @if (!empty($filterOptions))
-                    <form id="filter-form" method="GET" action="{{ url()->current() }}" class="flex flex-wrap items-center gap-2">
-                        <select name="tahun" onchange="applyFilters()" aria-label="Filter tahun"
-                            class="font-data text-[11px] uppercase tracking-wide border border-[#E2E6DA] px-2 py-2 bg-white text-gray-700">
-                            <option value="">Tahun</option>
+                    <form id="filter-form" method="GET" action="{{ url()->current() }}" class="gd-filter-toolbar">
+                        <select name="tahun" onchange="applyFilters()" aria-label="{{ __('Filter tahun') }}"
+                            data-filter
+                            class="gd-select gd-select-sm font-data uppercase tracking-wide">
+                            <option value="">{{ __('Tahun') }}</option>
                             @foreach ($filterOptions['tahun'] as $t)
                             <option value="{{ $t }}" {{ (string) $filterTahun === (string) $t ? 'selected' : '' }}>{{ $t }}</option>
                             @endforeach
                         </select>
-                        <select name="klasifikasi" onchange="applyFilters()" aria-label="Filter klasifikasi"
-                            class="font-data text-[11px] uppercase tracking-wide border border-[#E2E6DA] px-2 py-2 bg-white text-gray-700 max-w-[150px]">
-                            <option value="">Klasifikasi</option>
+                        <select name="klasifikasi" onchange="applyFilters()" aria-label="{{ __('Filter klasifikasi') }}"
+                            data-filter
+                            class="gd-select gd-select-sm font-data uppercase tracking-wide">
+                            <option value="">{{ __('Klasifikasi') }}</option>
                             @foreach ($filterOptions['klasifikasi'] as $k)
                             <option value="{{ $k }}" {{ $filterKlasifikasi === $k ? 'selected' : '' }}>{{ $k }}</option>
                             @endforeach
                         </select>
-                        <select name="pulau" onchange="applyFilters()" aria-label="Filter pulau"
-                            class="font-data text-[11px] uppercase tracking-wide border border-[#E2E6DA] px-2 py-2 bg-white text-gray-700">
-                            <option value="">Pulau</option>
+                        <select name="pulau" onchange="applyFilters()" aria-label="{{ __('Filter pulau') }}"
+                            data-filter
+                            class="gd-select gd-select-sm font-data uppercase tracking-wide">
+                            <option value="">{{ __('Pulau') }}</option>
                             @foreach ($filterOptions['pulau'] as $p)
                             <option value="{{ $p }}" {{ $filterPulau === $p ? 'selected' : '' }}>{{ $p }}</option>
                             @endforeach
                         </select>
                         @if ($filterTahun || $filterKlasifikasi || $filterPulau)
-                        <a href="{{ url()->current() }}#statistik"
+                        <a href="{{ url()->current() }}#statistik" data-statistik-nav
                             class="font-data text-[11px] uppercase tracking-wide text-[#2F6C14] hover:underline whitespace-nowrap">Reset</a>
                         @endif
                     </form>
                     @endif
-
-                    <div class="inline-flex border border-[#E2E6DA] p-0.5">
-                        <button @click="switchView('chart')"
-                            class="px-4 py-1.5 font-data text-[11px] uppercase tracking-wide transition-colors"
-                            :class="view === 'chart' ? 'bg-[#0B1E07] text-[#9BDB4D]' : 'text-gray-500 hover:text-gray-800'">Grafik</button>
-                        <button @click="switchView('table')"
-                            class="px-4 py-1.5 font-data text-[11px] uppercase tracking-wide transition-colors"
-                            :class="view === 'table' ? 'bg-[#0B1E07] text-[#9BDB4D]' : 'text-gray-500 hover:text-gray-800'">Tabel</button>
-                    </div>
                 </div>
             </div>
 
-            {{-- KPI ledger --}}
-            @php $byTitle = fn($t) => collect($kpiData ?? [])->firstWhere('title', $t); @endphp
-            <div class="mt-8 border border-[#E2E6DA]">
-                <dl class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#E2E6DA]">
-                    @foreach (['Perkara', 'Terdakwa', 'Pengadilan'] as $t)
-                    @php $k = $byTitle($t); @endphp
-                    @if ($k)
-                    <div class="px-6 py-5">
-                        <dd class="font-data text-2xl sm:text-3xl font-semibold text-gray-900">{{ $k['display'] }}</dd>
-                        <dt class="font-data text-[10px] tracking-[0.18em] uppercase text-gray-500 mt-1">{{ $k['title'] }}</dt>
-                    </div>
-                    @endif
-                    @endforeach
-                </dl>
-                <div class="grid grid-cols-1 lg:grid-cols-2 border-t border-[#E2E6DA] divide-y lg:divide-y-0 lg:divide-x divide-[#E2E6DA]">
-                    <div>
-                        <p class="px-6 pt-4 font-data text-[10px] tracking-[0.22em] uppercase text-gray-400">Subjek Hukum</p>
-                        <dl class="grid grid-cols-2 divide-x divide-[#E2E6DA]">
-                            @foreach (['Perorangan', 'Korporasi'] as $t)
-                            @php $k = $byTitle($t); @endphp
-                            @if ($k)
-                            <div class="px-6 py-4">
-                                <dd class="font-data text-xl font-semibold text-gray-900">{{ $k['display'] }}</dd>
-                                <dt class="font-data text-[10px] tracking-[0.18em] uppercase text-gray-500 mt-1">{{ $k['title'] }}</dt>
-                            </div>
-                            @endif
-                            @endforeach
-                        </dl>
-                    </div>
-                    <div>
-                        <p class="px-6 pt-4 font-data text-[10px] tracking-[0.22em] uppercase text-gray-400">Vonis Putusan</p>
-                        <dl class="grid grid-cols-3 divide-x divide-[#E2E6DA]">
-                            @foreach (['Bersalah', 'Bebas', 'Lepas'] as $t)
-                            @php $k = $byTitle('Vonis ' . $t); @endphp
-                            @if ($k)
-                            <div class="px-6 py-4">
-                                <dd class="font-data text-xl font-semibold text-gray-900">{{ $k['display'] }}</dd>
-                                <dt class="font-data text-[10px] tracking-[0.18em] uppercase text-gray-500 mt-1">{{ $t }}</dt>
-                            </div>
-                            @endif
-                            @endforeach
-                        </dl>
-                    </div>
+            {{-- Grafik (KPI dan grafik batang per tahun ada di Dashboard mode Perkara), lalu tabel Top 10 di bawahnya --}}
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                @foreach (array_filter($publicCharts, fn ($ch) => $ch['type'] !== 'bar') as $ch)
+                <div class="border border-[#E2E6DA]">
+                    <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ __($ch['title']) }}</h3>
+                    <div class="pub-echart" id="{{ $ch['id'] }}"
+                        data-chart='{{ json_encode($ch['data']) }}'
+                        data-type="{{ $ch['type'] }}"
+                        style="height:380px;width:100%"></div>
                 </div>
+                @endforeach
             </div>
 
-            {{-- CHART VIEW --}}
-            <div x-show="view === 'chart'" class="mt-6 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach (array_slice($publicCharts, 0, 2) as $ch)
-                    <div class="border border-[#E2E6DA]">
-                        <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ $ch['title'] }}</h3>
-                        <div class="pub-echart" id="{{ $ch['id'] }}"
-                            data-chart='{{ json_encode($ch['data']) }}'
-                            data-type="{{ $ch['type'] }}"
-                            style="height:380px;width:100%"></div>
-                    </div>
-                    @endforeach
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @foreach (array_slice($publicCharts, 2) as $ch)
-                    <div class="border border-[#E2E6DA]">
-                        <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ $ch['title'] }}</h3>
-                        <div class="pub-echart" id="{{ $ch['id'] }}"
-                            data-chart='{{ json_encode($ch['data']) }}'
-                            data-type="{{ $ch['type'] }}"
-                            style="height:320px;width:100%"></div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- TABLE VIEW --}}
-            <div x-show="view === 'table'" x-cloak class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                 @forelse ($tableData ?? [] as $td)
                 <div class="border border-[#E2E6DA]">
                     <div class="px-5 py-3 border-b border-[#E2E6DA] flex items-center justify-between">
-                        <h3 class="font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ $td['title'] }}</h3>
-                        <span class="font-data text-[10px] text-gray-400">{{ count($td['rows']) }} baris</span>
+                        <h3 class="font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ __($td['title']) }}</h3>
+                        <span class="font-data text-[10px] text-gray-400">{{ __(':count baris', ['count' => count($td['rows'])]) }}</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="border-b border-[#E2E6DA]">
                                     <th class="px-4 py-2.5 text-left font-data text-[10px] tracking-[0.14em] font-semibold text-gray-400 uppercase w-8">#</th>
-                                    <th class="px-4 py-2.5 text-left font-data text-[10px] tracking-[0.14em] font-semibold text-gray-400 uppercase">Nama</th>
-                                    <th class="px-4 py-2.5 text-right font-data text-[10px] tracking-[0.14em] font-semibold text-gray-400 uppercase">Jumlah</th>
+                                    <th class="px-4 py-2.5 text-left font-data text-[10px] tracking-[0.14em] font-semibold text-gray-400 uppercase">{{ __('Nama') }}</th>
+                                    <th class="px-4 py-2.5 text-right font-data text-[10px] tracking-[0.14em] font-semibold text-gray-400 uppercase">{{ __('Jumlah') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#F0F2EA]">
@@ -348,7 +281,7 @@
                     </div>
                 </div>
                 @empty
-                <div class="md:col-span-2 text-center py-10 text-gray-400">Belum ada data.</div>
+                <div class="md:col-span-2 text-center py-10 text-gray-400">{{ __('Belum ada data.') }}</div>
                 @endforelse
             </div>
 
@@ -361,11 +294,19 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
             <div class="bg-[#0B1E07] console-grid px-6 py-10 sm:px-12 sm:py-12 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div>
-                    <p class="font-data text-[11px] tracking-[0.28em] uppercase text-[#9BDB4D] mb-3">Notifikasi Kasus</p>
-                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">Berlangganan Kasus Terbaru</h2>
+                    <p class="font-data text-[11px] tracking-[0.28em] uppercase text-[#9BDB4D] mb-3">{{ __('Ikut Mengawal') }}</p>
+                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">{{ __('Kejahatan lingkungan tumbuh subur saat tak ada yang mengawasi.') }}</h2>
                     <p class="mt-3 text-sm text-white/60 leading-relaxed max-w-md">
-                        Masukkan email Anda untuk menerima informasi setiap ada kasus terverifikasi terbaru yang dipublikasikan.
+                        {{ __('Jadilah salah satu yang mengawasi. Kami kabari lewat email setiap ada kasus baru yang terverifikasi dan setiap kali status sebuah kasus berubah.') }}
                     </p>
+                    <ul class="mt-5 space-y-2 text-sm text-white/80">
+                        @foreach ([__('Kasus baru yang sudah diverifikasi tim Auriga'), __('Perkembangan status, dari penyidikan hingga putusan'), __('Gratis, langsung ke email Anda')] as $point)
+                            <li class="flex items-center gap-2">
+                                <svg class="flex-shrink-0 text-[#9BDB4D]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                {{ $point }}
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
                 <div class="lg:justify-self-end w-full max-w-md">
                     @livewire('case-subscribe-form')
@@ -378,172 +319,46 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/echarts@6/dist/echarts.min.js"></script>
+@include('front.components.perkara-charts-script')
+@include('front.components.page-swap-script')
 <script>
     (function () {
-        // Validated categorical palette (dataviz skill, green-first order)
-        var CAT = ['#008300', '#2a78d6', '#eda100', '#e87ba4', '#1baf7a', '#eb6834', '#4a3aa7', '#e34948'];
-        var GREEN = '#008300';
-        var INK = '#374151', MUTED = '#6b7268', GRID = '#EEF1E8', AXISLINE = '#E2E6DA';
-        var FONT = "'IBM Plex Mono', monospace";
-        // ponytail: console-style bar fill — deep-green base fading to bright leaf at the data end
-        function barFill(vertical) {
-            return {
-                type: 'linear',
-                x: 0, y: 0, x2: vertical ? 0 : 1, y2: vertical ? 1 : 0,
-                colorStops: [
-                    { offset: 0, color: vertical ? '#3FA90F' : '#1F6300' },
-                    { offset: 1, color: vertical ? '#1F6300' : '#3FA90F' }
-                ]
-            };
+        // Filter statistik tanpa reload: bagian #statistik diambil ulang dari server lalu ditukar, grafiknya
+        // dipasang lagi. Gagal → reload biasa.
+        var shown = location.search; // query statistik yang sedang tampil
+
+        function go(url, push, focusName) {
+            window.gdSwap(url, 'statistik', { beforeSwap: function (el) { window.pubDisposeCharts(el); } })
+                .then(function (section) {
+                    if (push) history.pushState({ statistik: true }, '', url);
+                    shown = new URL(url, location.href).search;
+                    window.pubInitCharts(section);
+                    var field = focusName && section.querySelector('#filter-form [name="' + focusName + '"]');
+                    if (field) field.focus({ preventScroll: true });
+                })
+                .catch(function (e) { if (e.name !== 'AbortError') location.assign(url); });
         }
 
-        window.pubChartInstances = window.pubChartInstances || {};
-
-        function axisCommon(labels, long) {
-            return {
-                type: 'category',
-                data: labels,
-                axisLine: { lineStyle: { color: AXISLINE } },
-                axisTick: { show: false },
-                axisLabel: {
-                    color: MUTED, fontSize: 10, fontFamily: FONT,
-                    interval: long ? Math.ceil(labels.length / 20) : 0,
-                    rotate: long ? 55 : 0
-                }
-            };
-        }
-
-        function valueAxis() {
-            return {
-                type: 'value', minInterval: 1,
-                axisLabel: { color: MUTED, fontSize: 10, fontFamily: FONT },
-                splitLine: { lineStyle: { color: GRID } }
-            };
-        }
-
-        function tooltipFmt(params) {
-            var p = Array.isArray(params) ? params[0] : params;
-            return '<b>' + p.name + '</b><br/>' + Number(p.value).toLocaleString('id-ID');
-        }
-
-        function pubInitChart(el) {
-            var raw = el.getAttribute('data-chart');
-            if (!raw) return;
-            var data = JSON.parse(raw);
-            if (!data.length) return;
-
-            if (window.pubChartInstances[el.id]) window.pubChartInstances[el.id].dispose();
-            var chart = echarts.init(el);
-            window.pubChartInstances[el.id] = chart;
-
-            var type = el.getAttribute('data-type') || 'bar';
-            var labels = data.map(function (d) { return d.label; });
-            var values = data.map(function (d) { return d.value; });
-            var long = labels.length > 15;
-
-            if (type === 'pie') {
-                chart.setOption({
-                    textStyle: { fontFamily: FONT },
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: function (p) {
-                            return '<b>' + p.name + '</b><br/>' + p.value.toLocaleString('id-ID') + ' (' + p.percent.toFixed(1) + '%)';
-                        }
-                    },
-                    series: [{
-                        type: 'pie',
-                        radius: ['38%', '68%'],
-                        data: data.map(function (d) { return { name: d.label, value: d.value }; }),
-                        itemStyle: {
-                            color: function (p) { return CAT[p.dataIndex % CAT.length]; },
-                            borderColor: '#fff', borderWidth: 2, borderRadius: 3
-                        },
-                        label: {
-                            color: INK, fontSize: 10, fontFamily: FONT,
-                            formatter: function (p) { return p.name + '\n' + p.value.toLocaleString('id-ID'); }
-                        },
-                        labelLine: { lineStyle: { color: AXISLINE } }
-                    }]
-                });
-            } else if (type === 'line') {
-                chart.setOption({
-                    textStyle: { fontFamily: FONT },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'line' }, formatter: tooltipFmt },
-                    grid: { left: 8, right: 16, top: 20, bottom: long ? 60 : 10, containLabel: true },
-                    xAxis: axisCommon(labels, long),
-                    yAxis: valueAxis(),
-                    series: [{
-                        type: 'line',
-                        data: values,
-                        lineStyle: { width: 2, color: GREEN },
-                        itemStyle: { color: GREEN, borderColor: '#fff', borderWidth: 2 },
-                        symbol: 'circle', symbolSize: 8,
-                        areaStyle: {
-                            color: {
-                                type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                                colorStops: [{ offset: 0, color: 'rgba(0,131,0,0.16)' }, { offset: 1, color: 'rgba(0,131,0,0.01)' }]
-                            }
-                        }
-                    }]
-                });
-            } else if (type === 'hbar') {
-                chart.setOption({
-                    textStyle: { fontFamily: FONT },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: tooltipFmt },
-                    grid: { left: 8, right: 40, top: 8, bottom: 8, containLabel: true },
-                    xAxis: valueAxis(),
-                    yAxis: {
-                        type: 'category',
-                        data: labels.slice().reverse(),
-                        axisLine: { lineStyle: { color: AXISLINE } },
-                        axisTick: { show: false },
-                        axisLabel: { color: MUTED, fontSize: 9, fontFamily: FONT, width: 120, overflow: 'truncate' }
-                    },
-                    series: [{
-                        type: 'bar',
-                        data: values.slice().reverse(),
-                        barMaxWidth: 16,
-                        itemStyle: { color: barFill(false), borderRadius: 0 },
-                        emphasis: { itemStyle: { color: '#0B1E07' } }
-                    }]
-                });
-            } else {
-                chart.setOption({
-                    textStyle: { fontFamily: FONT },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: tooltipFmt },
-                    grid: { left: 8, right: 16, top: 20, bottom: long ? 60 : 10, containLabel: true },
-                    xAxis: axisCommon(labels, long),
-                    yAxis: valueAxis(),
-                    dataZoom: long ? [{ type: 'slider', start: 0, end: 30, height: 16, bottom: 5 }] : undefined,
-                    series: [{
-                        type: 'bar',
-                        data: values,
-                        barMaxWidth: 28,
-                        itemStyle: { color: barFill(true), borderRadius: 0 },
-                        emphasis: { itemStyle: { color: '#0B1E07' } }
-                    }]
-                });
-            }
-        }
-
-        document.querySelectorAll('.pub-echart').forEach(pubInitChart);
-
-        function pubResizeAll() {
-            Object.keys(window.pubChartInstances).forEach(function (id) {
-                if (window.pubChartInstances[id]) window.pubChartInstances[id].resize();
-            });
-        }
-        window.pubResizeAll = pubResizeAll;
-        window.addEventListener('resize', pubResizeAll);
-
-        // ponytail: filters navigate (server re-renders everything) — no DOM patching
         window.applyFilters = function () {
             var p = new URLSearchParams(new FormData(document.getElementById('filter-form')));
             Array.from(p.keys()).forEach(function (k) { if (!p.get(k)) p.delete(k); });
             var qs = p.toString();
-            location.assign(location.pathname + (qs ? '?' + qs : '') + '#statistik');
+            var active = document.activeElement;
+            go(location.pathname + (qs ? '?' + qs : ''), true, active && active.form && active.form.id === 'filter-form' ? active.name : null);
         };
+
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('#statistik a[data-statistik-nav]');
+            if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            go(link.pathname + link.search, true);
+        });
+
+        window.addEventListener('popstate', function (e) {
+            // Kembali/maju ke entri dengan filter berbeda (bukan sekadar pindah #anchor).
+            if (e.state && e.state.statistik && location.search !== shown) go(location.href, false);
+        });
+        history.replaceState({ statistik: true }, '', location.href);
     })();
 </script>
 @endpush

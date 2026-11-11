@@ -10,6 +10,7 @@
         ['route' => 'artikel.index',    'match' => ['artikel.*'],      'label' => 'Artikels'],
         ['route' => 'subscription.index','match' => ['subscription.*'], 'label' => 'Subscriptions'],
         ['route' => 'about.edit',       'match' => ['about.edit'],     'label' => 'About'],
+        ['route' => 'translation.index','match' => ['translation.*'],  'label' => 'Translate'],
         ['route' => 'charts.dashboard', 'match' => ['charts.dashboard'],'label' => 'Charts'],
     ];
     $isActive = function (array $matches) {

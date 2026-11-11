@@ -6,12 +6,14 @@ use Illuminate\Support\Facades\{Auth, DB, Http, Log};
 use Illuminate\Support\Str;
 
 use App\Models\{CaseModel, CaseTranslation, Category};
-use App\Services\CaseTaskGenerator;
+use App\Services\{CaseCoverImage, CaseWriter};
+use App\Livewire\Concerns\AutoTranslates;
 use Livewire\{Component, WithFileUploads};
 
 class CaseForm extends Component
 {
     use WithFileUploads;
+    use AutoTranslates;
     public $case;
     public $caseId = null;
 
@@ -62,6 +64,14 @@ class CaseForm extends Component
     public $category_ids = [];
     public $existingBukti = [];
 
+    // Foto sampul (lihat App\Services\CaseCoverImage)
+    public $cover;
+    public $existingCover;
+    public $removeCover = false;
+    public $cover_caption_id;
+    public $cover_caption_en;
+    public $cover_credit;
+
     public $perkembangan_id;
     public $perkembangan_en;
     public $pembelajaran_id;
@@ -81,6 +91,17 @@ class CaseForm extends Component
         "category_ids" => "required|array|min:1",
         "category_ids.*" => "integer|exists:categories,id",
         "bukti.*" => "file|max:10240|mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,mp4,mov,avi,zip,rar",
+        "cover" => "nullable|image|mimes:jpg,jpeg,png,webp|max:8192|dimensions:min_width=800,min_height=450",
+        "cover_caption_id" => "nullable|string|max:255",
+        "cover_caption_en" => "nullable|string|max:255",
+        "cover_credit" => "nullable|string|max:150",
+    ];
+
+    protected $messages = [
+        "cover.image" => "Foto sampul harus berupa gambar JPG, PNG, atau WebP.",
+        "cover.mimes" => "Foto sampul harus berupa gambar JPG, PNG, atau WebP.",
+        "cover.max" => "Ukuran foto sampul maksimal 8 MB.",
+        "cover.dimensions" => "Foto sampul minimal 800 × 450 piksel agar tetap tajam.",
     ];
 
     public function mount($caseId = null)
@@ -126,13 +147,30 @@ class CaseForm extends Component
                 "sumber_id" => $this->case->sumber,
                 "instansi" => $this->case->instansi,
                 "status" => $this->case->status_narasi,
+                "cover_caption_id" => $idTranslation->cover_caption ?? "",
+                "cover_caption_en" => $enTranslation->cover_caption ?? "",
+                "cover_credit" => $this->case->cover_credit,
             ]);
 
             // dd($this->case);
 
             $this->existingBukti = $this->case->bukti ?? [];
             $this->bukti = [];
+            $this->existingCover = $this->case->cover_image;
         }
+    }
+
+    public function updatedCover(): void
+    {
+        $this->removeCover = false;
+        $this->validateOnly("cover");
+    }
+
+    public function removeCoverImage(): void
+    {
+        $this->cover = null;
+        $this->removeCover = true;
+        $this->resetValidation("cover");
     }
 
     // location
@@ -358,11 +396,7 @@ class CaseForm extends Component
         $this->validate();
 
         try {
-            $case = $this->case ?? new CaseModel();
-            $caseNumber = "CASE-" . strtoupper(Str::random(5));
-
             $data = [
-                "case_number" => $caseNumber,
                 "category_ids" => $this->category_ids,
                 "report_id" => $this->report_id,
                 "status_id" => $this->status_id,
@@ -382,61 +416,38 @@ class CaseForm extends Component
                 "sumber" => $this->sumber_id,
                 "status_narasi" => $this->status,
                 "instansi" => $this->instansi,
+                "cover_credit" => trim((string) $this->cover_credit) ?: null,
             ];
 
-            $case->fill($data)->save();
-            $case->refresh();
-
-            foreach (["id", "en"] as $locale) {
-                CaseTranslation::query()->updateOrCreate(
-                    ["case_id" => $case->id, "locale" => $locale],
-                    [
-                        "title" =>
-                            $locale === "id"
-                                ? $this->title_id
-                                : $this->title_en ?? "",
-                        "summary" => Str::of(
-                            $locale === "id"
-                                ? $this->desc_id
-                                : $this->desc_en ?? "",
-                        )->stripTags()->limit(300, "..."),
-                        "description" =>
-                            $locale === "id"
-                                ? $this->desc_id
-                                : $this->desc_en ?? "",
-                        "perkembangan" =>
-                            $locale === "id"
-                                ? $this->perkembangan_id
-                                : $this->perkembangan_en ?? "",
-                        "pembelajaran" =>
-                            $locale === "id"
-                                ? $this->pembelajaran_id
-                                : $this->pembelajaran_en ?? "",
-                        "dugaan_permasalahan" =>
-                            $locale === "id"
-                                ? $this->dugaan_permasalahan_id
-                                : $this->dugaan_permasalahan_en ?? "",
-                    ],
-                );
-            }
-
-            // \dd($case);
-
-            logger()->info("CATEGORY IDS", [
-                "raw" => $case->category_ids,
-                "type" => gettype($case->category_ids),
+            // Nomor kasus dibuat sekali saat kasus baru; edit tidak mengubahnya.
+            $case = app(CaseWriter::class)->save($this->case, $data, [
+                "id" => [
+                    "title" => $this->title_id,
+                    "cover_caption" => trim((string) $this->cover_caption_id) ?: null,
+                    "description" => $this->desc_id,
+                    "perkembangan" => $this->perkembangan_id,
+                    "pembelajaran" => $this->pembelajaran_id,
+                    "dugaan_permasalahan" => $this->dugaan_permasalahan_id,
+                ],
+                "en" => [
+                    "title" => $this->title_en ?? "",
+                    "cover_caption" => trim((string) $this->cover_caption_en) ?: null,
+                    "description" => $this->desc_en ?? "",
+                    "perkembangan" => $this->perkembangan_en ?? "",
+                    "pembelajaran" => $this->pembelajaran_en ?? "",
+                    "dugaan_permasalahan" => $this->dugaan_permasalahan_en ?? "",
+                ],
             ]);
 
-            // 3.1️⃣ Auto-generate tasks for this category (if templates exist)
-            $generated = 0;
-            try {
-                $generated = CaseTaskGenerator::generate(
-                    $case->id,
-                    $case->category_ids,
-                );
-            } catch (\Throwable $e) {
-                // don't block case creation; log and continue
-                Log::error("Case task generation failed: " . $e->getMessage());
+            // Foto sampul: foto baru menggantikan yang lama (berkas lama dihapus); tombol hapus mengosongkannya.
+            $covers = app(CaseCoverImage::class);
+            if ($this->cover instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+                $oldCover = $case->cover_image;
+                $case->update(["cover_image" => $covers->store($this->cover)]);
+                $covers->delete($oldCover);
+            } elseif ($this->removeCover && $case->cover_image) {
+                $covers->delete($case->cover_image);
+                $case->update(["cover_image" => null]);
             }
 
             $paths = [];
@@ -477,9 +488,8 @@ class CaseForm extends Component
                         \Mail::to($email)->queue(new \App\Mail\NewCaseMail(
                             (object) [
                                 "id" => $case->id,
-                                "title" =>
-                                    $case->title ??
-                                    "Case " . $case->case_number,
+                                "case_number" => $case->case_number,
+                                "title" => $this->title_id ?: "Case " . $case->case_number,
                                 "description" => $this->desc_id ?? "",
                             ],
                         ));
@@ -576,7 +586,25 @@ class CaseForm extends Component
             "title_en",
             "summary_en",
             "desc_en",
+            "cover",
+            "existingCover",
+            "removeCover",
+            "cover_caption_id",
+            "cover_caption_en",
+            "cover_credit",
         ]);
+    }
+
+    protected function translatableFields(): array
+    {
+        return [
+            "title_id" => "title_en",
+            "desc_id" => "desc_en",
+            "perkembangan_id" => "perkembangan_en",
+            "pembelajaran_id" => "pembelajaran_en",
+            "dugaan_permasalahan_id" => "dugaan_permasalahan_en",
+            "cover_caption_id" => "cover_caption_en",
+        ];
     }
 
     public function render()

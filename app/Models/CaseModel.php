@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class CaseModel extends Model
 {
@@ -10,6 +11,7 @@ class CaseModel extends Model
 
     protected $fillable = [
         'case_number',
+        'source_ref',
         'report_id',
         'category_id',
         'status_id',
@@ -34,6 +36,8 @@ class CaseModel extends Model
         'instansi',
         'sumber',
         'status_narasi',
+        'cover_image',
+        'cover_credit',
 
     ];
 
@@ -68,6 +72,79 @@ class CaseModel extends Model
     public function province()
     {
         return $this->belongsTo(Province::class);
+    }
+
+    /** Panjang maksimum bagian judul di URL publik (karakter). */
+    private const URL_TITLE_LENGTH = 60;
+
+    /**
+     * URL publik halaman detail kasus: /id/kasus/{judul}-{kode} atau /en/cases/{title}-{code},
+     * mis. /id/kasus/suap-perizinan-tambang-ilegal-xltlr. Judul mengikuti terjemahan bahasa tersebut.
+     */
+    public function publicUrl(?string $locale = null, bool $absolute = true): string
+    {
+        $locale ??= app()->getLocale();
+        $translation = $this->translations->firstWhere('locale', $locale)
+            ?? $this->translations->firstWhere('locale', 'id')
+            ?? $this->translations->first();
+
+        return self::publicUrlFor($this->case_number, $translation?->title, $locale, $absolute);
+    }
+
+    /** Sama dengan publicUrl(), untuk data kasus yang bukan model (mis. di email). */
+    public static function publicUrlFor(string $caseNumber, ?string $title, ?string $locale = null, bool $absolute = true): string
+    {
+        $locale = $locale === 'en' ? 'en' : 'id';
+
+        return route("public.case.{$locale}", ['locale' => $locale, 'slug' => self::publicSlug($caseNumber, $title)], $absolute);
+    }
+
+    /** "CASE-XLTLR" + "Suap Perizinan Tambang Ilegal" → "suap-perizinan-tambang-ilegal-xltlr". */
+    public static function publicSlug(string $caseNumber, ?string $title): string
+    {
+        $title = Str::slug(html_entity_decode(strip_tags((string) $title)));
+        if (strlen($title) > self::URL_TITLE_LENGTH) {
+            // Potong di batas kata agar tidak ada kata terpotong.
+            $title = Str::beforeLast(substr($title, 0, self::URL_TITLE_LENGTH + 1), '-');
+        }
+
+        return trim($title.'-'.self::urlCode($caseNumber), '-');
+    }
+
+    /** Kode kasus di URL: nomor kasus tanpa awalan "CASE-", huruf kecil ("CASE-XLTLR" → "xltlr"). */
+    public static function urlCode(string $caseNumber): string
+    {
+        return Str::slug(Str::after($caseNumber, 'CASE-'));
+    }
+
+    /**
+     * Cari kasus publik dari slug URL. Kode kasus ada di akhir slug dan bisa memuat tanda hubung
+     * ("...-2024-001"), jadi beberapa akhiran dicoba sekaligus; yang terpanjang dan cocok dipakai.
+     */
+    public static function findPublicBySlug(string $slug): ?self
+    {
+        $parts = explode('-', Str::lower($slug));
+        $candidates = [];
+        for ($i = count($parts) - 1; $i >= max(0, count($parts) - 4); $i--) {
+            $code = Str::upper(implode('-', array_slice($parts, $i)));
+            array_push($candidates, 'CASE-'.$code, $code);
+        }
+
+        return static::query()
+            ->where('is_public', true)
+            ->whereIn('case_number', $candidates)
+            ->get()
+            ->filter(fn (self $case) => str_ends_with(Str::lower($slug), self::urlCode($case->case_number)))
+            ->sortByDesc(fn (self $case) => strlen($case->case_number))
+            ->first();
+    }
+
+    /**
+     * URL publik foto sampul (lihat App\Services\CaseCoverImage), null bila kasus belum punya foto sampul.
+     */
+    public function getCoverUrlAttribute(): ?string
+    {
+        return $this->cover_image ? asset('storage/'.$this->cover_image) : null;
     }
 
     public function status()

@@ -1,5 +1,5 @@
 <div x-show="lang === 'id'" x-data="{
-    desc_id: @entangle('desc_id'),
+    desc_id: @entangle($tinymceModel ?? 'desc_id'),
     initEditor() {
         let self = this;
         if (tinymce.get('editor_id')) tinymce.get('editor_id').remove();

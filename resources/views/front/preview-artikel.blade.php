@@ -1,10 +1,15 @@
 @extends('layouts.main')
 
 @php
-    $pageTitle = ($case->title ?? $case->slug ?? 'Artikel') . ' — greendefender';
-    $pageDescription = 'Artikel dari greendefender tentang penegakan hukum lingkungan hidup di Indonesia.';
-    $ogImage = $case->image ? asset('storage/' . $case->image) : asset('img/image.png');
+    $pageTitle = ($case->title ?? $case->slug ?? __('Artikel')) . ' — greendefender';
+    $pageDescription = __('Artikel dari greendefender tentang penegakan hukum lingkungan hidup di Indonesia.');
+    $ogImage = $case->image
+        ? (\Illuminate\Support\Str::startsWith($case->image, ['http://', 'https://']) ? $case->image : asset('storage/' . $case->image))
+        : asset('img/image.png');
     $ogType = 'article';
+    // Tautan yang dibagikan selalu alamat resmi artikel, tanpa parameter pelacak (?fbclid, ?utm_...) atau #.
+    $shareUrl = route('public.artikel.detail', ['locale' => app()->getLocale(), 'slug' => $case->slug]);
+    $shareTitle = $case->title ?? $case->slug;
 @endphp
 
 @section('structured-data')
@@ -12,7 +17,7 @@
 {
     "@@context": "https://schema.org",
     "@@type": "Article",
-    "headline": {{ json_encode($case->title ?? $case->slug ?? 'Artikel') }},
+    "headline": {{ json_encode($case->title ?? $case->slug ?? __('Artikel')) }},
     "description": {{ json_encode(mb_substr(strip_tags($case->content ?? ''), 0, 300)) }},
     "image": {{ json_encode($case->image ? asset('storage/' . $case->image) : asset('img/image.png')) }},
     "datePublished": {{ json_encode(optional($case->created_at)->toIso8601String()) }},
@@ -66,7 +71,7 @@
         <div
             class="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0B1E07]/80 backdrop-blur-sm py-4 px-4 md:px-8">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-                <span class="font-data uppercase tracking-[0.2em] text-[10px] text-[#9BDB4D]">greendefender / Artikel</span>
+                <span class="font-data uppercase tracking-[0.2em] text-[10px] text-[#9BDB4D]">greendefender / {{ __('Artikel') }}</span>
 
                 <div class="flex flex-wrap items-center gap-3 font-data text-[11px] text-white/70">
                     @if (!empty($case->category_name))
@@ -86,10 +91,13 @@
     {{-- Title band --}}
     <header class="bg-white border-b border-[#E2E6DA]">
         <div class="max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
-            <p class="font-data uppercase tracking-[0.2em] text-xs text-[#264c16] mb-4">Artikel</p>
+            <p class="font-data uppercase tracking-[0.2em] text-xs text-[#264c16] mb-4">{{ __('Artikel') }}</p>
             <h1 class="font-display text-3xl md:text-5xl font-bold text-[#0B1E07] leading-tight">
                 {{ $case->title ?? $case->slug }}
             </h1>
+            <div class="mt-8">
+                @include('front.components.share-buttons', ['url' => $shareUrl, 'title' => $shareTitle, 'center' => true])
+            </div>
         </div>
     </header>
 
@@ -119,13 +127,17 @@
         {!! $case->content !!}
     </article>
 
-    {{-- Back to articles --}}
+    {{-- Bagikan di akhir artikel, lalu kembali ke daftar --}}
     <div class="max-w-3xl mx-auto px-4 pb-16 md:pb-24">
-        <div class="border-t border-[#E2E6DA] py-8 md:py-12">
+        <section class="border-t border-[#E2E6DA] pt-8 md:pt-10">
+            <h2 class="font-data text-[11px] font-semibold uppercase tracking-widest text-[#6b7268] mb-4">{{ __('Bagikan artikel ini') }}</h2>
+            @include('front.components.share-buttons', ['url' => $shareUrl, 'title' => $shareTitle])
+        </section>
+        <div class="border-t border-[#E2E6DA] mt-8 py-8 md:py-12">
             <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}"
                 class="inline-flex items-center gap-2 font-data text-xs uppercase tracking-[0.2em] text-[#6b7268] hover:text-[#0B1E07] transition-colors">
                 <span class="text-[#9BDB4D]">&larr;</span>
-                Kembali ke Artikel
+                {{ __('Kembali ke Artikel') }}
             </a>
         </div>
     </div>

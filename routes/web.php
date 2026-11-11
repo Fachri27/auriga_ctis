@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{AdminDashboardController, ArtikelController, CaseGeometryController, HomeController, ProfileController, PublicCaseController, PublicDashboardController};
 use App\Livewire\About\AboutForm;
 use App\Livewire\Artikels\{ArtikelForm, ArtikelTable};
-use App\Livewire\Cases\{CaseAction, CaseDetail, CaseForm, CaseList};
+use App\Livewire\Cases\{CaseAction, CaseDetail, CaseForm, CaseImport, CaseList};
 use App\Livewire\Categories\{CategoriesForm, CategoriesTable};
 use App\Livewire\Process\{ProcessForm, ProcessTable};
 use App\Livewire\Reports\{ReportDetail, ReportForm, ReportTable};
@@ -13,6 +13,7 @@ use App\Livewire\Status\StatusList;
 use App\Livewire\Tasks\{TaskForm, TaskList, TaskRequirementForm, TaskRequirementList};
 use App\Livewire\{SubscriptionList, UserForm, UserList};
 use App\Livewire\Permission\ManagePermission;
+use App\Livewire\Translations\TranslationCenter;
 
 Route::get('/', function () {
     return redirect('/id');
@@ -36,6 +37,7 @@ Route::group([
     Route::get('/verify-case/{case_number}', [\App\Http\Controllers\Public\CaseVerificationController::class, 'show'])->name('verify-case');
 
     Route::get('/about', [\App\Http\Controllers\HomeController::class, 'about'])->name('about-user');
+    Route::get('/protokol', [\App\Http\Controllers\HomeController::class, 'protocol'])->name('front.protocol');
 
     Route::get('/reports/create', ReportForm::class)->middleware('auth')->name('report.form');
 
@@ -43,7 +45,12 @@ Route::group([
     //     [PublicCaseController::class, 'show']
     // )->name('public.verify.case');
 
-    Route::get('/detail-case/{caseNumber}', [PublicCaseController::class, 'show'])
+    // Detail kasus: /id/kasus/{judul-kode} & /en/cases/{title-code} (lihat CaseModel::publicUrl()).
+    Route::get('/kasus/{slug}', [PublicCaseController::class, 'show'])->name('public.case.id');
+    Route::get('/cases/{slug}', [PublicCaseController::class, 'show'])->name('public.case.en');
+
+    // Alamat lama /detail-case/{nomor} tetap jalan: dialihkan permanen ke alamat baru.
+    Route::get('/detail-case/{caseNumber}', [PublicCaseController::class, 'legacy'])
         ->name('public.verify.case');
 
     // Public dashboard route
@@ -67,6 +74,7 @@ Route::get('/sitemap.xml', function () {
 
     // Static pages
     $items[] = ['url' => url('/id/about'), 'lastmod' => now(), 'priority' => '0.8', 'changefreq' => 'monthly'];
+    $items[] = ['url' => url('/id/protokol'), 'lastmod' => now(), 'priority' => '0.6', 'changefreq' => 'monthly'];
     $items[] = ['url' => url('/id/verified-cases'), 'lastmod' => now(), 'priority' => '0.9', 'changefreq' => 'daily'];
     $items[] = ['url' => url('/id/dashboard'), 'lastmod' => now(), 'priority' => '0.9', 'changefreq' => 'daily'];
     $items[] = ['url' => url('/id/artikels'), 'lastmod' => now(), 'priority' => '0.7', 'changefreq' => 'weekly'];
@@ -86,7 +94,7 @@ Route::get('/sitemap.xml', function () {
 
     foreach ($cases as $case) {
         $items[] = [
-            'url' => url('/id/detail-case/' . $case->case_number),
+            'url' => \App\Models\CaseModel::publicUrlFor($case->case_number, $case->title, 'id'),
             'lastmod' => $case->updated_at ?? now(),
             'priority' => '0.8',
             'changefreq' => 'weekly',
@@ -95,6 +103,7 @@ Route::get('/sitemap.xml', function () {
 
     // Published articles
     $artikels = DB::table('artikels')
+        ->where('type', 'internal')
         ->whereNotNull('published_at')
         ->select('slug', 'updated_at')
         ->orderBy('updated_at', 'desc')
@@ -161,11 +170,12 @@ Route::get('/llms.txt', function () {
         ->get();
     foreach ($cases as $c) {
         $label = trim($c->title ?? '') !== '' ? $c->title : $c->case_number;
-        $out[] = "- [" . $label . "](" . $base . "/id/detail-case/" . $c->case_number . ")";
+        $out[] = "- [" . $label . "](" . \App\Models\CaseModel::publicUrlFor($c->case_number, $c->title, 'id') . ")";
     }
     $out[] = '';
     $out[] = '## Artikel terbaru';
     $artikels = DB::table('artikels')
+        ->where('type', 'internal')
         ->whereNotNull('published_at')
         ->select('slug')
         ->orderByDesc('published_at')
@@ -258,7 +268,7 @@ Route::get('/llms-full.txt', function () {
         if ($desc !== '') {
             $out[] = '- Deskripsi: ' . mb_substr($desc, 0, 600);
         }
-        $out[] = '- URL: ' . $base . '/id/detail-case/' . $c->case_number;
+        $out[] = '- URL: ' . \App\Models\CaseModel::publicUrlFor($c->case_number, $c->title, 'id');
         $out[] = '';
     }
 
@@ -309,6 +319,7 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
 
     Route::get('/cms/cases', CaseList::class)->name('case.index');
     Route::get('/cms/cases/create', CaseForm::class)->name('case.create');
+    Route::get('/cms/cases/import', CaseImport::class)->name('case.import');
     Route::get('/cms/cases/{id}/detail', CaseDetail::class)->name('case.detail');
     Route::get('/cms/cases/{caseId}/edit', CaseForm::class)->name('case.edit');
 
@@ -335,6 +346,7 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('cms/artikels/', ArtikelTable::class)->name('artikel.index');
 
     Route::get('/cms/subscriptions', SubscriptionList::class)->name('subscription.index');
+    Route::get('/cms/translations', TranslationCenter::class)->name('translation.index');
     Route::get('cms/artikels/{artikelId}/edit/', ArtikelForm::class)->name('artikel.edit');
 
     Route::get('cms/users/', UserList::class)->name('user.index');

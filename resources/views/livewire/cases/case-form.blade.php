@@ -14,11 +14,14 @@
                 <span x-show="lang === 'en'">Submit Cases</span>
             </h1>
         </div>
-        <div class="flex rounded-lg border border-[color:var(--hairline)] bg-[color:var(--paper-2)] p-1">
-            <button :class="lang === 'id' ? 'cms-btn-primary' : 'cms-btn-ghost'" @click="lang = 'id'"
-                class="px-3 py-1.5 text-xs rounded-md transition-colors">Indonesia</button>
-            <button :class="lang === 'en' ? 'cms-btn-primary' : 'cms-btn-ghost'" @click="lang = 'en'"
-                class="px-3 py-1.5 text-xs rounded-md transition-colors">English</button>
+        <div class="flex items-center gap-2">
+            <x-internal.translate-button />
+            <div class="flex rounded-lg border border-[color:var(--hairline)] bg-[color:var(--paper-2)] p-1">
+                <button :class="lang === 'id' ? 'cms-btn-primary' : 'cms-btn-ghost'" @click="lang = 'id'"
+                    class="px-3 py-1.5 text-xs rounded-md transition-colors">Indonesia</button>
+                <button :class="lang === 'en' ? 'cms-btn-primary' : 'cms-btn-ghost'" @click="lang = 'en'"
+                    class="px-3 py-1.5 text-xs rounded-md transition-colors">English</button>
+            </div>
         </div>
         <input type="hidden" name="lang" :value="lang">
     </div>
@@ -270,6 +273,77 @@
                 @enderror
             </section>
 
+        </div>
+    </div>
+
+    {{-- ================= FOTO SAMPUL ================= --}}
+    @php
+        // Pratinjau: foto baru yang sedang diunggah, atau foto sampul yang tersimpan (kecuali ditandai hapus).
+        try {
+            $coverPreview = $cover && ! $errors->has('cover') ? $cover->temporaryUrl() : null;
+        } catch (\Throwable) {
+            $coverPreview = null;
+        }
+        $coverPreview ??= $existingCover && ! $removeCover ? asset('storage/' . $existingCover) : null;
+    @endphp
+    <div class="cms-panel">
+        <div class="cms-panel-head" style="padding:14px 20px">
+            <div class="cms-panel-title">Foto Sampul</div>
+        </div>
+        <div class="cms-panel-body" style="padding:16px 20px">
+            <p class="text-sm mb-3" style="color:var(--muted)">
+                Tampil di kartu kasus, bagian atas halaman detail kasus, dan saat tautan kasus dibagikan (WhatsApp, media sosial).
+                Bila kosong, kartu memakai citra satelit lokasi kasus.
+            </p>
+            <div class="rounded p-3 mb-4 text-xs leading-relaxed" style="background:#FFF7E6;border:1px solid #F5D9A8;color:#7A4B00">
+                <strong>Pastikan foto aman dipublikasikan:</strong> tidak memperlihatkan wajah atau identitas pelapor, korban, maupun saksi,
+                tidak memuat dokumen pribadi, dan lembaga berhak memakainya. Jangan memakai foto dari Bukti tanpa pemeriksaan.
+                Lokasi GPS dan metadata lain di dalam foto dihapus otomatis saat disimpan.
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <div class="relative w-full aspect-video rounded overflow-hidden border border-[color:var(--hairline)] bg-[color:var(--paper-2)]">
+                        @if ($coverPreview)
+                            <img src="{{ $coverPreview }}" alt="Pratinjau foto sampul" class="absolute inset-0 w-full h-full object-cover">
+                        @else
+                            <div class="absolute inset-0 flex items-center justify-center text-xs" style="color:var(--muted)">Belum ada foto sampul</div>
+                        @endif
+                        <div wire:loading.flex wire:target="cover" class="absolute inset-0 items-center justify-center text-xs" style="background:rgba(255,255,255,.8)">Mengunggah…</div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-3">
+                        <input type="file" wire:model="cover" accept="image/jpeg,image/png,image/webp" class="text-sm">
+                        @if ($coverPreview)
+                            <button type="button" wire:click="removeCoverImage" class="cms-btn cms-btn-ghost">Hapus foto</button>
+                        @endif
+                    </div>
+                    <p class="mt-2 text-xs" style="color:var(--muted)">JPG, PNG, atau WebP · minimal 800 × 450 px · maks. 8 MB · rasio 16:9 paling pas.</p>
+                    @error('cover')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">
+                            <span x-show="lang === 'id'">Keterangan foto (ID)</span>
+                            <span x-show="lang === 'en'">Photo caption (EN)</span>
+                        </label>
+                        <input x-show="lang === 'id'" type="text" wire:model="cover_caption_id" maxlength="255" class="cms-input w-full"
+                            placeholder="mis. Bukaan tambang di kawasan hutan lindung, Maret 2026">
+                        <input x-show="lang === 'en'" type="text" wire:model="cover_caption_en" maxlength="255" class="cms-input w-full"
+                            placeholder="e.g. Mining pit inside a protected forest, March 2026">
+                        <p class="mt-1 text-xs" style="color:var(--muted)">Juga dipakai sebagai teks alternatif untuk pembaca layar.</p>
+                        @error('cover_caption_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        @error('cover_caption_en') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Kredit foto</label>
+                        <input type="text" wire:model="cover_credit" maxlength="150" class="cms-input w-full" placeholder="mis. Dok. Auriga Nusantara">
+                        @error('cover_credit') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

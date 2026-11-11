@@ -52,7 +52,7 @@ class CaseSubscribeForm extends Component
             'email' => ['required', 'email', 'max:255'],
             'turnstileToken' => ['required', 'string'],
         ], [
-            'turnstileToken.required' => 'Verifikasi keamanan belum selesai, silakan coba lagi.',
+            'turnstileToken.required' => __('Verifikasi keamanan belum selesai, silakan coba lagi.'),
         ]);
 
         $verify = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
@@ -66,7 +66,7 @@ class CaseSubscribeForm extends Component
         $this->dispatch('turnstile-reset');
 
         if (!($verify['success'] ?? false)) {
-            $this->addError('email', 'Verifikasi keamanan gagal, silakan coba lagi.');
+            $this->addError('email', __('Verifikasi keamanan gagal, silakan coba lagi.'));
             return;
         }
 
@@ -88,7 +88,13 @@ class CaseSubscribeForm extends Component
 
     public function render()
     {
-        return view('livewire.case-subscribe-form');
+        return view('livewire.case-subscribe-form', [
+            // Jumlah pengikut (kasus ini, atau semua email pelanggan untuk form umum), ditampilkan sebagai ajakan
+            // bila sudah cukup banyak.
+            'followers' => $this->caseId
+                ? CaseSubscription::where('case_id', $this->caseId)->count()
+                : CaseSubscription::distinct()->count('email'),
+        ]);
     }
 
     /**

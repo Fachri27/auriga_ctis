@@ -260,7 +260,7 @@
             <p class="text">{{ \Illuminate\Support\Str::limit(strip_tags($case->description), 280) }}</p>
             @endif
 
-            <a href="{{ route('public.verify.case', ['locale' => app()->getLocale(), 'caseNumber' => $case->case_number]) }}" class="cta">
+            <a href="{{ \App\Models\CaseModel::publicUrlFor($case->case_number, $case->title ?? null, app()->getLocale()) }}" class="cta">
                 Lihat Detail Kasus
             </a>
 
