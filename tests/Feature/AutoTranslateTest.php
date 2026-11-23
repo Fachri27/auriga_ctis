@@ -134,6 +134,22 @@ class AutoTranslateTest extends TestCase
         $this->assertSame('[EN] Lahan gambut terbakar', $en->summary);
     }
 
+    public function test_translate_record_fills_missing_english_stage_notes(): void
+    {
+        $this->fakeDeepL();
+
+        $caseId = $this->createCase('CASE-TAHAP',
+            ['title' => 'Tumpahan minyak', 'keterangan_tahapan' => json_encode(['sanksi' => 'Paksaan pemerintah', 'terbuka' => 'Dilaporkan warga'])],
+            ['title' => 'Oil spill', 'keterangan_tahapan' => json_encode(['terbuka' => 'Reported by residents (manual)'])],
+        );
+
+        $this->assertSame(1, app(ContentTranslationService::class)->translateRecord('case', $caseId));
+
+        $en = DB::table('case_translations')->where('case_id', $caseId)->where('locale', 'en')->first();
+        $this->assertSame('Oil spill', $en->title);
+        $this->assertSame(['terbuka' => 'Reported by residents (manual)', 'sanksi' => '[EN] Paksaan pemerintah'], json_decode($en->keterangan_tahapan, true));
+    }
+
     public function test_pending_ids_and_missing_english_row(): void
     {
         $this->fakeDeepL();

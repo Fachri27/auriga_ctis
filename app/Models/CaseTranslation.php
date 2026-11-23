@@ -15,7 +15,13 @@ class CaseTranslation extends Model
         'description',
         'perkembangan',
         'pembelajaran',
-        'dugaan_permasalahan'
+        'dugaan_permasalahan',
+        'keterangan_tahapan',
+    ];
+
+    protected $casts = [
+        // Keterangan custom per tahapan: key tahapan => teks (lihat App\Services\CaseStages).
+        'keterangan_tahapan' => 'array',
     ];
 
     public function case()

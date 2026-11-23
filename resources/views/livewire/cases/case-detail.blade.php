@@ -117,6 +117,9 @@
                         elseif (in_array($case->status_key, ['rejected'])) $statusVariant = 'danger';
                         elseif (in_array($case->status_key, ['open'])) $statusVariant = 'danger';
                     @endphp
+                    @if ($kualifikasiLabel = \App\Models\CaseModel::KUALIFIKASI[$case->kualifikasi ?? ''] ?? null)
+                        <x-internal.badge variant="default">{{ $kualifikasiLabel }}</x-internal.badge>
+                    @endif
                     <x-internal.badge variant="{{ $statusVariant }}">{{ $case->status_name }}</x-internal.badge>
                     <x-internal.badge variant="{{ $case->is_public ? 'ok' : 'default' }}">{{ $case->is_public ? 'Publik' : 'Draft' }}</x-internal.badge>
                 </div>
@@ -208,8 +211,7 @@
                 <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Tanggal</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->event_date ?? '—' }}</p></div>
                 <div class="col-span-2"><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Lokasi</p><p class="text-[color:var(--ink-2)] truncate">{{ implode(', ', array_filter([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])) ?: '—' }}</p></div>
                 <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Pelapor</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->pelapor ?? '—' }}</p></div>
-                <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Terlapor</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->terlapor ?? '—' }}</p></div>
-                <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Arsip</p><p class="text-[color:var(--ink-2)]"><span class="tabular-nums">{{ $docCount }}</span> dok · <span class="tabular-nums">{{ $actorCount }}</span> aktor · <span class="tabular-nums">{{ $buktiCount }}</span> bukti</p></div>
+                <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Terlapor</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->terlapor ?? '—' }}</p></div>                <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Arsip</p><p class="text-[color:var(--ink-2)]"><span class="tabular-nums">{{ $docCount }}</span> dok · <span class="tabular-nums">{{ $actorCount }}</span> aktor · <span class="tabular-nums">{{ $buktiCount }}</span> bukti</p></div>
             </div>
 
             {{-- actions --}}

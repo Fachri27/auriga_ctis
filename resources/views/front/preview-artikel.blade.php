@@ -2,7 +2,8 @@
 
 @php
     $pageTitle = ($case->title ?? $case->slug ?? __('Artikel')) . ' — greendefender';
-    $pageDescription = __('Artikel dari greendefender tentang penegakan hukum lingkungan hidup di Indonesia.');
+    $pageDescription = \Illuminate\Support\Str::limit(trim(html_entity_decode(strip_tags((string) ($case->excerpt ?: $case->content)))), 160)
+        ?: __('Artikel dari greendefender tentang penegakan hukum lingkungan hidup di Indonesia.');
     $ogImage = $case->image
         ? (\Illuminate\Support\Str::startsWith($case->image, ['http://', 'https://']) ? $case->image : asset('storage/' . $case->image))
         : asset('img/image.png');
@@ -42,99 +43,95 @@
 
 @section('content')
 
+@php
+    $coverUrl = $case->image
+        ? (\Illuminate\Support\Str::startsWith($case->image, ['http://', 'https://']) ? $case->image : asset('storage/' . $case->image))
+        : null;
+    $description = trim(strip_tags((string) $case->content)) !== '' ? $case->content : $case->excerpt;
+    // Hanya tautan web yang ditampilkan (mencegah javascript: dsb. dari isian tautan).
+    $publicationLink = \Illuminate\Support\Str::startsWith((string) $case->link, ['http://', 'https://']) ? $case->link : null;
+    $pdfs = array_filter(['Indonesia' => $case->pdf_id ?? null, 'English' => $case->pdf_en ?? null]);
+@endphp
+
+{{-- Tata letak publikasi: cover & unduhan PDF di kiri; judul, deskripsi, dan tautan publikasi di kanan.
+     Grid & tombol ditulis di sini karena kelas Tailwind-nya belum ada di CSS hasil build. --}}
+<style>
+    #artikel-page .pub-grid { display: grid; gap: 2rem; padding-top: 2.5rem; border-top: 2px solid #2F6C14; }
+    #artikel-page .pub-cover { max-width: 280px; margin: 0 auto; }
+    @media (min-width: 768px) {
+        #artikel-page .pub-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 3rem; align-items: start; }
+        #artikel-page .pub-cover { max-width: none; margin: 0; }
+    }
+    #artikel-page .pdf-btn {
+        display: inline-flex; align-items: center; justify-content: center; min-width: 9rem;
+        padding: .55rem 1.5rem; border: 2px solid #2F6C14; border-radius: 9999px; color: #2F6C14;
+        font-size: .875rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+        transition: background-color .2s, color .2s;
+    }
+    #artikel-page .pdf-btn:hover, #artikel-page .pdf-btn:focus-visible { background: #2F6C14; color: #fff; }
+</style>
+
 <div id="artikel-page" class="mt-16 bg-white">
-    {{-- ============================= --}}
-    {{-- BAGIAN PARALLAX HEADER --}}
-    {{-- ============================= --}}
-    <section x-data="{ offset: 0 }" x-init="
-                window.addEventListener('scroll', () => {
-                    if (window.innerWidth >= 768) {
-                        offset = window.scrollY * 0.3
-                    }
-                })
-            "
-        class="relative min-h-[40vh] md:min-h-[70vh] overflow-hidden bg-[#0B1E07]">
+    <div class="max-w-6xl mx-auto px-4 py-12 md:py-16">
+        <p class="font-data uppercase tracking-[0.2em] text-xs text-[#264c16] mb-6">
+            {{ __('Analisis Auriga') }}
+            @if (!empty($case->published_at))
+                <span class="text-[#6b7268]">/ {{ \Illuminate\Support\Carbon::parse($case->published_at)->translatedFormat('d M Y') }}</span>
+            @endif
+        </p>
 
-        {{-- ponytail: parallax scroll listener retained verbatim --}}
+        <div class="pub-grid">
+            {{-- Cover & unduhan --}}
+            <div class="pub-cover w-full">
+                @if ($coverUrl)
+                    <img src="{{ $coverUrl }}" alt="{{ $case->title ?? $case->slug }}" class="w-full shadow-xl border border-[#E2E6DA]">
+                @else
+                    <div class="relative w-full shadow-xl" style="aspect-ratio: 3 / 4">
+                        @include('front.components.artikel-image-fallback', ['label' => __('Analisis Auriga')])
+                    </div>
+                @endif
 
-        <!-- Background Image -->
-        <div class="absolute inset-0 w-full h-full bg-center bg-cover z-0"
-            :style="`transform: translateY(${offset}px); background-image: url('{{ asset('storage/' . $case->image) }}')`">
-        </div>
+                @if ($pdfs)
+                    <div class="mt-8">
+                        <p class="font-data uppercase tracking-[0.2em] text-xs text-[#6b7268] mb-3">{{ __('Unduh PDF') }}</p>
+                        <div class="flex flex-wrap gap-3">
+                            @foreach ($pdfs as $language => $pdf)
+                                <a href="{{ asset('storage/' . $pdf) }}" target="_blank" rel="noopener" class="pdf-btn"
+                                    aria-label="{{ __('Unduh PDF :language', ['language' => $language]) }}">{{ $language }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
 
-        <!-- Console gradient + blueprint grid overlay -->
-        <div
-            class="absolute inset-0 z-10 console-grid bg-gradient-to-t from-[#0B1E07] via-[#0B1E07]/70 to-[#0B1E07]/40">
-        </div>
+            {{-- Judul, deskripsi, tautan publikasi --}}
+            <div>
+                <h1 class="font-display text-3xl md:text-4xl font-bold text-[#2F6C14] leading-tight">
+                    {{ $case->title ?? $case->slug }}
+                </h1>
 
-        <!-- Mono meta bar -->
-        <div
-            class="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-[#0B1E07]/80 backdrop-blur-sm py-4 px-4 md:px-8">
-            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-                <span class="font-data uppercase tracking-[0.2em] text-[10px] text-[#9BDB4D]">greendefender / {{ __('Artikel') }}</span>
+                @if (trim(strip_tags((string) $description)) !== '')
+                    <div class="mt-8 prose max-w-none text-[#0B1E07] prose-a:text-[#2F6C14] md:text-base text-sm prose-p:leading-relaxed prose-p:tracking-[0.020em] prose-p:my-[1em]">
+                        {!! $description !!}
+                    </div>
+                @endif
 
-                <div class="flex flex-wrap items-center gap-3 font-data text-[11px] text-white/70">
-                    @if (!empty($case->category_name))
-                        <span>{{ $case->category_name }}</span>
-                    @endif
-                    @if (!empty($case->created_at))
-                        @if (!empty($case->category_name))
-                            <span class="text-white/30">/</span>
-                        @endif
-                        <span>{{ optional($case->created_at)->format('d M Y') }}</span>
-                    @endif
-                </div>
+                @if ($publicationLink)
+                    <p class="mt-6 text-sm md:text-base break-all">
+                        <a href="{{ $publicationLink }}" target="_blank" rel="noopener"
+                            class="text-[#2F6C14] underline underline-offset-4 hover:text-[#0B1E07]">{{ $publicationLink }}</a>
+                    </p>
+                @endif
             </div>
         </div>
-    </section>
 
-    {{-- Title band --}}
-    <header class="bg-white border-b border-[#E2E6DA]">
-        <div class="max-w-4xl mx-auto px-4 py-12 md:py-16 text-center">
-            <p class="font-data uppercase tracking-[0.2em] text-xs text-[#264c16] mb-4">{{ __('Artikel') }}</p>
-            <h1 class="font-display text-3xl md:text-5xl font-bold text-[#0B1E07] leading-tight">
-                {{ $case->title ?? $case->slug }}
-            </h1>
-            <div class="mt-8">
-                @include('front.components.share-buttons', ['url' => $shareUrl, 'title' => $shareTitle, 'center' => true])
-            </div>
-        </div>
-    </header>
-
-    {{-- Article body --}}
-    <article class="
-          prose
-          max-w-3xl mx-auto
-          px-4
-          py-12 md:py-16
-          text-[#0B1E07]
-          prose-headings:font-display
-          prose-a:text-[#2F6C14]
-
-          md:text-base text-sm
-          text-left
-
-          prose-p:leading-relaxed md:prose-p:leading-relaxed
-          prose-p:tracking-[0.020em]
-          prose-p:my-[1em]
-
-          prose-h2:text-[24px]
-          prose-h2:mt-8 prose-h2:mb-4 prose-h2:font-bold
-
-          prose-h3:text-[21px]
-          prose-h3:mt-6 prose-h3:mb-3 prose-h3:font-semibold
-        ">
-        {!! $case->content !!}
-    </article>
-
-    {{-- Bagikan di akhir artikel, lalu kembali ke daftar --}}
-    <div class="max-w-3xl mx-auto px-4 pb-16 md:pb-24">
-        <section class="border-t border-[#E2E6DA] pt-8 md:pt-10">
+        {{-- Bagikan, lalu kembali ke daftar --}}
+        <section class="border-t border-[#E2E6DA] pt-8" style="margin-top: 3rem">
             <h2 class="font-data text-[11px] font-semibold uppercase tracking-widest text-[#6b7268] mb-4">{{ __('Bagikan artikel ini') }}</h2>
             @include('front.components.share-buttons', ['url' => $shareUrl, 'title' => $shareTitle])
         </section>
-        <div class="border-t border-[#E2E6DA] mt-8 py-8 md:py-12">
-            <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale()]) }}"
+        <div class="border-t border-[#E2E6DA] mt-8 pt-8">
+            <a href="{{ route('public.artikel.list', ['locale' => app()->getLocale(), 'jenis' => 'analisis']) }}"
                 class="inline-flex items-center gap-2 font-data text-xs uppercase tracking-[0.2em] text-[#6b7268] hover:text-[#0B1E07] transition-colors">
                 <span class="text-[#9BDB4D]">&larr;</span>
                 {{ __('Kembali ke Artikel') }}

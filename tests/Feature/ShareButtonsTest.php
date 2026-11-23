@@ -28,8 +28,8 @@ class ShareButtonsTest extends TestCase
             ->assertDontSee('IwAR3abc')
             ->getContent();
 
-        // Dua deret tombol (di bawah judul & di akhir artikel), skripnya cukup sekali.
-        $this->assertSame(2, substr_count($html, 'data-share-instagram aria-label'));
+        // Satu deret tombol di akhir halaman analisis, skripnya cukup sekali.
+        $this->assertSame(1, substr_count($html, 'data-share-instagram aria-label'));
         $this->assertSame(1, substr_count($html, "closest('[data-share]')"));
     }
 }

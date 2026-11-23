@@ -11,8 +11,9 @@ use ZipArchive;
 /**
  * Membaca isi .docx menjadi daftar paragraf sederhana.
  *
- * Setiap paragraf berisi teks polos, HTML inline (tebal, miring, tautan) dan jenis
- * daftar bila paragraf itu bagian dari list bernomor/berbutir Word.
+ * Setiap paragraf berisi teks polos, HTML inline (tebal, miring, tautan), jenis daftar bila paragraf itu
+ * bagian dari list bernomor/berbutir Word, dan letak selnya bila paragraf ada di dalam tabel.
+ * Isi dropdown Google Docs (content control w:sdt) ikut terbaca sebagai teks biasa.
  */
 class DocxReader
 {
@@ -21,7 +22,7 @@ class DocxReader
     private const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 
     /**
-     * @return list<array{text: string, html: string, style: ?string, list: ?string}>
+     * @return list<array{text: string, html: string, style: ?string, list: ?string, cell: ?array{row: string, col: int}}>
      */
     public function read(string $binary): array
     {
@@ -46,12 +47,18 @@ class DocxReader
 
             $numId = $xpath->evaluate('string(w:pPr/w:numPr/w:numId/@w:val)', $p);
             $level = $xpath->evaluate('string(w:pPr/w:numPr/w:ilvl/@w:val)', $p) ?: '0';
+            $cell = $xpath->query('ancestor::w:tc[1]', $p)->item(0);
 
             $paragraphs[] = [
                 'text' => $text,
                 'html' => trim($this->render($segments)),
                 'style' => $xpath->evaluate('string(w:pPr/w:pStyle/@w:val)', $p) ?: null,
                 'list' => ($numId !== '' && $numId !== '0') ? ($listTypes[$numId][$level] ?? 'ol') : null,
+                // Sel tabel: baris (path node, unik per baris) dan nomor kolomnya, agar tabel bisa dibaca per baris.
+                'cell' => $cell ? [
+                    'row' => $cell->parentNode->getNodePath(),
+                    'col' => (int) $xpath->evaluate('count(preceding-sibling::w:tc)', $cell),
+                ] : null,
             ];
         }
 
@@ -168,7 +175,7 @@ class DocxReader
     {
         $segments = [];
 
-        foreach ($xpath->query('w:r | w:hyperlink/w:r | w:ins/w:r | w:smartTag/w:r', $p) as $run) {
+        foreach ($xpath->query('w:r | w:hyperlink/w:r | w:ins/w:r | w:smartTag/w:r | w:sdt/w:sdtContent/w:r | w:sdt/w:sdtContent/w:hyperlink/w:r', $p) as $run) {
             $href = null;
             if ($run->parentNode instanceof DOMElement && $run->parentNode->localName === 'hyperlink') {
                 $href = $links[$run->parentNode->getAttributeNS(self::R, 'id')] ?? null;

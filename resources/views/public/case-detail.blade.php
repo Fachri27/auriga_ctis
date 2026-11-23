@@ -127,67 +127,12 @@
 
             $noTransMsg = '<em class="text-gray-400">' . e(__('Konten tidak tersedia dalam bahasa ini')) . '</em>';
 
-            // Pemetaan status ke tahapan proses hukum
-            $statusSteps = [
-                'open' => ['label' => __('Terbuka'), 'step' => 1],
-                'verified' => ['label' => __('Terverifikasi'), 'step' => 2],
-                'published' => ['label' => __('Dipublikasikan'), 'step' => 3],
-                'penyelidikan' => ['label' => __('Penyelidikan'), 'step' => 4],
-                'investigation' => ['label' => __('Investigasi'), 'step' => 4],
-                'penyidikan' => ['label' => __('Penyidikan'), 'step' => 5],
-                'prosecution' => ['label' => __('Penuntutan'), 'step' => 6],
-                'trial' => ['label' => __('Persidangan'), 'step' => 7],
-                'vonis' => ['label' => __('Vonis'), 'step' => 8],
-                'Berkekuatan hukum tetap' => ['label' => __('Berkekuatan Hukum'), 'step' => 9],
-                'executed' => ['label' => __('Putusan Dijalankan'), 'step' => 10],
-                'completed' => ['label' => __('Selesai'), 'step' => 11],
-                'closed' => ['label' => __('Ditutup'), 'step' => 12],
-                'rejected' => ['label' => __('Ditolak'), 'step' => 12],
-                'converted' => ['label' => __('Dikonversi'), 'step' => 12],
-            ];
-
-            $currentKey = $case->status?->key ?? '';
-            $currentStep = $statusSteps[$currentKey]['step'] ?? 0;
-
-            $visibleSteps = [
-                1 => [
-                    'label' => __('Terbuka'),
-                    'desc' => __('Laporan atau kasus baru masuk dan telah didaftarkan ke sistem.'),
-                ],
-                3 => [
-                    'label' => __('Dipublikasikan'),
-                    'desc' => __('Informasi kasus telah dipublikasikan dan dapat diakses oleh publik.'),
-                ],
-                4 => [
-                    'label' => __('Penyelidikan'),
-                    'desc' => __('Penegak hukum sedang mengumpulkan bukti awal untuk menentukan apakah ada tindak pidana.'),
-                ],
-                5 => [
-                    'label' => __('Penyidikan'),
-                    'desc' => __('Bukti sudah cukup. Penyidik resmi mengusut tersangka dan mengumpulkan alat bukti.'),
-                ],
-                6 => [
-                    'label' => __('Penuntutan'),
-                    'desc' => __('Jaksa menyusun surat dakwaan dan mempersiapkan kasus untuk dibawa ke pengadilan.'),
-                ],
-                7 => [
-                    'label' => __('Persidangan'),
-                    'desc' => __('Kasus sedang disidangkan di pengadilan. Hakim memeriksa bukti dan keterangan saksi.'),
-                ],
-                8 => [
-                    'label' => __('Vonis'),
-                    'desc' => __('Hakim telah menjatuhkan putusan bersalah atau tidak bersalah kepada terdakwa.'),
-                ],
-                9 => [
-                    'label' => __('Hukum Tetap'),
-                    'desc' => __('Putusan telah berkekuatan hukum tetap (inkracht) — tidak bisa digugat lagi.'),
-                ],
-                10 => [
-                    'label' => __('Dijalankan'),
-                    'desc' => __('Terpidana sedang menjalani hukuman sesuai putusan pengadilan.'),
-                ],
-                11 => ['label' => __('Selesai'), 'desc' => __('Seluruh proses hukum telah selesai.')],
-            ];
+            // Tahapan kasus mengikuti kualifikasinya (pidana / perdata / administrasi), lihat App\Services\CaseStages
+            // Key dinormalkan karena ada data lama berbentuk "Berkekuatan hukum tetap".
+            $currentKey = \Illuminate\Support\Str::slug($case->status?->key ?? '');
+            // Keterangan custom per tahapan hanya dari bahasa halaman ini; yang kosong memakai keterangan standar.
+            $stageNotes = $case->translations->firstWhere('locale', app()->getLocale())?->keterangan_tahapan ?? [];
+            ['steps' => $visibleSteps, 'current' => $currentStep] = \App\Services\CaseStages::for($case->kualifikasi, $currentKey, $stageNotes);
 
             // Penjelasan status dalam bahasa sederhana
             $statusExplainer = [
@@ -199,15 +144,28 @@
                 'penyidikan' => __('Sudah ada tersangka. Penyidik resmi sedang mengumpulkan alat bukti untuk pelimpahan ke jaksa.'),
                 'prosecution' => __('Jaksa sedang menyusun surat dakwaan. Kasus ini akan segera masuk ke pengadilan.'),
                 'trial' => __('Sidang sedang berlangsung di pengadilan. Hakim, jaksa, dan pengacara memeriksa fakta-fakta kasus.'),
+                'gugatan' => __('Gugatan perdata sudah didaftarkan ke pengadilan dan menunggu proses persidangan.'),
+                'pembuktian' => __('Persidangan memasuki tahap pembuktian. Para pihak mengajukan bukti, saksi, dan ahli.'),
+                'sanksi' => __('Pemerintah telah menjatuhkan sanksi administratif kepada pihak yang bertanggung jawab.'),
                 'vonis' => __('Hakim telah menjatuhkan putusan. Terdakwa dinyatakan bersalah atau bebas.'),
-                'Berkekuatan hukum tetap' => __('Putusan sudah final dan tidak bisa digugat lagi. Proses banding atau kasasi telah selesai.'),
+                'berkekuatan-hukum-tetap' => __('Putusan sudah final dan tidak bisa digugat lagi. Proses banding atau kasasi telah selesai.'),
                 'executed' => __('Terpidana sedang menjalani hukuman — baik penjara, denda, maupun hukuman lainnya.'),
                 'completed' => __('Seluruh proses hukum pada kasus ini telah selesai.'),
                 'closed' => __('Kasus ini telah ditutup.'),
                 'rejected' => __('Kasus ini ditolak karena tidak memenuhi syarat atau tidak cukup bukti.'),
                 'converted' => __('Status kasus ini telah dikonversi ke proses atau jalur hukum lain.'),
             ];
+            if ($case->kualifikasi === 'perdata') {
+                $statusExplainer['vonis'] = __('Hakim telah menjatuhkan putusan atas gugatan ini.');
+            }
             $explainer = $statusExplainer[$currentKey] ?? null;
+
+            // Kualifikasi kasus (jalur hukum yang ditempuh), lihat CaseModel::KUALIFIKASI
+            $kualifikasiExplainer = [
+                'pidana' => __('Ditangani lewat jalur pidana: penyelidikan, penyidikan, penuntutan, hingga putusan pengadilan.'),
+                'perdata' => __('Ditangani lewat gugatan perdata, misalnya tuntutan ganti rugi atau pemulihan lingkungan.'),
+                'administrasi' => __('Ditangani lewat sanksi administratif dari pemerintah, misalnya teguran, paksaan pemerintah, atau pencabutan izin.'),
+            ][$case->kualifikasi ?? ''] ?? null;
 
             $kategori = $categories
                 ->map(function ($cat) {
@@ -256,6 +214,19 @@
             <aside class="py-10 lg:pr-10 lg:border-r lg:border-gray-200">
                 <div class="lg:sticky lg:top-24 space-y-8">
 
+                    {{-- kualifikasi --}}
+                    <section>
+                        <h2 class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">{{ __('Kualifikasi Kasus') }}</h2>
+                        @if ($case->kualifikasi_label)
+                            <span class="inline-block px-2.5 py-1 bg-gray-900 text-white text-xs font-semibold">{{ $case->kualifikasi_label }}</span>
+                            @if ($kualifikasiExplainer)
+                                <p class="mt-2 text-xs text-gray-500 leading-relaxed">{{ $kualifikasiExplainer }}</p>
+                            @endif
+                        @else
+                            <p class="text-xs text-gray-400 italic">{{ __('Belum ditentukan') }}</p>
+                        @endif
+                    </section>
+
                     {{-- tahapan: vertical rail --}}
                     <section>
                         <h2 class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">{{ __('Tahapan Kasus') }}</h2>
@@ -268,18 +239,11 @@
                                 <li class="relative pl-5">
                                     <span class="absolute -left-[5.5px] top-1 w-2.5 h-2.5 rounded-full
                                         {{ $active ? 'bg-gray-900 ring-4 ring-gray-200' : ($reached ? 'bg-gray-900' : 'bg-white border border-gray-300') }}"></span>
-                                    <p class="group/step relative inline-block text-xs leading-snug cursor-default {{ $active ? 'font-bold' : ($reached ? 'font-medium text-gray-700' : 'text-gray-400') }}">
+                                    <p class="text-xs leading-snug {{ $active ? 'font-bold' : ($reached ? 'font-medium text-gray-700' : 'text-gray-400') }}">
                                         {{ $info['label'] }}
-                                        {{-- tooltip: anchored to the label text itself --}}
-                                        <span class="hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-3 w-56 bg-gray-900 text-white font-normal text-xs px-3 py-2 leading-snug
-                                            opacity-0 group-hover/step:opacity-100 pointer-events-none transition-opacity duration-200 z-30 shadow-xl">
-                                            {{ $info['desc'] }}
-                                            <span class="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></span>
-                                        </span>
                                     </p>
-                                    @if ($active)
-                                        <p class="mt-1 text-xs text-gray-500 leading-relaxed">{{ $info['desc'] }}</p>
-                                    @endif
+                                    {{-- keterangan tiap tahapan --}}
+                                    <p class="mt-1 text-xs leading-relaxed {{ $active ? 'text-gray-600' : ($reached ? 'text-gray-500' : 'text-gray-400') }}">{!! nl2br(e($info['desc'])) !!}</p>
                                 </li>
                             @endforeach
                         </ol>

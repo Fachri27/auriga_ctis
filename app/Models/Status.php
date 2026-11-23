@@ -18,6 +18,12 @@ class Status extends Model
         return in_array(Str::slug((string) $key), self::FINISHED_KEYS, true) ? 'selesai' : 'aktif';
     }
 
+    /** Status dengan key ini (dinormalkan seperti group()), mis. dari tabel "Tahapan Kasus" dokumen impor. */
+    public static function findByKey(string $key): ?self
+    {
+        return static::query()->get(['id', 'key', 'name'])->first(fn ($status) => Str::slug($status->key) === Str::slug($key));
+    }
+
     protected $fillable = [
         'key',
         'name'

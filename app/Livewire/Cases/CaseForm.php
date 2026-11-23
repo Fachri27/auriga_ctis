@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\{Auth, DB, Http, Log};
 use Illuminate\Support\Str;
 
 use App\Models\{CaseModel, CaseTranslation, Category};
-use App\Services\{CaseCoverImage, CaseWriter};
+use App\Services\{CaseCoverImage, CaseStages, CaseWriter};
 use App\Livewire\Concerns\AutoTranslates;
 use Livewire\{Component, WithFileUploads};
 
@@ -23,6 +23,8 @@ class CaseForm extends Component
     public $category_id;
 
     public $status_id;
+
+    public $kualifikasi;
 
     public $event_date;
 
@@ -78,6 +80,10 @@ class CaseForm extends Component
     public $pembelajaran_en;
     public $dugaan_permasalahan_id;
     public $dugaan_permasalahan_en;
+
+    // Keterangan custom per tahapan kasus: key tahapan => teks (lihat App\Services\CaseStages)
+    public $tahapan_id = [];
+    public $tahapan_en = [];
     public $pelapor;
     public $terlapor;
     public $sumber_id;
@@ -87,6 +93,7 @@ class CaseForm extends Component
     protected $rules = [
         // 'category_id' => 'required',
         "status_id" => "required",
+        "kualifikasi" => "nullable|in:pidana,perdata,administrasi",
         "event_date" => "required|date",
         "category_ids" => "required|array|min:1",
         "category_ids.*" => "integer|exists:categories,id",
@@ -95,6 +102,8 @@ class CaseForm extends Component
         "cover_caption_id" => "nullable|string|max:255",
         "cover_caption_en" => "nullable|string|max:255",
         "cover_credit" => "nullable|string|max:150",
+        "tahapan_id.*" => "nullable|string|max:500",
+        "tahapan_en.*" => "nullable|string|max:500",
     ];
 
     protected $messages = [
@@ -102,6 +111,8 @@ class CaseForm extends Component
         "cover.mimes" => "Foto sampul harus berupa gambar JPG, PNG, atau WebP.",
         "cover.max" => "Ukuran foto sampul maksimal 8 MB.",
         "cover.dimensions" => "Foto sampul minimal 800 × 450 piksel agar tetap tajam.",
+        "tahapan_id.*.max" => "Keterangan tahapan maksimal 500 karakter.",
+        "tahapan_en.*.max" => "Keterangan tahapan maksimal 500 karakter.",
     ];
 
     public function mount($caseId = null)
@@ -126,6 +137,7 @@ class CaseForm extends Component
                 "desc_en" => $enTranslation->description ?? "",
                 "category_ids" => $this->case->category_ids,
                 "status_id" => $this->case->status_id,
+                "kualifikasi" => $this->case->kualifikasi,
                 "event_date" => $this->case->event_date,
                 "lat" => $this->case->latitude,
                 "lng" => $this->case->longitude,
@@ -142,6 +154,8 @@ class CaseForm extends Component
                 "pembelajaran_en" => $enTranslation->pembelajaran ?? "",
                 "dugaan_permasalahan_id" => $idTranslation->dugaan_permasalahan ?? "",
                 "dugaan_permasalahan_en" => $enTranslation->dugaan_permasalahan ?? "",
+                "tahapan_id" => $idTranslation->keterangan_tahapan ?? [],
+                "tahapan_en" => $enTranslation->keterangan_tahapan ?? [],
                 "pelapor" => $this->case->pelapor,
                 "terlapor" => $this->case->terlapor,
                 "sumber_id" => $this->case->sumber,
@@ -400,6 +414,7 @@ class CaseForm extends Component
                 "category_ids" => $this->category_ids,
                 "report_id" => $this->report_id,
                 "status_id" => $this->status_id,
+                "kualifikasi" => $this->kualifikasi ?: null,
                 "event_date" => $this->event_date,
                 "verified_by" => Auth::id(),
                 "latitude" => $this->lat,
@@ -428,6 +443,7 @@ class CaseForm extends Component
                     "perkembangan" => $this->perkembangan_id,
                     "pembelajaran" => $this->pembelajaran_id,
                     "dugaan_permasalahan" => $this->dugaan_permasalahan_id,
+                    "keterangan_tahapan" => $this->stageNotes($this->tahapan_id),
                 ],
                 "en" => [
                     "title" => $this->title_en ?? "",
@@ -436,6 +452,7 @@ class CaseForm extends Component
                     "perkembangan" => $this->perkembangan_en ?? "",
                     "pembelajaran" => $this->pembelajaran_en ?? "",
                     "dugaan_permasalahan" => $this->dugaan_permasalahan_en ?? "",
+                    "keterangan_tahapan" => $this->stageNotes($this->tahapan_en),
                 ],
             ]);
 
@@ -576,6 +593,7 @@ class CaseForm extends Component
             "caseId",
             "category_id",
             "status_id",
+            "kualifikasi",
             "event_date",
             "latitude",
             "longitude",
@@ -592,7 +610,21 @@ class CaseForm extends Component
             "cover_caption_id",
             "cover_caption_en",
             "cover_credit",
+            "tahapan_id",
+            "tahapan_en",
         ]);
+    }
+
+    /**
+     * Keterangan tahapan yang diisi saja; null bila semuanya kosong (halaman publik memakai keterangan standar).
+     *
+     * @return array<string, string>|null
+     */
+    private function stageNotes(?array $notes): ?array
+    {
+        $notes = array_filter(array_map(fn ($note) => trim((string) $note), $notes ?? []), fn ($note) => $note !== "");
+
+        return $notes ?: null;
     }
 
     protected function translatableFields(): array
@@ -604,7 +636,10 @@ class CaseForm extends Component
             "pembelajaran_id" => "pembelajaran_en",
             "dugaan_permasalahan_id" => "dugaan_permasalahan_en",
             "cover_caption_id" => "cover_caption_en",
-        ];
+        ] + collect($this->tahapan_id ?? [])
+            ->filter(fn ($note) => filled($note))
+            ->mapWithKeys(fn ($note, $key) => ["tahapan_id.{$key}" => "tahapan_en.{$key}"])
+            ->all();
     }
 
     public function render()
@@ -612,6 +647,9 @@ class CaseForm extends Component
         return view("livewire.cases.case-form", [
             "categories" => Category::with("translations")->get(),
             "statuses" => DB::table("statuses")->get(),
+            // Tahapan mengikuti kualifikasi yang dipilih; keterangan standar jadi placeholder isian.
+            "stagesId" => CaseStages::for($this->kualifikasi, null, [], "id")["steps"],
+            "stagesEn" => CaseStages::for($this->kualifikasi, null, [], "en")["steps"],
         ])->layout("layouts.internal");
     }
 }

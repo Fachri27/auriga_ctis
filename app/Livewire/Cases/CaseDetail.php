@@ -68,7 +68,7 @@ class CaseDetail extends Component
             // Status baru yang tidak ada di daftar tetap ditampilkan di akhir.
             $barOrder = [
                 'open', 'verified', 'published', 'penyelidikan', 'investigation',
-                'penyidikan', 'prosecution', 'trial', 'vonis',
+                'penyidikan', 'prosecution', 'trial', 'gugatan', 'pembuktian', 'vonis', 'sanksi',
                 'berkekuatan-hukum-tetap', 'executed', 'completed',
                 'closed', 'rejected', 'converted',
             ];

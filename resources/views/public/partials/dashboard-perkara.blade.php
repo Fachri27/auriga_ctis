@@ -139,17 +139,28 @@
 
 {{-- ===================== GRAFIK BATANG ===================== --}}
 @if ($yearlyCharts)
+    {{-- Baris pertama: jumlah per tahun (3 kolom); baris kedua: rata-rata vonis pidana (2 kolom). --}}
+    @php [$sentenceCharts, $countCharts] = collect($yearlyCharts)->partition(fn ($ch) => !empty($ch['unit'])); @endphp
     <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @foreach ($yearlyCharts as $ch)
-                <div class="bg-white border border-[#E2E6DA]">
-                    <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ __($ch['title']) }}</h3>
-                    <div class="pub-echart" id="{{ $ch['id'] }}" data-chart="{{ json_encode($ch['data']) }}" data-type="{{ $ch['type'] }}" style="height:320px;width:100%"></div>
+        @foreach ([[$countCharts, 'md:grid-cols-3'], [$sentenceCharts, 'md:grid-cols-2']] as [$charts, $cols])
+            @if ($charts->isNotEmpty())
+                <div class="grid grid-cols-1 {{ $cols }} gap-6 {{ $loop->first ? '' : 'mt-6' }}">
+                    @foreach ($charts as $ch)
+                        <div class="bg-white border border-[#E2E6DA]">
+                            <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ __($ch['title']) }}</h3>
+                            <div class="pub-echart" id="{{ $ch['id'] }}" data-chart="{{ json_encode($ch['data']) }}" data-type="{{ $ch['type'] }}"
+                                @if (!empty($ch['unit'])) data-unit="{{ $ch['unit'] }}" data-unit-label="{{ __($ch['unit']) }}" @endif
+                                style="height:320px;width:100%"></div>
+                        </div>
+                    @endforeach
                 </div>
-            @endforeach
-        </div>
+            @endif
+        @endforeach
         <p class="mt-4 text-xs text-[#6b7268]">
             {{ __('Sumber: indeksasi putusan pidana sektor sumber daya alam dan lingkungan hidup :from–:to.', ['from' => \App\Services\PerkaraStatistics::YEARS[0], 'to' => \App\Services\PerkaraStatistics::YEARS[1]]) }}
+            @if ($sentenceCharts->isNotEmpty())
+                {{ __('Rata-rata vonis dihitung dari perkara yang terbukti bersalah dan dijatuhi pidana penjara atau denda.') }}
+            @endif
         </p>
     </section>
 @endif

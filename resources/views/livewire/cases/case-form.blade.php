@@ -127,8 +127,23 @@
                     <input type="text" wire:model="title_en" class="cms-input w-full">
                 </div>
 
+                <!-- Kualifikasi -->
+                <div>
+                    <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Kualifikasi Kasus</label>
+                    {{-- live: panel Keterangan Tahapan mengikuti kualifikasi yang dipilih --}}
+                    <select wire:model.live="kualifikasi" class="cms-input w-full">
+                        <option value="">Pilih kualifikasi…</option>
+                        @foreach (\App\Models\CaseModel::KUALIFIKASI as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('kualifikasi')
+                        <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Event Date -->
-                <div class="md:col-span-2">
+                <div>
                     <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Event Date</label>
                     <input type="date" wire:model="event_date" class="cms-input w-full">
                     @error('event_date')
@@ -276,6 +291,42 @@
         </div>
     </div>
 
+    {{-- ================= KETERANGAN TAHAPAN ================= --}}
+    <div class="cms-panel">
+        <div class="cms-panel-head" style="padding:14px 20px">
+            <div class="cms-panel-title">
+                <span x-show="lang === 'id'">Keterangan Tahapan</span>
+                <span x-show="lang === 'en'">Stage Notes</span>
+            </div>
+        </div>
+        <div class="cms-panel-body" style="padding:16px 20px">
+            <p class="text-sm mb-4" style="color:var(--muted)">
+                Tampil di bawah tiap tahapan pada halaman detail kasus. Tahapannya mengikuti kualifikasi kasus.
+                Kosongkan untuk memakai keterangan standar (teks abu-abu di dalam isian).
+            </p>
+            <div class="space-y-4">
+                @foreach ($stagesId as $step => $stage)
+                    <div wire:key="tahapan-{{ $stage['key'] }}">
+                        <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">
+                            <span x-show="lang === 'id'">{{ $stage['label'] }}</span>
+                            <span x-show="lang === 'en'">{{ $stagesEn[$step]['label'] }}</span>
+                        </label>
+                        <textarea x-show="lang === 'id'" wire:model="tahapan_id.{{ $stage['key'] }}" rows="2" maxlength="500"
+                            class="cms-input w-full" placeholder="{{ $stage['desc'] }}"></textarea>
+                        <textarea x-show="lang === 'en'" wire:model="tahapan_en.{{ $stage['key'] }}" rows="2" maxlength="500"
+                            class="cms-input w-full" placeholder="{{ $stagesEn[$step]['desc'] }}"></textarea>
+                        @error('tahapan_id.' . $stage['key'])
+                            <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                        @enderror
+                        @error('tahapan_en.' . $stage['key'])
+                            <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                        @enderror
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
     {{-- ================= FOTO SAMPUL ================= --}}
     @php
         // Pratinjau: foto baru yang sedang diunggah, atau foto sampul yang tersimpan (kecuali ditandai hapus).
@@ -292,8 +343,7 @@
         </div>
         <div class="cms-panel-body" style="padding:16px 20px">
             <p class="text-sm mb-3" style="color:var(--muted)">
-                Tampil di kartu kasus, bagian atas halaman detail kasus, dan saat tautan kasus dibagikan (WhatsApp, media sosial).
-                Bila kosong, kartu memakai citra satelit lokasi kasus.
+                Tampil di bagian atas halaman detail kasus dan saat tautan kasus dibagikan (WhatsApp, media sosial).
             </p>
             <div class="rounded p-3 mb-4 text-xs leading-relaxed" style="background:#FFF7E6;border:1px solid #F5D9A8;color:#7A4B00">
                 <strong>Pastikan foto aman dipublikasikan:</strong> tidak memperlihatkan wajah atau identitas pelapor, korban, maupun saksi,

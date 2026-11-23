@@ -4,9 +4,12 @@ namespace App\Livewire\About;
 
 use App\Models\{AboutPage, AboutPageTranslation};
 use Livewire\Component;
+use App\Livewire\Concerns\AutoTranslates;
 
 class AboutForm extends Component
 {
+    use AutoTranslates;
+
     public $aboutPage;
 
     public $title_id;
@@ -63,6 +66,16 @@ class AboutForm extends Component
         }
 
         session()->flash('success', 'About page berhasil disimpan.');
+    }
+
+    protected function translatableFields(): array
+    {
+        return [
+            'title_id' => 'title_en',
+            'content_id' => 'content_en',
+            'vision_id' => 'vision_en',
+            'mission_id' => 'mission_en',
+        ];
     }
 
     public function render()

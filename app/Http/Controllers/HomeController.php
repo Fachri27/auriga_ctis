@@ -298,8 +298,6 @@ class HomeController extends Controller
             // Top 10 tables from filtered
             $tableData = [];
             $topQueries = [
-                ['title' => 'Top 10 Hakim',          'field' => 'nama_hakim'],
-                ['title' => 'Top 10 Jaksa Penuntun Umum', 'field' => 'jaksa'],
                 ['title' => 'Top 10 Pengadilan',      'field' => 'pengadilan'],
                 ['title' => 'Top 10 Kabupaten/Kota',  'field' => 'kabupaten'],
             ];
@@ -380,8 +378,6 @@ class HomeController extends Controller
             // Top 10 tables from raw_cases
             $tableData = [];
             $topQueries = [
-                ['title' => 'Top 10 Hakim',          'field' => 'nama_hakim'],
-                ['title' => 'Top 10 Jaksa Penuntun Umum', 'field' => 'jaksa'],
                 ['title' => 'Top 10 Pengadilan',      'field' => 'pengadilan'],
                 ['title' => 'Top 10 Kabupaten/Kota',  'field' => 'kabupaten'],
             ];
@@ -548,8 +544,10 @@ class HomeController extends Controller
             )
             ->first();
 
+        abort_unless($case, 404);
+
         // Berita eksternal tidak punya isi di situs ini; arahkan ke berita aslinya.
-        if ($case && $case->type === 'eksternal' && $case->link) {
+        if ($case->type === 'eksternal' && $case->link) {
             return redirect()->away($case->link);
         }
 

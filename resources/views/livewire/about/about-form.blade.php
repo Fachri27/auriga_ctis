@@ -7,6 +7,7 @@
                     <div class="cms-eyebrow">ABOUT</div>
                     <h1 class="text-xl font-semibold text-[color:var(--ink)] tracking-tight mt-0.5">Edit About Page</h1>
                 </div>
+                <x-internal.translate-button />
             </div>
             <div class="cms-panel-body" style="padding:16px 20px">
 
@@ -49,8 +50,11 @@
                             {{-- Content --}}
                             <div class="cms-panel">
                                 <div class="cms-panel-head">
-                                    <div class="cms-panel-title">Content</div>
+                                    <div class="cms-panel-title">Tentang greendefender</div>
                                 </div>
+                                <p class="text-xs text-[color:var(--muted)]" style="padding:12px 20px 0">
+                                    Paragraf pembuka halaman About. Kosongkan untuk memakai teks bawaan.
+                                </p>
                                 <div class="cms-panel-body" style="padding:16px 20px">
                                     <div x-show="lang === 'id'">
                                         @include('front.components.tinymce-about-content-id')
@@ -61,11 +65,14 @@
                                 </div>
                             </div>
 
-                            {{-- Vision --}}
+                            {{-- Tujuan (kolom vision) --}}
                             <div class="cms-panel">
                                 <div class="cms-panel-head">
-                                    <div class="cms-panel-title">Vision</div>
+                                    <div class="cms-panel-title">Tujuan</div>
                                 </div>
+                                <p class="text-xs text-[color:var(--muted)]" style="padding:12px 20px 0">
+                                    Tampil di kartu "Tujuan" halaman About. Kosongkan untuk memakai teks bawaan.
+                                </p>
                                 <div class="cms-panel-body" style="padding:16px 20px">
                                     <div x-show="lang === 'id'">
                                         @include('front.components.tinymce-about-vision-id')
@@ -76,11 +83,14 @@
                                 </div>
                             </div>
 
-                            {{-- Mission --}}
+                            {{-- Komitmen Kami (kolom mission) --}}
                             <div class="cms-panel">
                                 <div class="cms-panel-head">
-                                    <div class="cms-panel-title">Mission</div>
+                                    <div class="cms-panel-title">Komitmen Kami</div>
                                 </div>
+                                <p class="text-xs text-[color:var(--muted)]" style="padding:12px 20px 0">
+                                    Tampil di kartu "Komitmen Kami" halaman About. Kosongkan untuk memakai teks bawaan.
+                                </p>
                                 <div class="cms-panel-body" style="padding:16px 20px">
                                     <div x-show="lang === 'id'">
                                         @include('front.components.tinymce-about-mission-id')

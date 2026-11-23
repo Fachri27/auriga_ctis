@@ -38,7 +38,7 @@
         <div class="cms-panel-head">
             <div>
                 <div class="cms-panel-title">Sumber dokumen</div>
-                <div class="cms-panel-sub">Satu dokumen = satu kasus. Format: judul, label (Pengungkap, Terlapor, Penyidik, Lokasi, Tahun), lalu bagian Kronologi, Perkembangan, Dugaan Permasalahan, Lesson Learning, Status, Sumber.</div>
+                <div class="cms-panel-sub">Satu dokumen = satu kasus. Format: judul, label (Pengungkap, Terlapor, Penyidik, Lokasi, Tahun), lalu bagian Kronologi, Perkembangan, Dugaan Permasalahan, Lesson Learning, Status, Sumber, serta Kualifikasi Kasus (dropdown) dan Tahapan Kasus (tabel).</div>
             </div>
         </div>
         <div class="cms-panel-body grid grid-cols-1 lg:grid-cols-2 gap-6" style="padding:16px 20px">
@@ -107,7 +107,7 @@
             <div class="cms-panel-head flex-wrap gap-3">
                 <div>
                     <div class="cms-panel-title">Pratinjau ({{ count($rows) }} dokumen)</div>
-                    <div class="cms-panel-sub">Periksa kategori dan tanggal. Semua kasus diimpor berstatus Terbuka sebagai draft; status dan publikasi diatur dari halaman detail setelah dicek.</div>
+                    <div class="cms-panel-sub">Periksa kategori dan tanggal. Kasus diimpor sebagai draft dengan status dari tahapan terjauh yang terisi di tabel Tahapan Kasus (selain itu Terbuka); publikasi diatur dari halaman detail setelah dicek.</div>
                 </div>
                 <div class="flex items-center gap-2">
                     @if ($this->failedCount && ! $queue)
@@ -132,6 +132,8 @@
                                     @checked($this->selectedCount > 0) wire:click="selectAll($event.target.checked)">
                             </th>
                             <th>Dokumen</th>
+                            <th>Kualifikasi</th>
+                            <th>Tahapan</th>
                             <th>Lokasi (titik peta)</th>
                             <th>Tanggal kejadian</th>
                             <th>Kategori</th>
@@ -160,6 +162,29 @@
                                             <div class="mt-1 text-xs text-[color:var(--danger)]">⚠ {{ $warning }}</div>
                                         @endforeach
                                     @endif
+                                </td>
+                                <td class="align-top whitespace-nowrap">
+                                    @unless ($row['error'])
+                                        @if ($row['kualifikasi'] ?? null)
+                                            <x-internal.badge variant="info" size="sm">{{ \App\Models\CaseModel::KUALIFIKASI[$row['kualifikasi']] }}</x-internal.badge>
+                                        @else
+                                            <span class="text-xs text-[color:var(--muted)]">Tidak ada di dokumen</span>
+                                        @endif
+                                    @endunless
+                                </td>
+                                <td class="align-top min-w-[240px]">
+                                    @unless ($row['error'])
+                                        <div class="text-xs text-[color:var(--muted)]">Status saat impor:</div>
+                                        <x-internal.badge :variant="($row['tahap'] ?? null) ? 'success' : 'default'" size="sm">{{ $row['tahap'] ?? 'Terbuka' }}</x-internal.badge>
+                                        @forelse ($row['tahapan'] ?? [] as $stage)
+                                            <div class="mt-1.5 text-xs" title="{{ $stage['note'] }}">
+                                                <span class="font-semibold text-[color:var(--ink)]">{{ $stage['label'] }}:</span>
+                                                <span class="text-[color:var(--muted)]">{{ Str::limit($stage['note'], 90) }}</span>
+                                            </div>
+                                        @empty
+                                            <div class="mt-1.5 text-[11px] text-[color:var(--muted)]">{{ ($row['has_tahapan'] ?? false) ? 'Tabel Tahapan Kasus belum diisi.' : 'Dokumen belum memakai tabel Tahapan Kasus.' }}</div>
+                                        @endforelse
+                                    @endunless
                                 </td>
                                 <td class="align-top min-w-[220px]">
                                     @unless ($row['error'])

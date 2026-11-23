@@ -2,8 +2,8 @@
 
 namespace App\Services\CaseImport;
 
-use App\Models\CaseModel;
-use App\Services\CaseWriter;
+use App\Models\{CaseModel, Status};
+use App\Services\{CaseStages, CaseWriter};
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -11,7 +11,8 @@ use RuntimeException;
 /**
  * Impor dokumen kasus (.docx) dalam dua langkah:
  *  1. prepare(): baca & petakan dokumen untuk pratinjau; isi lengkapnya disimpan di cache.
- *  2. import():  simpan sebagai kasus draft (tidak publik, status Terbuka) memakai CaseWriter.
+ *  2. import():  simpan sebagai kasus draft (tidak publik) memakai CaseWriter. Status mengikuti tabel
+ *                 "Tahapan Kasus" di dokumen (tahapan terjauh yang terisi), atau Terbuka bila tidak ada.
  */
 class CaseImporter
 {
@@ -25,7 +26,8 @@ class CaseImporter
 
     /**
      * @return array{ref: string, name: string, title: string, lokasi: ?string, location: ?string, precision: ?string,
-     *     event_date: ?string, sections: list<string>, warnings: list<string>, existing: ?string}
+     *     event_date: ?string, sections: list<string>, warnings: list<string>, existing: ?string,
+     *     kualifikasi: ?string, tahap: ?string, has_tahapan: bool, tahapan: list<array{label: string, note: string}>}
      */
     public function prepare(string $batch, string $sourceRef, string $name, string $binary): array
     {
@@ -58,8 +60,28 @@ class CaseImporter
             'category_reason' => $category['reason'] ?? null,
             'sections' => $parsed['sections'],
             'warnings' => $parsed['warnings'],
+            'kualifikasi' => $parsed['kualifikasi'],
+            // Nama status dari tabel "Tahapan Kasus", untuk pratinjau.
+            'tahap' => $parsed['tahap'] ? (Status::findByKey($parsed['tahap'])?->name ?? $parsed['tahap']) : null,
+            'has_tahapan' => in_array('tahapan', $parsed['sections'], true),
+            'tahapan' => $this->stageNotes($parsed),
             'existing' => CaseModel::where('source_ref', $sourceRef)->value('case_number') ?? $this->caseNumberByTitle($parsed['title']),
         ];
+    }
+
+    /**
+     * Keterangan tahapan dari dokumen untuk pratinjau, urut dan berlabel seperti di halaman publik.
+     *
+     * @return list<array{label: string, note: string}>
+     */
+    private function stageNotes(array $parsed): array
+    {
+        $steps = CaseStages::for($parsed['kualifikasi'], null, $parsed['keterangan_tahapan'] ?? [], 'id')['steps'];
+
+        return array_values(array_map(
+            fn ($step) => ['label' => $step['label'], 'note' => $step['desc']],
+            array_filter($steps, fn ($step) => $step['custom']),
+        ));
     }
 
     /**
@@ -89,14 +111,16 @@ class CaseImporter
         $parsed = Cache::get($this->cacheKey($batch, $sourceRef))
             ?? throw new RuntimeException('Data pratinjau sudah kedaluwarsa. Baca ulang folder lalu impor lagi.');
 
-        // Semua kasus hasil impor berstatus "Terbuka"; narasi status dari dokumen tetap disimpan.
-        $statusId = DB::table('statuses')->where('key', 'open')->value('id')
+        // Status dari tabel "Tahapan Kasus" (bila ada), selain itu "Terbuka"; narasi status dari dokumen tetap disimpan.
+        $statusId = (($parsed['tahap'] ?? null) ? Status::findByKey($parsed['tahap'])?->id : null)
+            ?? DB::table('statuses')->where('key', 'open')->value('id')
             ?? throw new RuntimeException('Status "open" (Terbuka) tidak ada di tabel statuses.');
 
         $case = $this->writer->save(null, [
             'source_ref' => $sourceRef,
             'category_ids' => array_map('intval', $categoryIds),
             'status_id' => $statusId,
+            'kualifikasi' => $parsed['kualifikasi'] ?? null,
             'event_date' => $eventDate,
             'latitude' => $lat,
             'longitude' => $lng,
@@ -116,6 +140,7 @@ class CaseImporter
                 'perkembangan' => $parsed['perkembangan'],
                 'pembelajaran' => $parsed['pembelajaran'],
                 'dugaan_permasalahan' => $parsed['dugaan_permasalahan'],
+                'keterangan_tahapan' => $parsed['keterangan_tahapan'] ?? null,
             ],
             // Baris EN kosong seperti kasus baru dari form; bisa diisi lewat Auto Translate.
             'en' => array_fill_keys(['title', 'description', 'perkembangan', 'pembelajaran', 'dugaan_permasalahan'], ''),

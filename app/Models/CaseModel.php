@@ -15,6 +15,7 @@ class CaseModel extends Model
         'report_id',
         'category_id',
         'status_id',
+        'kualifikasi',
         'event_date',
         'latitude',
         'longitude',
@@ -72,6 +73,21 @@ class CaseModel extends Model
     public function province()
     {
         return $this->belongsTo(Province::class);
+    }
+
+    /** Kualifikasi kasus (jalur hukum yang ditempuh): nilai kolom kualifikasi => label (ID, diterjemahkan lewat __()). */
+    public const KUALIFIKASI = [
+        'pidana' => 'Pidana',
+        'perdata' => 'Perdata',
+        'administrasi' => 'Administrasi',
+    ];
+
+    /** Label kualifikasi dalam bahasa aktif, null bila belum diisi. */
+    public function getKualifikasiLabelAttribute(): ?string
+    {
+        $label = self::KUALIFIKASI[$this->kualifikasi ?? ''] ?? null;
+
+        return $label ? __($label) : null;
     }
 
     /** Panjang maksimum bagian judul di URL publik (karakter). */

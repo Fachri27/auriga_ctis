@@ -80,6 +80,19 @@ class GoogleDriveService
     }
 
     /**
+     * Metadata satu file (dipakai untuk mengunduh ulang dokumen kasus yang sudah diimpor).
+     *
+     * @return array{id: string, name: string, mimeType: string}
+     */
+    public function file(string $fileId): array
+    {
+        return $this->send(fn (PendingRequest $http) => $http->get("/files/{$fileId}", [
+            'fields' => 'id, name, mimeType',
+            'supportsAllDrives' => 'true',
+        ]))->json();
+    }
+
+    /**
      * Isi dokumen dalam format .docx (Google Docs diekspor, file .docx diunduh apa adanya).
      */
     public function downloadDocx(string $fileId, string $mimeType): string

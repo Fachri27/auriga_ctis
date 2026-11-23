@@ -78,6 +78,9 @@ class TaskRequirementCase extends Component
 
     public function save()
     {
+        // Batas sama dengan bawaan Livewire sebelumnya; batas unggahan global dinaikkan untuk PDF Analisis Auriga.
+        $this->validate(['taskFiles.*' => 'nullable|file|max:12288']);
+
         foreach ($this->requirements as $req) {
 
             $value = $req['value'] ?? null;

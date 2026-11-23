@@ -14,7 +14,8 @@ use App\Services\DeepLTranslator;
 trait AutoTranslates
 {
     /**
-     * Pasangan properti sumber (ID) => properti target (EN).
+     * Pasangan properti sumber (ID) => properti target (EN). Boleh berupa path ke isi array,
+     * mis. "tahapan_id.gugatan" => "tahapan_en.gugatan".
      *
      * @return array<string, string>
      */
@@ -32,8 +33,8 @@ trait AutoTranslates
 
         $sources = [];
         foreach ($this->translatableFields() as $from => $to) {
-            if (DeepLTranslator::hasText($this->{$from})) {
-                $sources[$to] = $this->{$from};
+            if (DeepLTranslator::hasText(data_get($this, $from))) {
+                $sources[$to] = data_get($this, $from);
             }
         }
 
@@ -45,7 +46,7 @@ trait AutoTranslates
 
         try {
             foreach ($translator->translate($sources) as $to => $text) {
-                $this->{$to} = $text;
+                data_set($this, $to, $text);
             }
         } catch (TranslationException $e) {
             $this->dispatch('notify-error', message: $e->getMessage());

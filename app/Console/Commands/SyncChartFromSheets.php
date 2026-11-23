@@ -220,7 +220,7 @@ class SyncChartFromSheets extends Command
                     if ($dbCol === 'tahun') {
                         $data[$dbCol] = (int) $val;
                     } elseif (in_array($dbCol, $decimalCols)) {
-                        $data[$dbCol] = (float) preg_replace('/[^0-9.]/', '', str_replace(',', '.', str_replace('.', '', $val)));
+                        $data[$dbCol] = self::parseNumber($val);
                     } else {
                         $data[$dbCol] = $val;
                     }
@@ -239,6 +239,26 @@ class SyncChartFromSheets extends Command
             }
         }
         $this->info("  {$total} raw cases imported.");
+    }
+
+    /**
+     * Angka dari sel sheet. Sheet memakai format Amerika ("Rp500,000,000", "0.67" bulan); format Indonesia
+     * ("1.500.000", "0,5") tetap dikenali. Sel berisi lebih dari satu angka (mis. "3 & 4") diambil angka pertamanya.
+     */
+    public static function parseNumber(string $value): ?float
+    {
+        if (! preg_match('/\d[\d.,]*/', $value, $match)) {
+            return null;
+        }
+
+        $number = rtrim($match[0], '.,');
+        $lastComma = strrpos($number, ',');
+        if (substr_count($number, '.') > 1
+            || ($lastComma !== false && $lastComma > (int) strrpos($number, '.') && ! preg_match('/^\d{1,3}(,\d{3})+$/', $number))) {
+            $number = str_replace(['.', ','], ['', '.'], $number);
+        }
+
+        return (float) str_replace(',', '', $number);
     }
 
     private function syncDashboardData(array $rows): void

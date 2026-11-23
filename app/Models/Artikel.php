@@ -13,6 +13,8 @@ class Artikel extends Model
         'published_at',
         'status',
         'link',
+        'pdf_id',
+        'pdf_en',
         'source_name',
         'external_id',
         'enriched_at',

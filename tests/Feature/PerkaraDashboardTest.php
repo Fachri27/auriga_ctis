@@ -61,6 +61,57 @@ class PerkaraDashboardTest extends TestCase
                 === ['Perkara' => '3', 'Terdakwa' => '6', 'Korporasi' => '1', 'Vonis Bebas' => '1']);
     }
 
+    public function test_defendant_breakdown_and_criminal_sentences(): void
+    {
+        $sentences = [
+            // [no_perkara, tahun, vonis_putusan, penjara (bulan), denda (Rp)]
+            ['0/Pid.B/2021/PN', 2021, 'Bersalah', 12, 500_000_000],
+            ['1/Pid.B/2022/PN', 2022, 'Bersalah', 6, 1_500_000_000],
+            ['2/Pid.B/2022/PN', 2022, 'Bebas', 0, 0],
+        ];
+        foreach ($sentences as [$noPerkara, $tahun, $vonis, $penjara, $denda]) {
+            DB::table('raw_cases')->where('no_perkara', $noPerkara)->update([
+                'vonis_putusan' => $vonis, 'vonis_penjara' => $penjara, 'vonis_denda' => $denda,
+            ]);
+        }
+
+        $this->get('/id/dashboard?mode=perkara')
+            ->assertOk()
+            // Perorangan/Korporasi merinci 6 terdakwa (5 + 1), bukan jumlah perkara.
+            ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->keyBy('title')->only(['Perorangan', 'Korporasi', 'Rata-rata Penjara', 'Rata-rata Denda', 'Total Denda'])
+                ->map(fn ($k) => [$k['display'], $k['share'] ?? null])->all() === [
+                    'Perorangan' => ['5', '83,3%'],
+                    'Korporasi' => ['1', '16,7%'],
+                    'Rata-rata Penjara' => ['9 bulan', null],
+                    'Rata-rata Denda' => ['Rp1 miliar', null],
+                    'Total Denda' => ['Rp2 miliar', null],
+                ])
+            // Angka tampil di atas labelnya.
+            ->assertSeeInOrder(['Keterangan Terdakwa', 'Perorangan', 'Korporasi', 'Vonis Putusan', 'Vonis Pidana', '9 bulan', 'Rata-rata Penjara', 'Rp1 miliar', 'Rata-rata Denda', 'Rp2 miliar', 'Total Denda'])
+            ->assertViewHas('yearlyCharts', fn ($charts) => collect($charts)->keyBy('id')->only(['perkara-penjara-tahun', 'perkara-denda-tahun'])
+                ->map(fn ($c) => [$c['unit'], $c['data']])->all() === [
+                    'perkara-penjara-tahun' => ['bulan', [['label' => '2021', 'value' => 12.0], ['label' => '2022', 'value' => 6.0]]],
+                    'perkara-denda-tahun' => ['rupiah', [['label' => '2021', 'value' => 500000000.0], ['label' => '2022', 'value' => 1500000000.0]]],
+                ])
+            ->assertSee('data-unit="rupiah"', false)
+            ->assertSee('data-unit-label="bulan"', false);
+
+        $this->get('/en/dashboard?mode=perkara')
+            ->assertOk()
+            ->assertSee('Defendant Breakdown')
+            ->assertSee('9 months')
+            ->assertSee('Rp1 billion')
+            ->assertSee('data-unit-label="months"', false);
+    }
+
+    public function test_sentence_charts_are_hidden_without_sentence_data(): void
+    {
+        $this->get('/id/dashboard?mode=perkara')
+            ->assertOk()
+            ->assertViewHas('yearlyCharts', fn ($charts) => array_column($charts, 'id') === ['perkara-perkara-tahun', 'perkara-terdakwa-tahun', 'perkara-pengadilan-tahun'])
+            ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->firstWhere('title', 'Rata-rata Penjara')['display'] === '–');
+    }
+
     public function test_filters_narrow_the_figures_but_keep_every_classification_listed(): void
     {
         $this->get('/id/dashboard?mode=perkara&klasifikasi=MINERBA')

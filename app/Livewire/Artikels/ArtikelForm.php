@@ -47,6 +47,15 @@ class ArtikelForm extends Component
 
     public $categoryId;
 
+    // PDF Analisis Auriga per bahasa (unggahan baru), berkas tersimpan, dan tanda hapus.
+    public $pdf_id;
+
+    public $pdf_en;
+
+    public $existingPdf = ['id' => null, 'en' => null];
+
+    public $removePdf = ['id' => false, 'en' => false];
+
     public function mount($artikelId = null)
     {
         if ($artikelId) {
@@ -73,6 +82,7 @@ class ArtikelForm extends Component
 
             $this->oldImage = $this->artikel->image;
             $this->image = null;
+            $this->existingPdf = ['id' => $this->artikel->pdf_id, 'en' => $this->artikel->pdf_en];
         }
     }
 
@@ -85,6 +95,15 @@ class ArtikelForm extends Component
             'image' => 'nullable|image|mimes:jpg,jpeg,png,PNG|max:10048',
             'publishedAt' => 'nullable|date',
             'status' => 'required|in:draft,active,inactive',
+            'link' => 'nullable|url|max:2048',
+            'pdf_id' => 'nullable|file|mimes:pdf|max:51200',
+            'pdf_en' => 'nullable|file|mimes:pdf|max:51200',
+        ], [
+            'link.url' => 'Tautan harus berupa alamat web lengkap, diawali https://.',
+            'pdf_id.mimes' => 'File PDF (Indonesia) harus berupa PDF.',
+            'pdf_en.mimes' => 'File PDF (English) harus berupa PDF.',
+            'pdf_id.max' => 'File PDF maksimal 50 MB.',
+            'pdf_en.max' => 'File PDF maksimal 50 MB.',
         ]);
 
         $artikel = $this->artikel ?? new Artikel;
@@ -125,6 +144,10 @@ class ArtikelForm extends Component
             $data['image'] = $this->oldImage;
         }
 
+        foreach (['id', 'en'] as $locale) {
+            $data["pdf_{$locale}"] = $this->storePdf($locale);
+        }
+
         $artikel->fill($data)->save();
         $artikel->refresh();
 
@@ -144,6 +167,34 @@ class ArtikelForm extends Component
 
         return redirect()->route('artikel.index');
         
+    }
+
+    /**
+     * Path PDF bahasa ini setelah disimpan: unggahan baru menggantikan berkas lama, tanda hapus mengosongkannya.
+     */
+    private function storePdf(string $locale): ?string
+    {
+        $upload = $this->{"pdf_{$locale}"};
+        $existing = $this->existingPdf[$locale] ?? null;
+
+        if ($upload instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+            if ($existing) {
+                Storage::disk('public')->delete($existing);
+            }
+
+            // Akhiran acak: unggahan pengganti tidak pernah memakai nama berkas yang sama dengan berkas lama.
+            return $upload->storeAs('publikasi', Str::slug(Str::limit($this->titleId, 80, '')).'-'.$locale.'-'.Str::lower(Str::random(8)).'.pdf', 'public');
+        }
+
+        if ($this->removePdf[$locale] ?? false) {
+            if ($existing) {
+                Storage::disk('public')->delete($existing);
+            }
+
+            return null;
+        }
+
+        return $existing;
     }
 
     protected function translatableFields(): array

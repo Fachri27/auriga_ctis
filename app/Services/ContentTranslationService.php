@@ -131,11 +131,30 @@ class ContentTranslationService
             $texts[$field] = $source->{$field};
         }
 
+        // Keterangan tahapan kasus (JSON per tahapan): yang belum ada versi EN-nya ikut diterjemahkan.
+        $sourceNotes = $type === 'case' ? (json_decode($source->keterangan_tahapan ?? '', true) ?: []) : [];
+        $notes = $existing && ! $overwrite ? (json_decode($existing->keterangan_tahapan ?? '', true) ?: []) : [];
+        foreach ($sourceNotes as $key => $note) {
+            if (filled($note) && blank($notes[$key] ?? null)) {
+                $texts["tahapan.{$key}"] = $note;
+            }
+        }
+
         if ($texts === []) {
             return 0;
         }
 
         $translated = $this->translator->translate($texts);
+
+        foreach ($sourceNotes as $key => $note) {
+            if (array_key_exists("tahapan.{$key}", $translated)) {
+                $notes[$key] = $translated["tahapan.{$key}"];
+                unset($translated["tahapan.{$key}"]);
+            }
+        }
+        if ($notes) {
+            $translated['keterangan_tahapan'] = json_encode($notes, JSON_UNESCAPED_UNICODE);
+        }
 
         // Ringkasan kasus diturunkan dari deskripsi, sama seperti CaseForm.
         if ($type === 'case' && isset($translated['description'])) {

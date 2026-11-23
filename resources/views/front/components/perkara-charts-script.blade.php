@@ -37,17 +37,31 @@
             };
         }
 
-        function valueAxis() {
+        function valueAxis(fmt) {
             return {
                 type: 'value', minInterval: 1,
-                axisLabel: { color: MUTED, fontSize: 10, fontFamily: FONT },
+                axisLabel: { color: MUTED, fontSize: 10, fontFamily: FONT, formatter: fmt ? function (v) { return fmt(v, true); } : undefined },
                 splitLine: { lineStyle: { color: GRID } }
             };
         }
 
-        function tooltipFmt(params) {
-            var p = Array.isArray(params) ? params[0] : params;
-            return '<b>' + p.name + '</b><br/>' + Number(p.value).toLocaleString('id-ID');
+        // Format nilai per grafik. data-unit="rupiah": diringkas di sumbu (Rp500 jt); data-unit-label: satuan di tooltip (mis. bulan).
+        function valueFormatter(el) {
+            var unit = el.getAttribute('data-unit'), label = el.getAttribute('data-unit-label');
+            var locale = document.documentElement.lang === 'en' ? 'en-US' : 'id-ID';
+            return function (v, compact) {
+                if (unit === 'rupiah') {
+                    return 'Rp' + Number(v).toLocaleString(locale, compact ? { notation: 'compact', maximumFractionDigits: 1 } : { maximumFractionDigits: 0 });
+                }
+                return Number(v).toLocaleString(locale, { maximumFractionDigits: 1 }) + (unit && label && !compact ? ' ' + label : '');
+            };
+        }
+
+        function tooltipFmt(fmt) {
+            return function (params) {
+                var p = Array.isArray(params) ? params[0] : params;
+                return '<b>' + p.name + '</b><br/>' + fmt(p.value, false);
+            };
         }
 
         function pubInitChart(el) {
@@ -61,6 +75,8 @@
             window.pubChartInstances[el.id] = chart;
 
             var type = el.getAttribute('data-type') || 'bar';
+            var fmt = valueFormatter(el);
+            var unitAxis = el.getAttribute('data-unit') ? fmt : null;
             var labels = data.map(function (d) { return d.label; });
             var values = data.map(function (d) { return d.value; });
             var long = labels.length > 15;
@@ -92,10 +108,10 @@
             } else if (type === 'line') {
                 chart.setOption({
                     textStyle: { fontFamily: FONT },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'line' }, formatter: tooltipFmt },
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'line' }, formatter: tooltipFmt(fmt) },
                     grid: { left: 8, right: 16, top: 20, bottom: long ? 60 : 10, containLabel: true },
                     xAxis: axisCommon(labels, long),
-                    yAxis: valueAxis(),
+                    yAxis: valueAxis(unitAxis),
                     series: [{
                         type: 'line',
                         data: values,
@@ -113,9 +129,9 @@
             } else if (type === 'hbar') {
                 chart.setOption({
                     textStyle: { fontFamily: FONT },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: tooltipFmt },
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: tooltipFmt(fmt) },
                     grid: { left: 8, right: 40, top: 8, bottom: 8, containLabel: true },
-                    xAxis: valueAxis(),
+                    xAxis: valueAxis(unitAxis),
                     yAxis: {
                         type: 'category',
                         data: labels.slice().reverse(),
@@ -134,10 +150,10 @@
             } else {
                 chart.setOption({
                     textStyle: { fontFamily: FONT },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: tooltipFmt },
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: tooltipFmt(fmt) },
                     grid: { left: 8, right: 16, top: 20, bottom: long ? 60 : 10, containLabel: true },
                     xAxis: axisCommon(labels, long),
-                    yAxis: valueAxis(),
+                    yAxis: valueAxis(unitAxis),
                     dataZoom: long ? [{ type: 'slider', start: 0, end: 30, height: 16, bottom: 5 }] : undefined,
                     series: [{
                         type: 'bar',

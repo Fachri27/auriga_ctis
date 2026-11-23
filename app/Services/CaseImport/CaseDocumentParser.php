@@ -2,6 +2,8 @@
 
 namespace App\Services\CaseImport;
 
+use App\Models\CaseModel;
+use App\Services\CaseStages;
 use Illuminate\Support\Str;
 
 /**
@@ -12,6 +14,8 @@ use Illuminate\Support\Str;
  *   Label: nilai            ← Pengungkap/Pelapor/Penggugat, Terlapor, Penyidik, Lokasi, Tahun/Periode, Status
  *   Kronologi               ← judul bagian, diikuti paragraf isinya
  *   Perkembangan / Dugaan Permasalahan / Lesson Learning / Status / Sumber
+ *   Kualifikasi Kasus       ← diikuti dropdown/teks Pidana, Perdata, atau Administrasi
+ *   Tahapan Kasus           ← tabel dua kolom: nama tahapan | keterangan (lihat CaseStages::fromDocument())
  */
 class CaseDocumentParser
 {
@@ -26,7 +30,17 @@ class CaseDocumentParser
         'status' => 'status',
         'sumber' => 'sumber',
         'referensi' => 'sumber',
+        'kualifikasi kasus' => 'kualifikasi',
+        'kualifikasi' => 'kualifikasi',
+        'tahapan kasus' => 'tahapan',
+        'tahapan' => 'tahapan',
     ];
+
+    /** Bagian yang diolah menjadi data terstruktur, bukan teks; isi lain di dalamnya kembali ke bagian sebelumnya. */
+    private const STRUCTURED = ['kualifikasi', 'tahapan'];
+
+    /** Batas keterangan tahapan, sama dengan form CMS kasus. */
+    private const STAGE_NOTE_MAX = 500;
 
     /** Label "X: nilai" di kepala dokumen → field */
     private const LABELS = [
@@ -43,6 +57,8 @@ class CaseDocumentParser
         'tahun' => 'tahun',
         'periode' => 'tahun',
         'status' => 'status',
+        'kualifikasi kasus' => 'kualifikasi',
+        'kualifikasi' => 'kualifikasi',
     ];
 
     private const MONTHS = [
@@ -51,11 +67,12 @@ class CaseDocumentParser
     ];
 
     /**
-     * @param  list<array{text: string, html: string, style: ?string, list: ?string}>  $paragraphs
+     * @param  list<array{text: string, html: string, style: ?string, list: ?string, cell?: ?array{row: string, col: int}}>  $paragraphs
      * @return array{
      *     title: string, pelapor: ?string, terlapor: ?string, instansi: ?string, lokasi: ?string, tahun: ?string,
      *     description: ?string, perkembangan: ?string, dugaan_permasalahan: ?string, pembelajaran: ?string,
-     *     status: ?string, sumber: ?string, event_date: ?string, sections: list<string>, warnings: list<string>
+     *     status: ?string, sumber: ?string, event_date: ?string, sections: list<string>, warnings: list<string>,
+     *     kualifikasi: ?string, keterangan_tahapan: ?array<string, string>, tahap: ?string
      * }
      */
     public function parse(array $paragraphs): array
@@ -65,21 +82,27 @@ class CaseDocumentParser
         $labels = [];
         $sections = [];
         $current = null;
+        // Bagian teks tepat sebelum Kualifikasi/Tahapan Kasus: tempat isi lain di dalam kedua bagian itu.
+        $textSection = null;
 
         foreach (array_slice($paragraphs, 1) as $paragraph) {
-            $heading = $this->heading($paragraph['text']);
+            // Isi sel tabel (mis. "Status" di tabel info perkara) bukan judul bagian.
+            $heading = ($paragraph['cell'] ?? null) === null ? $this->heading($paragraph['text']) : null;
             if ($heading !== null) {
+                if (in_array($heading, self::STRUCTURED, true) && $current !== null && ! in_array($current, self::STRUCTURED, true)) {
+                    $textSection = $current;
+                }
                 $current = $heading;
                 $sections[$current] ??= [];
 
                 continue;
             }
 
-            // "Status: ..." bisa muncul di kepala dokumen maupun di akhir bagian lain.
+            // "Status: ..." / "Kualifikasi Kasus: ..." bisa muncul di kepala dokumen maupun di akhir bagian lain.
             if (preg_match('/^([^:]{2,40}):\s*(.+)$/u', $paragraph['text'], $m)) {
                 $field = self::LABELS[Str::lower(trim($m[1]))] ?? null;
 
-                if ($field !== null && ($current === null || $field === 'status')) {
+                if ($field !== null && ($current === null || in_array($field, ['status', 'kualifikasi'], true))) {
                     $labels[$field][] = trim($m[2]);
 
                     continue;
@@ -101,6 +124,31 @@ class CaseDocumentParser
             $sections[$current][] = $paragraph;
         }
 
+        $kualifikasi = $this->kualifikasi([...($labels['kualifikasi'] ?? []), ...array_column(
+            array_filter($sections['kualifikasi'] ?? [], fn ($p) => ($p['cell'] ?? null) === null), 'text')], $warnings);
+        [$stageRows, $rest] = $this->stageRows($sections['tahapan'] ?? []);
+        $stages = CaseStages::fromDocument($kualifikasi, $stageRows);
+
+        // Isi lain di bagian Kualifikasi/Tahapan Kasus (mis. tabel info perkara) tetap ikut, di bagian teks sebelumnya.
+        $rest = [...array_filter($sections['kualifikasi'] ?? [], fn ($p) => ($p['cell'] ?? null) !== null), ...$rest];
+        if ($rest !== [] && $textSection !== null) {
+            array_push($sections[$textSection], ...$rest);
+        } elseif ($rest !== []) {
+            $warnings[] = 'Isi bagian "Tahapan Kasus" yang bukan baris tahapan dilewati: '.Str::limit($rest[0]['text'], 60);
+        }
+        foreach ($stages['skipped'] as $label) {
+            $warnings[] = "Keterangan tahap \"{$label}\" tidak disimpan: tahap ini tidak ada di halaman publik"
+                .($kualifikasi ? ' untuk kualifikasi '.CaseModel::KUALIFIKASI[$kualifikasi] : '').'.';
+        }
+        foreach ($stages['notes'] as $key => $note) {
+            if (mb_strlen($note) > self::STAGE_NOTE_MAX) {
+                $stages['notes'][$key] = Str::limit($note, self::STAGE_NOTE_MAX - 3);
+                $warnings[] = "Keterangan tahap \"{$key}\" lebih dari ".self::STAGE_NOTE_MAX.' karakter dan dipotong.';
+            }
+        }
+        $structured = array_intersect(self::STRUCTURED, array_keys($sections));
+        $sections = array_diff_key($sections, array_flip(self::STRUCTURED));
+
         $html = array_map(fn (array $blocks) => $this->toHtml($blocks), $sections);
         $text = array_map(fn (array $blocks) => implode("\n", array_column($blocks, 'text')), $sections);
 
@@ -120,8 +168,12 @@ class CaseDocumentParser
             'pembelajaran' => $html['pembelajaran'] ?? null,
             'status' => $statusHtml !== '' ? $statusHtml : null,
             'sumber' => $html['sumber'] ?? null,
-            'sections' => array_keys(array_filter($html)),
+            'sections' => [...array_keys(array_filter($html)), ...$structured],
             'warnings' => $warnings,
+            'kualifikasi' => $kualifikasi,
+            'keterangan_tahapan' => $stages['notes'] ?: null,
+            // Status kasus (key tabel statuses) dari tahapan terjauh yang terisi; null = tetap Terbuka.
+            'tahap' => $stages['status'],
         ];
 
         if ($title === '') {
@@ -170,6 +222,65 @@ class CaseDocumentParser
         return null;
     }
 
+    /**
+     * Kualifikasi dari isi dropdown/teks bagian "Kualifikasi Kasus" atau label "Kualifikasi Kasus: ...".
+     *
+     * @param  list<string>  $candidates
+     */
+    private function kualifikasi(array $candidates, array &$warnings): ?string
+    {
+        foreach ($candidates as $text) {
+            foreach (array_keys(CaseModel::KUALIFIKASI) as $key) {
+                if (Str::contains(Str::lower($text), $key)) {
+                    return $key;
+                }
+            }
+        }
+
+        if ($candidates !== []) {
+            $warnings[] = 'Kualifikasi kasus "'.Str::limit($candidates[0], 40).'" tidak dikenali (Pidana/Perdata/Administrasi); isi manual.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Baris tabel tahapan (kolom pertama = nama tahapan yang dikenal) yang keterangannya terisi, dan sisa isi bagian.
+     * Paragraf satu sel digabung per baris baru; kolom setelah kolom kedua ikut digabung.
+     *
+     * @return array{0: list<array{label: string, text: string}>, 1: list<array>}
+     */
+    private function stageRows(array $blocks): array
+    {
+        $rows = [];
+        $rest = [];
+        foreach ($blocks as $block) {
+            if (($block['cell'] ?? null) === null) {
+                $rest[] = $block;
+            } else {
+                $rows[$block['cell']['row']][] = $block;
+            }
+        }
+
+        $stages = [];
+        foreach ($rows as $row) {
+            $label = implode(' ', array_column(array_filter($row, fn ($b) => $b['cell']['col'] === 0), 'text'));
+
+            if (! CaseStages::isDocumentStage($label)) {
+                array_push($rest, ...$row);
+
+                continue;
+            }
+
+            $text = trim(implode("\n", array_column(array_filter($row, fn ($b) => $b['cell']['col'] > 0), 'text')));
+            if ($text !== '') {
+                $stages[] = ['label' => $label, 'text' => $text];
+            }
+        }
+
+        return [$stages, $rest];
+    }
+
     private function heading(string $text): ?string
     {
         $key = Str::lower(trim(rtrim(trim($text), ':')));
@@ -196,7 +307,7 @@ class CaseDocumentParser
     }
 
     /**
-     * @param  list<array{text: string, html: string, style: ?string, list: ?string}>  $blocks
+     * @param  list<array{text: string, html: string, style: ?string, list: ?string, cell?: ?array{row: string, col: int}}>  $blocks
      */
     private function toHtml(array $blocks): ?string
     {

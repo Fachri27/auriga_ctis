@@ -95,14 +95,42 @@
                                 </div>
                             </div>
 
-                            <div x-show="type === 'eksternal'">
-                                {{-- Link --}}
-                                <div>
-                                    <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">Link</label>
-                                    <input type="text" wire:model="link"
-                                        class="cms-input w-full"
-                                        placeholder="https://contoh.com/resource">
-                                </div>
+                            {{-- Link: eksternal = alamat berita aslinya; internal = tautan publikasi (tampil di halaman analisis) --}}
+                            <div>
+                                <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">
+                                    <span x-show="type === 'eksternal'">Link</span>
+                                    <span x-show="type === 'internal'">Tautan publikasi (opsional)</span>
+                                </label>
+                                <input type="url" wire:model="link"
+                                    class="cms-input w-full"
+                                    placeholder="https://gakkum-sda.id/id/publikasi/...">
+                                @error('link') <p class="text-sm text-[color:var(--danger)]">{{ $message }}</p> @enderror
+                            </div>
+
+                            {{-- PDF Analisis Auriga per bahasa: tombol "Unduh PDF" di halaman analisis --}}
+                            <div x-show="type === 'internal'" class="space-y-3">
+                                @foreach (['id' => 'Indonesia', 'en' => 'English'] as $pdfLocale => $pdfLabel)
+                                    <div wire:key="pdf-{{ $pdfLocale }}">
+                                        <label class="block text-xs font-medium text-[color:var(--muted)] mb-1.5">File PDF ({{ $pdfLabel }})</label>
+                                        @if ($existingPdf[$pdfLocale] && ! $removePdf[$pdfLocale] && ! ${'pdf_' . $pdfLocale})
+                                            <div class="flex items-center justify-between gap-2 text-xs mb-2">
+                                                <a href="{{ asset('storage/' . $existingPdf[$pdfLocale]) }}" target="_blank" rel="noopener"
+                                                    class="truncate underline" style="color:var(--leaf-deep)">{{ basename($existingPdf[$pdfLocale]) }}</a>
+                                                <button type="button" wire:click="$set('removePdf.{{ $pdfLocale }}', true)"
+                                                    class="flex-shrink-0" style="color:var(--danger)">Hapus</button>
+                                            </div>
+                                        @elseif ($removePdf[$pdfLocale])
+                                            <p class="text-xs mb-2" style="color:var(--muted)">
+                                                PDF dihapus saat disimpan.
+                                                <button type="button" wire:click="$set('removePdf.{{ $pdfLocale }}', false)" class="underline">Batal</button>
+                                            </p>
+                                        @endif
+                                        <input type="file" wire:model="pdf_{{ $pdfLocale }}" accept="application/pdf" class="cms-input w-full">
+                                        <div wire:loading wire:target="pdf_{{ $pdfLocale }}" class="text-xs mt-1" style="color:var(--muted)">Mengunggah…</div>
+                                        @error('pdf_' . $pdfLocale) <p class="text-sm text-[color:var(--danger)]">{{ $message }}</p> @enderror
+                                    </div>
+                                @endforeach
+                                <p class="text-xs" style="color:var(--muted)">PDF maksimal 50 MB per bahasa.</p>
                             </div>
 
                             {{-- Featured Image --}}
