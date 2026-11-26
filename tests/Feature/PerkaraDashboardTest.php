@@ -82,16 +82,17 @@ class PerkaraDashboardTest extends TestCase
                 ->map(fn ($k) => [$k['display'], $k['share'] ?? null])->all() === [
                     'Perorangan' => ['5', '83,3%'],
                     'Korporasi' => ['1', '16,7%'],
-                    'Rata-rata Penjara' => ['9 bulan', null],
-                    'Rata-rata Denda' => ['Rp1 miliar', null],
+                    // Seperti tab Dashboard spreadsheet: perkara bebas ikut dirata-rata sebagai 0.
+                    'Rata-rata Penjara' => ['6 bulan', null],
+                    'Rata-rata Denda' => ['Rp666,7 juta', null],
                     'Total Denda' => ['Rp2 miliar', null],
                 ])
             // Angka tampil di atas labelnya.
-            ->assertSeeInOrder(['Keterangan Terdakwa', 'Perorangan', 'Korporasi', 'Vonis Putusan', 'Vonis Pidana', '9 bulan', 'Rata-rata Penjara', 'Rp1 miliar', 'Rata-rata Denda', 'Rp2 miliar', 'Total Denda'])
+            ->assertSeeInOrder(['Keterangan Terdakwa', 'Perorangan', 'Korporasi', 'Vonis Putusan', 'Vonis Pidana', '6 bulan', 'Rata-rata Penjara', 'Rp666,7 juta', 'Rata-rata Denda', 'Rp2 miliar', 'Total Denda'])
             ->assertViewHas('yearlyCharts', fn ($charts) => collect($charts)->keyBy('id')->only(['perkara-penjara-tahun', 'perkara-denda-tahun'])
                 ->map(fn ($c) => [$c['unit'], $c['data']])->all() === [
-                    'perkara-penjara-tahun' => ['bulan', [['label' => '2021', 'value' => 12.0], ['label' => '2022', 'value' => 6.0]]],
-                    'perkara-denda-tahun' => ['rupiah', [['label' => '2021', 'value' => 500000000.0], ['label' => '2022', 'value' => 1500000000.0]]],
+                    'perkara-penjara-tahun' => ['bulan', [['label' => '2021', 'value' => 12.0], ['label' => '2022', 'value' => 3.0]]],
+                    'perkara-denda-tahun' => ['rupiah', [['label' => '2021', 'value' => 500000000.0], ['label' => '2022', 'value' => 750000000.0]]],
                 ])
             ->assertSee('data-unit="rupiah"', false)
             ->assertSee('data-unit-label="bulan"', false);
@@ -99,9 +100,30 @@ class PerkaraDashboardTest extends TestCase
         $this->get('/en/dashboard?mode=perkara')
             ->assertOk()
             ->assertSee('Defendant Breakdown')
-            ->assertSee('9 months')
-            ->assertSee('Rp1 billion')
+            ->assertSee('6 months')
+            ->assertSee('Rp666.7 million')
             ->assertSee('data-unit-label="months"', false);
+    }
+
+    public function test_rows_without_year_count_in_totals_but_not_in_yearly_bars(): void
+    {
+        // Tab Dashboard spreadsheet juga menghitung baris CleanData yang tahunnya kosong.
+        DB::table('raw_cases')->insert([
+            'no_perkara' => '9/Pid.B/PN', 'pengadilan' => 'PN 9', 'klasifikasi_clean' => 'MINERBA', 'tahun' => null,
+            'pulau' => 'Kalimantan', 'subjek_hukum' => 'Perorangan', 'vonis_putusan' => 'Bersalah', 'jumlah_terdakwa' => 4,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $this->get('/id/dashboard?mode=perkara')
+            ->assertOk()
+            ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->pluck('display', 'title')->only(['Perkara', 'Terdakwa', 'Vonis Bersalah'])->all()
+                === ['Perkara' => '4', 'Terdakwa' => '10', 'Vonis Bersalah' => '3'])
+            ->assertViewHas('classifications', fn ($c) => $c[0] === ['label' => 'MINERBA', 'value' => 3])
+            ->assertViewHas('yearlyCharts', fn ($charts) => $charts[0]['data'] === [['label' => '2021', 'value' => 1.0], ['label' => '2022', 'value' => 2.0]]);
+
+        // Dengan filter tahun, baris tanpa tahun tidak ikut.
+        $this->get('/id/dashboard?mode=perkara&tahun=2022')
+            ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->firstWhere('title', 'Perkara')['display'] === '2');
     }
 
     public function test_sentence_charts_are_hidden_without_sentence_data(): void

@@ -196,11 +196,12 @@ class HomeController extends Controller
         $filterPulau = $request->input('pulau');
         $hasFilters = $filterTahun || $filterKlasifikasi || $filterPulau;
 
+        // Rentang tahun perkara; RawCase::inPeriod() juga menghitung baris tanpa tahun, seperti tab Dashboard spreadsheet.
         $yearRange = [2019, 2025];
         $filterOptions = [
             'tahun'        => RawCase::whereNotNull('tahun')->whereBetween('tahun', $yearRange)->distinct()->orderBy('tahun', 'desc')->pluck('tahun'),
-            'klasifikasi'  => RawCase::whereBetween('tahun', $yearRange)->whereNotNull('klasifikasi_clean')->distinct()->orderBy('klasifikasi_clean')->pluck('klasifikasi_clean'),
-            'pulau'        => RawCase::whereBetween('tahun', $yearRange)->whereNotNull('pulau')->distinct()->orderBy('pulau')->pluck('pulau'),
+            'klasifikasi'  => RawCase::inPeriod($yearRange)->whereNotNull('klasifikasi_clean')->distinct()->orderBy('klasifikasi_clean')->pluck('klasifikasi_clean'),
+            'pulau'        => RawCase::inPeriod($yearRange)->whereNotNull('pulau')->distinct()->orderBy('pulau')->pluck('pulau'),
         ];
 
         // =========================================
@@ -211,18 +212,18 @@ class HomeController extends Controller
         $yearlyMergeDatasets = ['Perkara per Tahun', 'Terdakwa per Tahun', 'Pengadilan per Tahun'];
 
         if ($hasFilters) {
-            $rcFull = RawCase::whereBetween('tahun', $yearRange);
+            $rcFull = RawCase::inPeriod($yearRange);
             if ($filterTahun) $rcFull->where('tahun', (int) $filterTahun);
             if ($filterKlasifikasi) $rcFull->where('klasifikasi_clean', $filterKlasifikasi);
             if ($filterPulau) $rcFull->where('pulau', $filterPulau);
 
             // For line/bar charts, exclude tahun filter so they still show full year range
-            $rcNoTahun = RawCase::whereBetween('tahun', $yearRange);
+            $rcNoTahun = RawCase::inPeriod($yearRange);
             if ($filterKlasifikasi) $rcNoTahun->where('klasifikasi_clean', $filterKlasifikasi);
             if ($filterPulau) $rcNoTahun->where('pulau', $filterPulau);
 
             // For pie chart, exclude klasifikasi filter (pie shows all categories)
-            $rcPie = RawCase::whereBetween('tahun', $yearRange);
+            $rcPie = RawCase::inPeriod($yearRange);
             if ($filterTahun) $rcPie->where('tahun', (int) $filterTahun);
             if ($filterPulau) $rcPie->where('pulau', $filterPulau);
 
@@ -382,7 +383,7 @@ class HomeController extends Controller
                 ['title' => 'Top 10 Kabupaten/Kota',  'field' => 'kabupaten'],
             ];
             foreach ($topQueries as $tq) {
-                $rows = RawCase::whereBetween('tahun', $yearRange)->whereNotNull($tq['field'])
+                $rows = RawCase::inPeriod($yearRange)->whereNotNull($tq['field'])
                     ->selectRaw("{$tq['field']} as label, COUNT(*) as cnt")
                     ->groupBy($tq['field'])
                     ->orderByDesc('cnt')
@@ -413,13 +414,13 @@ class HomeController extends Controller
                 ->whereNotNull('year')
                 ->distinct()->orderBy('year')->pluck('year')->toArray();
 
-            $totalPerkara = RawCase::whereBetween('tahun', $yearRange)->count();
-            $totalTerdakwa = RawCase::whereBetween('tahun', $yearRange)->sum('jumlah_terdakwa');
-            $jmlPengadilan = RawCase::whereBetween('tahun', $yearRange)->whereNotNull('pengadilan')->distinct()->count('pengadilan');
-            $subjekCounts = RawCase::whereBetween('tahun', $yearRange)->whereNotNull('subjek_hukum')
+            $totalPerkara = RawCase::inPeriod($yearRange)->count();
+            $totalTerdakwa = RawCase::inPeriod($yearRange)->sum('jumlah_terdakwa');
+            $jmlPengadilan = RawCase::inPeriod($yearRange)->whereNotNull('pengadilan')->distinct()->count('pengadilan');
+            $subjekCounts = RawCase::inPeriod($yearRange)->whereNotNull('subjek_hukum')
                 ->selectRaw("CASE WHEN subjek_hukum IN ('Korporasi','Koperasi') THEN 'Korporasi' ELSE subjek_hukum END as kelompok, COUNT(*) as cnt")
                 ->groupBy('kelompok')->pluck('cnt', 'kelompok');
-            $vonisCounts = RawCase::whereBetween('tahun', $yearRange)->whereNotNull('vonis_putusan')
+            $vonisCounts = RawCase::inPeriod($yearRange)->whereNotNull('vonis_putusan')
                 ->selectRaw('vonis_putusan, COUNT(*) as cnt')
                 ->groupBy('vonis_putusan')->pluck('cnt', 'vonis_putusan');
 

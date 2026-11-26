@@ -51,7 +51,7 @@
     @if ($byTitle('Rata-rata Penjara'))
     <div class="border-t border-[#E2E6DA]">
         <p class="px-6 pt-4 font-data text-[10px] tracking-[0.22em] uppercase text-gray-400">
-            {{ __('Vonis Pidana') }} <span style="text-transform: none; letter-spacing: normal">· {{ __('perkara yang terbukti bersalah') }}</span>
+            {{ __('Vonis Pidana') }} <span style="text-transform: none; letter-spacing: normal">· {{ __('semua putusan') }}</span>
         </p>
         <dl class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#E2E6DA]">
             @foreach (['Rata-rata Penjara', 'Rata-rata Denda', 'Total Denda'] as $t)

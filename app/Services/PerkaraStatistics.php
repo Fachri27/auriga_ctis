@@ -52,7 +52,7 @@ class PerkaraStatistics
 
     public function filterOptions(): array
     {
-        $base = fn () => RawCase::whereBetween('tahun', self::YEARS);
+        $base = fn () => RawCase::inPeriod(self::YEARS);
 
         return [
             'tahun' => $base()->whereNotNull('tahun')->distinct()->orderByDesc('tahun')->pluck('tahun'),
@@ -62,8 +62,9 @@ class PerkaraStatistics
     }
 
     /**
-     * KPI (judul + angka tampil). Perorangan/Korporasi merinci jumlah terdakwa; vonis pidana (penjara & denda)
-     * dihitung dari perkara yang terbukti bersalah dan dijatuhi pidana tersebut.
+     * KPI (judul + angka tampil), dihitung seperti tab Dashboard di spreadsheet. Perorangan/Korporasi merinci
+     * jumlah terdakwa; rata-rata vonis penjara & denda mencakup semua perkara yang vonisnya terisi angka
+     * (perkara bebas/lepas tercatat 0).
      *
      * @return list<array{title: string, display: string, share?: string}>
      */
@@ -78,8 +79,8 @@ class PerkaraStatistics
         $vonis = (clone $query)->whereNotNull('vonis_putusan')
             ->selectRaw('vonis_putusan, COUNT(*) as cnt')
             ->groupBy('vonis_putusan')->pluck('cnt', 'vonis_putusan');
-        $pidana = (clone $query)->where('vonis_putusan', 'Bersalah')
-            ->selectRaw('AVG(CASE WHEN vonis_penjara > 0 THEN vonis_penjara END) as penjara, AVG(CASE WHEN vonis_denda > 0 THEN vonis_denda END) as denda, SUM(vonis_denda) as total_denda')
+        $pidana = (clone $query)
+            ->selectRaw('AVG(vonis_penjara) as penjara, AVG(vonis_denda) as denda, SUM(vonis_denda) as total_denda')
             ->first();
 
         $kpis = [
@@ -117,7 +118,7 @@ class PerkaraStatistics
 
     /**
      * Grafik batang per tahun (filter tahun diabaikan, agar rentang tahun tetap utuh). Grafik ber-'unit' (vonis
-     * penjara dalam bulan, denda dalam rupiah) adalah rata-rata dari perkara yang terbukti bersalah.
+     * penjara dalam bulan, denda dalam rupiah) adalah rata-rata seperti di kpis().
      *
      * @return list<array{id: string, title: string, type: string, unit: ?string, data: list<array{label: string, value: float}>}>
      */
@@ -127,8 +128,8 @@ class PerkaraStatistics
             'perkara' => ['Perkara per Tahun', 'COUNT(*)', null],
             'terdakwa' => ['Terdakwa per Tahun', 'SUM(jumlah_terdakwa)', null],
             'pengadilan' => ['Pengadilan per Tahun', 'COUNT(DISTINCT pengadilan)', null],
-            'penjara' => ['Rata-rata Vonis Penjara per Tahun (bulan)', "AVG(CASE WHEN vonis_putusan = 'Bersalah' AND vonis_penjara > 0 THEN vonis_penjara END)", 'bulan'],
-            'denda' => ['Rata-rata Denda per Tahun', "AVG(CASE WHEN vonis_putusan = 'Bersalah' AND vonis_denda > 0 THEN vonis_denda END)", 'rupiah'],
+            'penjara' => ['Rata-rata Vonis Penjara per Tahun (bulan)', 'AVG(vonis_penjara)', 'bulan'],
+            'denda' => ['Rata-rata Denda per Tahun', 'AVG(vonis_denda)', 'rupiah'],
         ];
 
         $charts = [];
@@ -252,7 +253,7 @@ class PerkaraStatistics
 
     private function query(array $filters, array $ignore = []): Builder
     {
-        $query = RawCase::query()->whereBetween('tahun', self::YEARS);
+        $query = RawCase::query()->inPeriod(self::YEARS);
 
         if ($filters['tahun'] && ! in_array('tahun', $ignore, true)) {
             $query->where('tahun', (int) $filters['tahun']);

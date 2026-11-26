@@ -82,9 +82,13 @@ class SyncChartFromSheets extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * Tab data mentah. CleanData didahulukan karena tab Dashboard di spreadsheet dihitung dari tab itu,
+     * sehingga angka di web sama dengan angka di spreadsheet.
+     */
     private function pickRawSheet(array $available): ?string
     {
-        $priority = ['Final', 'CleanData', 'Final 2019-2025'];
+        $priority = ['CleanData', 'Final 2019-2025', 'Final'];
 
         foreach ($priority as $name) {
             if (in_array($name, $available)) {

@@ -159,7 +159,7 @@
         <p class="mt-4 text-xs text-[#6b7268]">
             {{ __('Sumber: indeksasi putusan pidana sektor sumber daya alam dan lingkungan hidup :from–:to.', ['from' => \App\Services\PerkaraStatistics::YEARS[0], 'to' => \App\Services\PerkaraStatistics::YEARS[1]]) }}
             @if ($sentenceCharts->isNotEmpty())
-                {{ __('Rata-rata vonis dihitung dari perkara yang terbukti bersalah dan dijatuhi pidana penjara atau denda.') }}
+                {{ __('Rata-rata vonis dihitung dari semua putusan yang vonisnya tercatat, termasuk putusan bebas atau lepas (dihitung 0).') }}
             @endif
         </p>
     </section>
