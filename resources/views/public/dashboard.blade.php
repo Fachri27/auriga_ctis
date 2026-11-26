@@ -40,10 +40,10 @@
                     </a>
                 @endforeach
             </div>
+            {{-- Definisi yang sama dengan bagian Terminologi di halaman About. --}}
+            @php $term = __('about.content.terms.' . $mode); @endphp
             <p class="text-xs text-[#6b7268]">
-                {{ $mode === 'perkara'
-                    ? __('Perkara: putusan pidana sektor SDA dan lingkungan hidup :from–:to.', ['from' => \App\Services\PerkaraStatistics::YEARS[0], 'to' => \App\Services\PerkaraStatistics::YEARS[1]])
-                    : __('Kasus: kasus yang dihimpun dan diverifikasi tim Auriga.') }}
+                <strong class="font-semibold text-[#0B1E07]">{{ $term['term'] }}:</strong> {{ $term['text'] }}
             </p>
         </nav>
     </section>

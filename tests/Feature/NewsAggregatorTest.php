@@ -352,6 +352,8 @@ class NewsAggregatorTest extends TestCase
         $this->get('/id/artikels')
             ->assertOk()
             ->assertSeeInOrder(['Kajian Auriga: Efek Jera Penegakan Hukum', 'Polda Kalteng Tetapkan Korporasi Tersangka Karhutla'])
+            // Catatan konten eksternal (dipindah dari halaman About) tampil di hero.
+            ->assertSee('dapat memuat konten yang disematkan dari sumber lain')
             ->assertSee('src="https://img.mongabay.test/karhutla.jpg"', false)
             ->assertDontSee('Berita Penegakan Hukum Lingkungan')
             // Berita tanpa gambar (Google News) belum tampil sampai gambarnya ditemukan.

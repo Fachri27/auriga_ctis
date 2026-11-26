@@ -2,7 +2,7 @@
 
 // English text for the About page (front/about.blade.php); translated from resources/lang/id/about.php.
 return [
-    'meta_description' => 'greendefender is an information and data platform for monitoring natural resource and environmental law cases in Indonesia, developed by Yayasan Auriga Nusantara. Learn what we monitor, how we work, our data sources, and their limitations.',
+    'meta_description' => 'Greendefender is an information and data platform for monitoring natural resource and environmental law cases in Indonesia, developed by Yayasan Auriga Nusantara. Learn what we monitor, how we work, our data sources, and their limitations.',
 
     'label' => 'About the Platform',
     'title' => 'About greendefender',
@@ -11,25 +11,25 @@ return [
     'toc' => 'Contents',
 
     'intro' => [
-        'greendefender is an information and data platform for monitoring natural resource and environmental law cases in Indonesia. It was developed to strengthen transparency, widen public access to information, and promote accountable law enforcement against crimes in the natural resource and environmental sectors.',
-        'greendefender brings together information and data on environmental cases, the progress of case handling, and court rulings in a single platform open to the public. This information is compiled from a range of credible sources and organized systematically to help the public understand the dynamics of environmental law enforcement, how cases are handled by law enforcement officials, and how far legal liability has been imposed on perpetrators, both individuals and corporations.',
+        'Greendefender is an information and data platform for monitoring natural resource and environmental law cases in Indonesia. It was developed to strengthen transparency, widen public access to information, and promote accountable law enforcement against crimes in the natural resource and environmental sectors.',
+        'Greendefender brings together information and data on environmental cases, the progress of case handling, and court rulings in a single platform open to the public. This information is compiled from a range of credible sources and organized systematically to help the public understand the dynamics of environmental law enforcement, how cases are handled by law enforcement officials, and how far legal liability has been imposed on perpetrators, both individuals and corporations.',
         'By managing and analyzing court case data, greendefender seeks to identify patterns in law enforcement, gaps in accountability, and problems in the handling of natural resource and environmental court cases. The data and information provided are intended to serve as a basis for research, advocacy, public oversight, and improvements to law enforcement policy in Indonesia.',
     ],
 
 
     'purpose' => [
         'title' => 'Purpose',
-        'text' => 'greendefender is developed by Yayasan Auriga Nusantara as part of its effort to promote more transparent, fair, and accountable governance of natural resources and the environment.',
+        'text' => 'Greendefender is developed by Yayasan Auriga Nusantara as part of its effort to promote more transparent, fair, and accountable governance of natural resources and the environment.',
     ],
 
     'commitment' => [
         'title' => 'Our Commitment',
-        'text' => 'greendefender is committed to presenting information objectively, transparently, and on the basis of accountable sources. We believe that open information is a basic right and an essential precondition for law enforcement that is accountable, just, and committed to conserving natural resources and the balance of the environment. By providing structured, simple, and publicly accessible information and data, we aim to strengthen public participation in oversight and to promote a justice system that is fairer to people and the environment.',
+        'text' => 'Greendefender is committed to presenting information objectively, transparently, and on the basis of accountable sources. We believe that open information is a basic right and an essential precondition for law enforcement that is accountable, just, and committed to conserving natural resources and the balance of the environment. By providing structured, simple, and publicly accessible information and data, we aim to strengthen public participation in oversight and to promote a justice system that is fairer to people and the environment.',
     ],
 
     'monitor' => [
         'title' => 'What Do We Monitor?',
-        'intro' => 'greendefender monitors court cases and documents alleged violations of the law related to crimes in the natural resource and environmental sectors, covering:',
+        'intro' => 'Greendefender monitors court cases and documents alleged violations of the law related to crimes in the natural resource and environmental sectors, covering:',
         'items' => [
             ['title' => 'Forestry and deforestation', 'text' => 'Illegal logging, encroachment on forest areas, forest and land fires, and ecosystem destruction.'],
             ['title' => 'Mining and energy', 'text' => 'Unlicensed mining, legal violations in mining activities, and the environmental impact of extractive activities.'],
@@ -53,7 +53,7 @@ return [
 
     'beneficiaries' => [
         'title' => 'Who Benefits?',
-        'intro' => 'greendefender is intended for anyone who needs information and data on natural resource and environmental law enforcement, in particular:',
+        'intro' => 'Greendefender is intended for anyone who needs information and data on natural resource and environmental law enforcement, in particular:',
         'items' => [
             ['title' => 'Affected people and communities', 'text' => 'to monitor the handling of court cases concerning their environment and living space.'],
             ['title' => 'Civil society organizations', 'text' => 'to strengthen advocacy and oversight of law enforcement.'],
@@ -67,9 +67,10 @@ return [
     'content' => [
         'title' => 'About the Content',
         'terms_title' => 'Terminology',
+        // Dipakai juga sebagai keterangan mode di dashboard publik.
         'terms' => [
-            ['term' => 'Case (kasus)', 'text' => 'An actual incident or problem in the field that requires attention, analysis, or handling.'],
-            ['term' => 'Court case (perkara)', 'text' => 'A problem or dispute that has formally entered the legal domain and has received a court ruling.'],
+            'kasus' => ['term' => 'Case (kasus)', 'text' => 'An actual incident or problem in the field that requires attention, analysis, or handling.'],
+            'perkara' => ['term' => 'Court case (perkara)', 'text' => 'A problem or dispute that has formally entered the legal domain and has received a court ruling.'],
         ],
         'sources' => [
             'title' => 'Sources and Methods',
@@ -86,10 +87,6 @@ return [
         'limits' => [
             'title' => 'Monitoring Limitations',
             'text' => 'As a civil society monitoring platform, greendefender is necessarily limited in its ability to cover every case report and court case in Indonesia. The court case information we compile as primary data depends on how up to date the data published on SIPP and the Supreme Court Decision Directory is. The availability of media coverage as a secondary source also limits our ability to obtain complete information from every region. Likewise, the involvement of our network of regional and national organizations in monitoring may not yet reach everywhere.',
-        ],
-        'articles' => [
-            'title' => 'Articles and News',
-            'text' => 'The articles and news pages on this platform may contain content embedded from other sources, such as news articles, videos, images, or other content from third-party (external) websites.',
         ],
         'disclaimer' => [
             'title' => 'Disclaimer',

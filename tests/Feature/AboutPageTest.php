@@ -15,13 +15,13 @@ class AboutPageTest extends TestCase
         $this->get('/id/about')->assertOk()->assertSeeInOrder([
             'Tentang greendefender',
             'Memantau perkara, mengungkap pola, dan mengawal penegakan hukum.',
-            'greendefender merupakan platform informasi dan data',
+            'Greendefender merupakan platform informasi dan data',
             'Tujuan', 'Komitmen Kami',
             'Apa yang Kami Pantau?', 'Kejahatan tumbuhan dan satwa liar',
             'Bagaimana Kami Bekerja?', 'Publikasi data dan informasi',
             'Siapa Penerima Manfaat?', 'Pemerintah dan pembuat kebijakan',
-            'Terminologi', 'Sumber dan Metode', 'Batasan Pemantauan', 'Artikel dan Berita', 'Disclaimer',
-        ]);
+            'Terminologi', 'Sumber dan Metode', 'Batasan Pemantauan', 'Disclaimer',
+        ])->assertDontSee('Artikel dan Berita');
 
         $this->get('/en/about')->assertOk()->assertSeeInOrder([
             'About greendefender', 'Purpose', 'Our Commitment', 'What Do We Monitor?', 'How Do We Work?',
@@ -39,7 +39,7 @@ class AboutPageTest extends TestCase
 
         $this->get('/id/about')->assertOk()
             ->assertSee('Intro dari CMS')
-            ->assertDontSee('greendefender merupakan platform informasi dan data')
-            ->assertSeeInOrder(['Tujuan', 'Tujuan dari CMS', 'Komitmen Kami', 'greendefender berkomitmen untuk menyajikan informasi']);
+            ->assertDontSee('Greendefender merupakan platform informasi dan data')
+            ->assertSeeInOrder(['Tujuan', 'Tujuan dari CMS', 'Komitmen Kami', 'Greendefender berkomitmen untuk menyajikan informasi']);
     }
 }

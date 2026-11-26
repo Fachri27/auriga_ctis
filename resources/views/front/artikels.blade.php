@@ -8,7 +8,7 @@
 @section('content')
     <div id="artikels-page" class="mt-16">
         <x-front.page-hero :label="__('Artikel')" :title="__('Artikel & Berita Lingkungan')"
-            :description="__('Kumpulan tulisan, laporan, dan berita seputar penegakan hukum lingkungan hidup di Indonesia.')" />
+            :description="__('Halaman artikel dan berita pada platform ini dapat memuat konten yang disematkan dari sumber lain berupa artikel berita, video, gambar atau konten lain dari situs website pihak ketiga (eksternal).')" />
 
         <section class="bg-[#F5F7F1] py-12 md:py-16">
         <div class="max-w-7xl mx-auto px-4">

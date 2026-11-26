@@ -3,7 +3,7 @@
 // Teks halaman About (front/about.blade.php), dari dokumen "Seputar Tentang dll GreenDefender" (editor: Roni).
 // Bagian intro, tujuan, dan komitmen bisa diganti lewat CMS (About); kosongkan di CMS untuk memakai teks ini.
 return [
-    'meta_description' => 'greendefender adalah platform informasi dan data untuk pemantauan kasus hukum sumber daya alam dan lingkungan hidup di Indonesia, dikembangkan oleh Yayasan Auriga Nusantara. Pelajari apa yang kami pantau, cara kerja, sumber data, dan batasannya.',
+    'meta_description' => 'Greendefender adalah platform informasi dan data untuk pemantauan kasus hukum sumber daya alam dan lingkungan hidup di Indonesia, dikembangkan oleh Yayasan Auriga Nusantara. Pelajari apa yang kami pantau, cara kerja, sumber data, dan batasannya.',
 
     'label' => 'Tentang Platform',
     'title' => 'Tentang greendefender',
@@ -12,25 +12,25 @@ return [
     'toc' => 'Daftar Isi',
 
     'intro' => [
-        'greendefender merupakan platform informasi dan data untuk pemantauan kasus hukum sumber daya alam dan lingkungan hidup di Indonesia. Platform ini dikembangkan sebagai upaya memperkuat transparansi, memperluas akses publik terhadap informasi, dan mendorong akuntabilitas penegakan hukum terhadap kejahatan di sektor sumber daya alam dan lingkungan hidup.',
-        'greendefender mengintegrasikan berbagai informasi dan data mengenai kasus-kasus lingkungan hidup, perkembangan proses penanganan perkara, dan data putusan pengadilan dalam satu platform yang dapat diakses publik. Data dan informasi tersebut dihimpun dari berbagai sumber yang kredibel, dan disusun secara sistematis untuk membantu masyarakat memahami bagaimana dinamika penegakan hukum lingkungan hidup, proses penanganan perkara ditangani oleh aparat penegak hukum, dan sejauh mana perkembangan pertanggungjawaban hukum dijatuhkan kepada pelaku, baik perorangan maupun korporasi.',
+        'Greendefender merupakan platform informasi dan data untuk pemantauan kasus hukum sumber daya alam dan lingkungan hidup di Indonesia. Platform ini dikembangkan sebagai upaya memperkuat transparansi, memperluas akses publik terhadap informasi, dan mendorong akuntabilitas penegakan hukum terhadap kejahatan di sektor sumber daya alam dan lingkungan hidup.',
+        'Greendefender mengintegrasikan berbagai informasi dan data mengenai kasus-kasus lingkungan hidup, perkembangan proses penanganan perkara, dan data putusan pengadilan dalam satu platform yang dapat diakses publik. Data dan informasi tersebut dihimpun dari berbagai sumber yang kredibel, dan disusun secara sistematis untuk membantu masyarakat memahami bagaimana dinamika penegakan hukum lingkungan hidup, proses penanganan perkara ditangani oleh aparat penegak hukum, dan sejauh mana perkembangan pertanggungjawaban hukum dijatuhkan kepada pelaku, baik perorangan maupun korporasi.',
         'Melalui pengelolaan dan analisis data perkara, greendefender berupaya mengidentifikasi pola penegakan hukum, kesenjangan pertanggungjawaban, dan berbagai persoalan dalam penanganan perkara sumber daya alam dan lingkungan hidup. Data dan informasi yang tersedia diharapkan dapat menjadi landasan bagi penelitian, advokasi, pengawasan publik, dan perbaikan kebijakan penegakan hukum di Indonesia.',
     ],
 
 
     'purpose' => [
         'title' => 'Tujuan',
-        'text' => 'greendefender dikembangkan oleh Yayasan Auriga Nusantara sebagai bagian dari upaya mendorong tata kelola sumber daya alam dan lingkungan hidup yang lebih transparan, adil, dan bertanggung jawab.',
+        'text' => 'Greendefender dikembangkan oleh Yayasan Auriga Nusantara sebagai bagian dari upaya mendorong tata kelola sumber daya alam dan lingkungan hidup yang lebih transparan, adil, dan bertanggung jawab.',
     ],
 
     'commitment' => [
         'title' => 'Komitmen Kami',
-        'text' => 'greendefender berkomitmen untuk menyajikan informasi secara objektif, transparan, dan berbasis pada sumber-sumber yang dapat dipertanggungjawabkan. Kami percaya bahwa keterbukaan informasi merupakan hak dasar dan salah satu prasyarat penting bagi penegakan hukum yang akuntabel, berkeadilan dan berperspektif pada pelestarian sumber daya alam dan keseimbangan lingkungan hidup. Melalui penyediaan informasi dan data yang terstruktur, sederhana dan mudah diakses publik, kami berupaya memperkuat partisipasi masyarakat dalam pengawasan dan mendorong sistem peradilan yang lebih adil bagi manusia dan lingkungan hidup.',
+        'text' => 'Greendefender berkomitmen untuk menyajikan informasi secara objektif, transparan, dan berbasis pada sumber-sumber yang dapat dipertanggungjawabkan. Kami percaya bahwa keterbukaan informasi merupakan hak dasar dan salah satu prasyarat penting bagi penegakan hukum yang akuntabel, berkeadilan dan berperspektif pada pelestarian sumber daya alam dan keseimbangan lingkungan hidup. Melalui penyediaan informasi dan data yang terstruktur, sederhana dan mudah diakses publik, kami berupaya memperkuat partisipasi masyarakat dalam pengawasan dan mendorong sistem peradilan yang lebih adil bagi manusia dan lingkungan hidup.',
     ],
 
     'monitor' => [
         'title' => 'Apa yang Kami Pantau?',
-        'intro' => 'greendefender melakukan pemantauan perkara dan dokumentasi kasus dugaan pelanggaran hukum yang berkaitan dengan kejahatan di sektor sumber daya alam dan lingkungan hidup yang mencakup:',
+        'intro' => 'Greendefender melakukan pemantauan perkara dan dokumentasi kasus dugaan pelanggaran hukum yang berkaitan dengan kejahatan di sektor sumber daya alam dan lingkungan hidup yang mencakup:',
         'items' => [
             ['title' => 'Kehutanan dan deforestasi', 'text' => 'Pembalakan liar, perambahan kawasan hutan, kebakaran hutan dan lahan, serta perusakan ekosistem.'],
             ['title' => 'Pertambangan dan energi', 'text' => 'Pertambangan tanpa izin, pelanggaran hukum dalam kegiatan pertambangan, dan dampak lingkungan dari aktivitas ekstraktif.'],
@@ -54,7 +54,7 @@ return [
 
     'beneficiaries' => [
         'title' => 'Siapa Penerima Manfaat?',
-        'intro' => 'greendefender ditujukan bagi siapa pun yang membutuhkan informasi dan data penegakan hukum sumber daya alam dan lingkungan hidup, khususnya:',
+        'intro' => 'Greendefender ditujukan bagi siapa pun yang membutuhkan informasi dan data penegakan hukum sumber daya alam dan lingkungan hidup, khususnya:',
         'items' => [
             ['title' => 'Masyarakat dan komunitas terdampak', 'text' => 'untuk mengawasi penanganan perkara yang berkaitan dengan lingkungan hidup dan ruang hidup mereka.'],
             ['title' => 'Organisasi masyarakat sipil', 'text' => 'untuk memperkuat kerja advokasi dan pengawasan penegakan hukum.'],
@@ -68,9 +68,10 @@ return [
     'content' => [
         'title' => 'Tentang Konten',
         'terms_title' => 'Terminologi',
+        // Dipakai juga sebagai keterangan mode di dashboard publik.
         'terms' => [
-            ['term' => 'Kasus', 'text' => 'Suatu kejadian, atau masalah nyata yang terjadi di lapangan dan memerlukan perhatian, analisis, atau penanganan.'],
-            ['term' => 'Perkara', 'text' => 'Suatu masalah, atau sengketa, yang secara formal masuk ke dalam ranah hukum yang sudah mendapat putusan pengadilan.'],
+            'kasus' => ['term' => 'Kasus', 'text' => 'Suatu kejadian, atau masalah nyata yang terjadi di lapangan dan memerlukan perhatian, analisis, atau penanganan.'],
+            'perkara' => ['term' => 'Perkara', 'text' => 'Suatu masalah, atau sengketa, yang secara formal masuk ke dalam ranah hukum yang sudah mendapat putusan pengadilan.'],
         ],
         'sources' => [
             'title' => 'Sumber dan Metode',
@@ -87,10 +88,6 @@ return [
         'limits' => [
             'title' => 'Batasan Pemantauan',
             'text' => 'Sebagai platform pemantauan oleh masyarakat sipil, greendefender tentu memiliki keterbatasan untuk dapat menjangkau seluruh laporan kasus dan perkara di Indonesia. Informasi perkara yang kami himpun sebagai data primer bergantung pada kebaruan dan data yang dipublikasikan dalam situs SIPP maupun Direktori Putusan Mahkamah Agung. Ketersediaan pemberitaan media sebagai sumber sekunder juga jadi keterbatasan kami dalam menjangkau informasi lengkap dari pelbagai wilayah. Begitu pula pelibatan jaringan organisasi di tingkat daerah dan nasional dalam pemantauan mungkin belum dapat menjangkau semua.',
-        ],
-        'articles' => [
-            'title' => 'Artikel dan Berita',
-            'text' => 'Halaman artikel dan berita pada platform ini dapat memuat konten yang disematkan dari sumber lain berupa artikel berita, video, gambar atau konten lain dari situs website pihak ketiga (eksternal).',
         ],
         'disclaimer' => [
             'title' => 'Disclaimer',
