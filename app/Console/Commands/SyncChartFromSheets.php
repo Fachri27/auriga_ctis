@@ -17,6 +17,12 @@ class SyncChartFromSheets extends Command
 
     private array $headerMap = [];
 
+    /** Dataset yang diisi dari tab DashboardData. */
+    private const DASHBOARD_DATASETS = [
+        'Perkara per Tahun', 'Klasifikasi Perkara', 'Vonis Putusan', 'Rata-rata Vonis Penjara',
+        'Terdakwa per Tahun', 'Pengadilan per Tahun', 'Pengadilan',
+    ];
+
     public function handle(GoogleSheetsService $sheets): int
     {
         $sheetNames = $this->option('sheets');
@@ -56,32 +62,52 @@ class SyncChartFromSheets extends Command
 
         $this->info('Raw rows: ' . count($rows));
 
-        $this->aggregateAndSync($rows);
+        $dashboardRows = $this->readSheet($sheets, $availableSheets, 'DashboardData');
+        $kpiRows = $this->readSheet($sheets, $availableSheets, 'Dashboard');
 
-        $this->importRawCases($rows);
+        // Semua tab dibaca dulu, lalu database diganti dalam satu transaksi: selama sync situs tetap
+        // menampilkan data lama, dan kalau ada yang gagal tidak ada yang berubah.
+        try {
+            DB::transaction(function () use ($rows, $dashboardRows, $kpiRows) {
+                // Dataset dari tab yang gagal dibaca dibiarkan apa adanya.
+                $keep = array_merge($dashboardRows === null ? self::DASHBOARD_DATASETS : [], $kpiRows === null ? ['KPI'] : []);
+                ChartDataset::whereNotIn('dataset', $keep)->delete();
 
-        if (in_array('DashboardData', $availableSheets)) {
-            $this->line("\nReading DashboardData sheet...");
-            try {
-                $dashboardRows = $sheets->getData("DashboardData!A1:Z");
-                // Satu transaksi: kalau satu baris gagal, data chart lama tetap utuh.
-                DB::transaction(fn () => $this->syncDashboardData($dashboardRows));
-            } catch (\Throwable $e) {
-                $this->warn("Failed to read DashboardData: {$e->getMessage()}");
-            }
-        }
+                $this->aggregateAndSync($rows);
+                $this->importRawCases($rows);
 
-        if (in_array('Dashboard', $availableSheets)) {
-            $this->line("\nReading Dashboard sheet for KPIs...");
-            try {
-                $kpiRows = $sheets->getData("Dashboard!A1:Z");
-                $this->syncKPIs($kpiRows);
-            } catch (\Throwable $e) {
-                $this->warn("Failed to read Dashboard KPIs: {$e->getMessage()}");
-            }
+                if ($dashboardRows !== null) {
+                    $this->syncDashboardData($dashboardRows);
+                }
+                if ($kpiRows !== null) {
+                    $this->syncKPIs($kpiRows);
+                }
+            });
+        } catch (\Throwable $e) {
+            // Dicatat ke log juga, karena sync terjadwal dan tombol Sync di CMS berjalan tanpa layar.
+            report($e);
+            $this->error("Sync gagal, data lama tetap dipakai: {$e->getMessage()}");
+
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;
+    }
+
+    private function readSheet(GoogleSheetsService $sheets, array $available, string $name): ?array
+    {
+        if (! in_array($name, $available)) {
+            return null;
+        }
+
+        $this->line("Reading {$name} sheet...");
+        try {
+            return $sheets->getData("{$name}!A1:Z");
+        } catch (\Throwable $e) {
+            $this->warn("Failed to read {$name}: {$e->getMessage()}");
+
+            return null;
+        }
     }
 
     /**
@@ -114,7 +140,6 @@ class SyncChartFromSheets extends Command
 
     private function aggregateAndSync(array $rows): void
     {
-        ChartDataset::truncate();
         $datasets = [
             [
                 'name' => 'Perkara',
@@ -138,20 +163,21 @@ class SyncChartFromSheets extends Command
 
             $data = array_filter($rows, $ds['filter']);
 
+            // Label dipotong sesuai panjang kolom; label yang jadi sama (atau hanya beda huruf besar/kecil,
+            // yang bagi MySQL sama) digabung.
             $grouped = [];
 
             foreach ($data as $row) {
-                $key = trim($ds['groupBy']($row));
-                if (!$key || $key === '-' || $key === '') {
+                $label = trim($ds['groupBy']($row) ?? '');
+                if ($label === '' || $label === '-') {
                     continue;
                 }
+                $label = mb_substr($label, 0, 250);
+                $key = mb_strtolower($label);
 
                 $year = trim($this->col($row, 'Tahun') ?? '');
 
-                if (!isset($grouped[$key])) {
-                    $grouped[$key] = ['count' => 0, 'years' => []];
-                }
-
+                $grouped[$key] ??= ['label' => $label, 'count' => 0, 'years' => []];
                 $grouped[$key]['count']++;
                 if ($year !== '') {
                     $y = (int) $year;
@@ -159,29 +185,27 @@ class SyncChartFromSheets extends Command
                 }
             }
 
-            arsort($grouped);
-
-            $imported = 0;
-
-            foreach ($grouped as $label => $info) {
-                $shortLabel = mb_substr($label, 0, 250);
-
-                ChartDataset::updateOrCreate(
-                    ['dataset' => $ds['name'], 'label' => $shortLabel, 'year' => null],
-                    ['value' => $info['count']],
-                );
-
+            // Disimpan sekaligus per 500 baris: menyimpan satu per satu memakan waktu beberapa menit di server.
+            $now = now()->toDateTimeString();
+            $batch = [];
+            $flush = function () use (&$batch) {
+                ChartDataset::upsert($batch, ['dataset', 'label', 'year'], ['value', 'updated_at']);
+                $batch = [];
+            };
+            foreach ($grouped as $info) {
+                $batch[] = ['dataset' => $ds['name'], 'label' => $info['label'], 'year' => null, 'value' => $info['count'], 'created_at' => $now, 'updated_at' => $now];
                 foreach ($info['years'] as $year => $count) {
-                    ChartDataset::updateOrCreate(
-                        ['dataset' => $ds['name'], 'label' => $shortLabel, 'year' => (int) $year],
-                        ['value' => $count],
-                    );
+                    $batch[] = ['dataset' => $ds['name'], 'label' => $info['label'], 'year' => $year, 'value' => $count, 'created_at' => $now, 'updated_at' => $now];
                 }
-
-                $imported++;
+                if (count($batch) >= 500) {
+                    $flush();
+                }
+            }
+            if ($batch) {
+                $flush();
             }
 
-            $this->info("    {$imported} labels, total " . count($data) . " rows processed.");
+            $this->info('    ' . count($grouped) . ' labels, total ' . count($data) . ' rows processed.');
         }
     }
 
@@ -212,7 +236,8 @@ class SyncChartFromSheets extends Command
         $allColumns = array_values($colMap);
         $decimalCols = ['vonis_penjara', 'subsidair', 'vonis_denda', 'biaya_perkara'];
 
-        RawCase::truncate();
+        // delete(), bukan truncate(): truncate di MySQL langsung meng-commit transaksi sync.
+        RawCase::query()->delete();
         $chunks = array_chunk($rows, 500);
         $total = 0;
         foreach ($chunks as $chunk) {

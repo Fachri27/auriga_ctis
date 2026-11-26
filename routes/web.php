@@ -361,8 +361,15 @@ Route::middleware(['auth', 'role:admin|cso'])->group(function () {
     Route::get('/cms/charts/upload', \App\Livewire\Charts\CsvUpload::class)->name('charts.upload');
     Route::get('/cms/charts', \App\Livewire\Charts\ChartsDashboard::class)->name('charts.dashboard');
     Route::get('/cms/charts/sync', function () {
-        \Illuminate\Support\Facades\Artisan::queue('chart:sync');
-        return redirect()->route('charts.dashboard')->with('success', 'Sync dijadwalkan, data akan diperbarui di background.');
+        // Dijalankan langsung (beberapa detik), bukan lewat antrean: hasilnya terlihat saat itu juga
+        // dan tidak bergantung pada queue worker.
+        set_time_limit(300);
+        $failed = \Illuminate\Support\Facades\Artisan::call('chart:sync') !== 0;
+        $lines = array_values(array_filter(array_map('trim', explode("\n", \Illuminate\Support\Facades\Artisan::output()))));
+
+        return redirect()->route('charts.dashboard')->with($failed
+            ? ['error' => end($lines) ?: 'Sync gagal, data lama tetap dipakai.']
+            : ['success' => 'Sync selesai: '.number_format(\App\Models\RawCase::count(), 0, ',', '.').' perkara dari spreadsheet.']);
     })->name('charts.sync');
 
 
