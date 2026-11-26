@@ -15,8 +15,23 @@ use Illuminate\Support\Str;
  */
 class PerkaraStatistics
 {
-    /** Rentang tahun yang ditampilkan, sama dengan statistik perkara di Beranda. */
-    public const YEARS = [2019, 2025];
+    /** Tahun pertama indeksasi putusan. */
+    public const FIRST_YEAR = 2019;
+
+    /**
+     * Rentang tahun yang ditampilkan (juga di Beranda): 2019 sampai tahun terbaru di data, sama seperti tab
+     * Dashboard spreadsheet dengan filter tahun "Semua". Tahun setelah tahun berjalan dianggap salah ketik.
+     *
+     * @return array{0: int, 1: int}
+     */
+    public static function years(): array
+    {
+        return once(function () {
+            $latest = (int) RawCase::where('tahun', '<=', now()->year)->max('tahun');
+
+            return [self::FIRST_YEAR, max(self::FIRST_YEAR, $latest ?: now()->year)];
+        });
+    }
 
     /** Ejaan kabupaten di data putusan yang berbeda dari nama resminya. */
     private const REGENCY_ALIASES = [
@@ -52,7 +67,7 @@ class PerkaraStatistics
 
     public function filterOptions(): array
     {
-        $base = fn () => RawCase::inPeriod(self::YEARS);
+        $base = fn () => RawCase::inPeriod(self::years());
 
         return [
             'tahun' => $base()->whereNotNull('tahun')->distinct()->orderByDesc('tahun')->pluck('tahun'),
@@ -243,7 +258,7 @@ class PerkaraStatistics
      */
     private function doubtfulRegencies(): array
     {
-        return RawCase::whereBetween('tahun', self::YEARS)
+        return RawCase::whereBetween('tahun', self::years())
             ->whereNotNull('kabupaten')->where('kabupaten', '<>', '')
             ->selectRaw('kabupaten, COUNT(DISTINCT pengadilan) as courts')
             ->groupBy('kabupaten')
@@ -253,7 +268,7 @@ class PerkaraStatistics
 
     private function query(array $filters, array $ignore = []): Builder
     {
-        $query = RawCase::query()->inPeriod(self::YEARS);
+        $query = RawCase::query()->inPeriod(self::years());
 
         if ($filters['tahun'] && ! in_array('tahun', $ignore, true)) {
             $query->where('tahun', (int) $filters['tahun']);

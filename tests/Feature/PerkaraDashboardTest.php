@@ -126,6 +126,28 @@ class PerkaraDashboardTest extends TestCase
             ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->firstWhere('title', 'Perkara')['display'] === '2');
     }
 
+    public function test_period_runs_to_the_latest_year_in_the_data(): void
+    {
+        // Tab Dashboard spreadsheet (filter tahun "Semua") ikut menghitung perkara tahun terbaru;
+        // tahun setelah tahun berjalan dianggap salah ketik.
+        foreach ([now()->year, now()->year + 5] as $i => $tahun) {
+            DB::table('raw_cases')->insert([
+                'no_perkara' => "1{$i}/Pid.B/{$tahun}/PN", 'pengadilan' => "PN 1{$i}", 'klasifikasi_clean' => 'MINERBA', 'tahun' => $tahun,
+                'pulau' => 'Kalimantan', 'subjek_hukum' => 'Perorangan', 'vonis_putusan' => 'Bersalah', 'jumlah_terdakwa' => 1,
+                'created_at' => now(), 'updated_at' => now(),
+            ]);
+        }
+
+        $this->get('/id/dashboard?mode=perkara')
+            ->assertOk()
+            ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->firstWhere('title', 'Perkara')['display'] === '4')
+            ->assertViewHas('filterOptions', fn ($o) => (int) $o['tahun']->first() === now()->year);
+
+        $this->getJson('/id')
+            ->assertOk()
+            ->assertJsonPath('kpiData.0', ['title' => 'Perkara', 'display' => '4']);
+    }
+
     public function test_sentence_charts_are_hidden_without_sentence_data(): void
     {
         $this->get('/id/dashboard?mode=perkara')

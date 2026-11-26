@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\{Cache, DB};
 use Illuminate\Http\Request;
 use App\Models\{AboutPage, Artikel, CaseModel, Category, ChartDataset, RawCase};
-use App\Services\ReverseGeocoder;
+use App\Services\{PerkaraStatistics, ReverseGeocoder};
 
 class HomeController extends Controller
 {
@@ -197,7 +197,7 @@ class HomeController extends Controller
         $hasFilters = $filterTahun || $filterKlasifikasi || $filterPulau;
 
         // Rentang tahun perkara; RawCase::inPeriod() juga menghitung baris tanpa tahun, seperti tab Dashboard spreadsheet.
-        $yearRange = [2019, 2025];
+        $yearRange = PerkaraStatistics::years();
         $filterOptions = [
             'tahun'        => RawCase::whereNotNull('tahun')->whereBetween('tahun', $yearRange)->distinct()->orderBy('tahun', 'desc')->pluck('tahun'),
             'klasifikasi'  => RawCase::inPeriod($yearRange)->whereNotNull('klasifikasi_clean')->distinct()->orderBy('klasifikasi_clean')->pluck('klasifikasi_clean'),
