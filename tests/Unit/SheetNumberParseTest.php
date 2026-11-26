@@ -38,4 +38,16 @@ class SheetNumberParseTest extends TestCase
     {
         $this->assertNull(SyncChartFromSheets::parseNumber('-'));
     }
+
+    public function test_long_chart_label_is_capped_to_column_length(): void
+    {
+        // Sel "Vonis Putusan" bisa berisi teks putusan sela yang panjang;
+        // kolom chart_data.label hanya 255 karakter.
+        $label = SyncChartFromSheets::chartLabel('  Putusan sela: '.str_repeat('dakwaan prematur ', 30));
+
+        $this->assertSame(255, mb_strlen($label));
+        $this->assertStringStartsWith('Putusan sela:', $label);
+        $this->assertStringEndsWith('…', $label);
+        $this->assertSame('Penjara', SyncChartFromSheets::chartLabel(' Penjara '));
+    }
 }

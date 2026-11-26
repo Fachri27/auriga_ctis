@@ -6,6 +6,7 @@ use App\Models\ChartDataset;
 use App\Models\RawCase;
 use App\Services\GoogleSheetsService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class SyncChartFromSheets extends Command
 {
@@ -63,7 +64,8 @@ class SyncChartFromSheets extends Command
             $this->line("\nReading DashboardData sheet...");
             try {
                 $dashboardRows = $sheets->getData("DashboardData!A1:Z");
-                $this->syncDashboardData($dashboardRows);
+                // Satu transaksi: kalau satu baris gagal, data chart lama tetap utuh.
+                DB::transaction(fn () => $this->syncDashboardData($dashboardRows));
             } catch (\Throwable $e) {
                 $this->warn("Failed to read DashboardData: {$e->getMessage()}");
             }
@@ -265,6 +267,17 @@ class SyncChartFromSheets extends Command
         return (float) str_replace(',', '', $number);
     }
 
+    /**
+     * Kolom chart_data.label hanya 255 karakter, sedangkan sel spreadsheet bisa
+     * berisi teks putusan panjang. Teks yang kepanjangan dipotong dan diberi "…".
+     */
+    public static function chartLabel(string $value): string
+    {
+        $value = trim($value);
+
+        return mb_strlen($value) > 255 ? rtrim(mb_substr($value, 0, 254)) . '…' : $value;
+    }
+
     private function syncDashboardData(array $rows): void
     {
         if (empty($rows)) {
@@ -286,7 +299,7 @@ class SyncChartFromSheets extends Command
             if ($tahun === '' || $jumlah === '' || !is_numeric(trim($jumlah))) continue;
             ChartDataset::create([
                 'dataset' => 'Perkara per Tahun',
-                'label' => trim($tahun),
+                'label' => self::chartLabel($tahun),
                 'year' => (int) $tahun,
                 'value' => (int) $jumlah,
             ]);
@@ -306,7 +319,7 @@ class SyncChartFromSheets extends Command
             if ($klasifikasi === '' || $jumlah === '' || !is_numeric(trim($jumlah))) continue;
             ChartDataset::create([
                 'dataset' => 'Klasifikasi Perkara',
-                'label' => trim($klasifikasi),
+                'label' => self::chartLabel($klasifikasi),
                 'year' => null,
                 'value' => (int) $jumlah,
             ]);
@@ -326,7 +339,7 @@ class SyncChartFromSheets extends Command
             if ($vonis === '' || $jumlah === '' || !is_numeric(trim($jumlah))) continue;
             ChartDataset::create([
                 'dataset' => 'Vonis Putusan',
-                'label' => trim($vonis),
+                'label' => self::chartLabel($vonis),
                 'year' => null,
                 'value' => (int) $jumlah,
             ]);
@@ -346,7 +359,7 @@ class SyncChartFromSheets extends Command
             if ($klasifikasi === '' || $rata === '' || !is_numeric(trim($rata))) continue;
             ChartDataset::create([
                 'dataset' => 'Rata-rata Vonis Penjara',
-                'label' => trim($klasifikasi),
+                'label' => self::chartLabel($klasifikasi),
                 'year' => null,
                 'value' => (float) $rata,
             ]);
@@ -366,7 +379,7 @@ class SyncChartFromSheets extends Command
             if ($tahun === '' || $jumlah === '' || !is_numeric(trim($jumlah))) continue;
             ChartDataset::create([
                 'dataset' => 'Terdakwa per Tahun',
-                'label' => trim($tahun),
+                'label' => self::chartLabel($tahun),
                 'year' => (int) $tahun,
                 'value' => (int) $jumlah,
             ]);
@@ -386,7 +399,7 @@ class SyncChartFromSheets extends Command
             if ($tahun === '' || $jumlah === '' || !is_numeric(trim($jumlah))) continue;
             ChartDataset::create([
                 'dataset' => 'Pengadilan per Tahun',
-                'label' => trim($tahun),
+                'label' => self::chartLabel($tahun),
                 'year' => (int) $tahun,
                 'value' => (int) $jumlah,
             ]);
@@ -405,7 +418,7 @@ class SyncChartFromSheets extends Command
             $pengadilan = $row[19] ?? '';
             $jumlah = $row[20] ?? '';
             if ($tahun === '' || $pengadilan === '' || $jumlah === '' || !is_numeric(trim($jumlah))) continue;
-            $shortLabel = mb_substr(trim($pengadilan), 0, 250);
+            $shortLabel = self::chartLabel($pengadilan);
             ChartDataset::create([
                 'dataset' => 'Pengadilan',
                 'label' => $shortLabel,
