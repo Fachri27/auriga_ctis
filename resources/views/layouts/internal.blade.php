@@ -260,7 +260,7 @@
 
     @livewireScripts
     <script src="/js/tinymce/tinymce.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.7.0/dist/js/tom-select.complete.min.js"></script>
 
     @stack('scripts')
 </body>
