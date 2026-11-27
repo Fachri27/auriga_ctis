@@ -68,7 +68,7 @@ class CaseKualifikasiGuessTest extends TestCase
         $filled = $this->case('CASE-ADMIN', $open, 'administrasi', 'Gugatan Warga', 'Tersangka ditahan.');
 
         $this->artisan('case:isi-kualifikasi', ['--dry-run' => true])
-            ->expectsOutputToContain('2 kasus akan diisi (dry run, belum disimpan): 1 Pidana, 1 Perdata, 0 Administrasi.')
+            ->expectsOutputToContain('2 kasus akan diubah (dry run, belum disimpan): 0 dari bagian Kualifikasi Perkara di dokumen, 2 tebakan.')
             ->assertSuccessful();
         $this->assertNull($empty->fresh()->kualifikasi);
 
@@ -80,8 +80,70 @@ class CaseKualifikasiGuessTest extends TestCase
         $this->assertSame('administrasi', $filled->fresh()->kualifikasi);
 
         $this->artisan('case:isi-kualifikasi')
-            ->expectsOutputToContain('0 kasus diisi')
+            ->expectsOutputToContain('0 kasus diubah')
             ->assertSuccessful();
+    }
+
+    public function test_kualifikasi_written_in_case_text_wins_and_is_removed(): void
+    {
+        // Dokumen berjudul "Kualifikasi Perkara" dulu belum dikenali: bagiannya masuk ke Perkembangan (ID & EN),
+        // lalu kualifikasinya ditebak perdata dan tahap Vonis tetap memakai jalur pidana/perdata.
+        $this->seed(StatusSeeder::class);
+        $case = CaseModel::create(['case_number' => 'CASE-WZOEZ', 'status_id' => Status::findByKey('vonis')->id, 'kualifikasi' => 'perdata']);
+        CaseTranslation::create(['case_id' => $case->id, 'locale' => 'id', 'title' => 'Tumpahan Minyak di Teluk Balikpapan',
+            'perkembangan' => '<p>KLHK menjatuhkan sanksi administratif.</p><p><strong>Kualifikasi Perkara</strong></p><p><strong>Administrasi</strong></p>',
+            'keterangan_tahapan' => ['vonis' => 'Pertamina dijatuhi sanksi administratif.']]);
+        CaseTranslation::create(['case_id' => $case->id, 'locale' => 'en', 'title' => 'Oil Spill in Balikpapan Bay',
+            'perkembangan' => '<p>KLHK imposed administrative sanctions.</p><p><strong>Case Classification</strong></p><p><strong>Administrative</strong></p>',
+            'keterangan_tahapan' => ['vonis' => 'Pertamina was given an administrative sanction.']]);
+        $other = $this->case('CASE-NAGOP', Status::findByKey('trial')->id, 'pidana', 'Gugatan Kebakaran Lahan',
+            'Gugatan dikabulkan.</p><p><strong>Kualifikasi Perkara</strong></p><p>Perdata (gugatan oleh pemerintah)</p><p><strong>Status</strong></p><p>Terbuka');
+
+        $this->artisan('case:isi-kualifikasi', ['--dry-run' => true])
+            ->expectsOutputToContain('2 kasus akan diubah (dry run, belum disimpan): 2 dari bagian Kualifikasi Perkara di dokumen, 0 tebakan.')
+            ->assertSuccessful();
+        $this->assertSame('perdata', $case->fresh()->kualifikasi);
+
+        $this->artisan('case:isi-kualifikasi')->assertSuccessful();
+
+        $case->refresh();
+        $this->assertSame('administrasi', $case->kualifikasi);
+        // Vonis bukan tahap jalur administrasi: keterangannya pindah ke Sanksi dan status ikut.
+        $this->assertSame('sanksi', $case->status->key);
+        $id = $case->translations()->where('locale', 'id')->first();
+        $en = $case->translations()->where('locale', 'en')->first();
+        $this->assertSame(['sanksi' => 'Pertamina dijatuhi sanksi administratif.'], $id->keterangan_tahapan);
+        $this->assertSame(['sanksi' => 'Pertamina was given an administrative sanction.'], $en->keterangan_tahapan);
+        $this->assertSame('<p>KLHK menjatuhkan sanksi administratif.</p>', $id->perkembangan);
+        $this->assertSame('<p>KLHK imposed administrative sanctions.</p>', $en->perkembangan);
+
+        // Nilai panjang dikenali dari kata pertamanya; paragraf setelahnya tidak ikut terhapus.
+        $this->assertSame('perdata', $other->fresh()->kualifikasi);
+        $this->assertSame('trial', $other->fresh()->status->key);
+        $this->assertSame('<p>Gugatan dikabulkan.</p><p><strong>Status</strong></p><p>Terbuka</p>',
+            $other->translations()->where('locale', 'id')->value('description'));
+
+        $this->artisan('case:isi-kualifikasi')->expectsOutputToContain('0 kasus diubah')->assertSuccessful();
+    }
+
+    public function test_english_notes_follow_the_track_after_sync(): void
+    {
+        // case:sync-tahapan sudah mengisi kualifikasi & keterangan ID dari dokumen; keterangan EN masih jalur lama.
+        $this->seed(StatusSeeder::class);
+        $case = CaseModel::create(['case_number' => 'CASE-SYNCD', 'status_id' => Status::findByKey('sanksi')->id, 'kualifikasi' => 'administrasi']);
+        CaseTranslation::create(['case_id' => $case->id, 'locale' => 'id', 'title' => 'Tumpahan Minyak',
+            'perkembangan' => '<p>Sanksi.</p><p><strong>Kualifikasi Perkara</strong></p><p><strong>Administrasi</strong></p>',
+            'keterangan_tahapan' => ['sanksi' => 'Sanksi administratif.']]);
+        CaseTranslation::create(['case_id' => $case->id, 'locale' => 'en', 'title' => 'Oil Spill',
+            'perkembangan' => '<p>Sanctions.</p><p><strong>Case Classification</strong></p><p><strong>Administrative</strong></p>',
+            'keterangan_tahapan' => ['vonis' => 'Administrative sanction.']]);
+
+        $this->artisan('case:isi-kualifikasi')->assertSuccessful();
+
+        $en = $case->translations()->where('locale', 'en')->first();
+        $this->assertSame(['sanksi' => 'Administrative sanction.'], $en->keterangan_tahapan);
+        $this->assertSame('<p>Sanctions.</p>', $en->perkembangan);
+        $this->assertSame('sanksi', $case->fresh()->status->key);
     }
 
     private function case(string $number, int $statusId, ?string $kualifikasi, string $title, string $description): CaseModel

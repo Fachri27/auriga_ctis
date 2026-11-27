@@ -200,9 +200,13 @@ class CaseKualifikasiTest extends TestCase
 
         Livewire::actingAs($user)->test(CaseForm::class, ['caseId' => $case->id])
             ->assertSet('tahapan_id.gugatan', "Gugatan didaftarkan 12 Januari 2026 di PN Jakarta Pusat.\nNomor perkara 123/Pdt.G/2026.")
-            ->set('tahapan_id.gugatan', str_repeat('a', 501))
+            ->set('tahapan_id.gugatan', str_repeat('Keterangan panjang. ', 75))
             ->call('save')
-            ->assertHasErrors(['tahapan_id.gugatan' => 'max']);
+            ->assertHasNoErrors();
+
+        // Keterangan tahapan tidak dibatasi 500 karakter lagi.
+        $this->assertSame(trim(str_repeat('Keterangan panjang. ', 75)),
+            $case->translations()->where('locale', 'id')->first()->keterangan_tahapan['gugatan']);
     }
 
     public function test_stage_notes_follow_the_selected_kualifikasi_in_the_form(): void

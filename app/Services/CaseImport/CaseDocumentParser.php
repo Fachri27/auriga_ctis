@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
  *   Label: nilai            ← Pengungkap/Pelapor/Penggugat, Terlapor, Penyidik, Lokasi, Tahun/Periode, Status
  *   Kronologi               ← judul bagian, diikuti paragraf isinya
  *   Perkembangan / Dugaan Permasalahan / Lesson Learning / Status / Sumber
- *   Kualifikasi Kasus       ← diikuti dropdown/teks Pidana, Perdata, atau Administrasi
+ *   Kualifikasi Kasus       ← diikuti dropdown/teks Pidana, Perdata, atau Administrasi (juga "Kualifikasi Perkara")
  *   Tahapan Kasus           ← tabel dua kolom: nama tahapan | keterangan (lihat CaseStages::fromDocument())
  */
 class CaseDocumentParser
@@ -31,16 +31,15 @@ class CaseDocumentParser
         'sumber' => 'sumber',
         'referensi' => 'sumber',
         'kualifikasi kasus' => 'kualifikasi',
+        'kualifikasi perkara' => 'kualifikasi',
         'kualifikasi' => 'kualifikasi',
         'tahapan kasus' => 'tahapan',
+        'tahapan perkara' => 'tahapan',
         'tahapan' => 'tahapan',
     ];
 
     /** Bagian yang diolah menjadi data terstruktur, bukan teks; isi lain di dalamnya kembali ke bagian sebelumnya. */
     private const STRUCTURED = ['kualifikasi', 'tahapan'];
-
-    /** Batas keterangan tahapan, sama dengan form CMS kasus. */
-    private const STAGE_NOTE_MAX = 500;
 
     /** Label "X: nilai" di kepala dokumen → field */
     private const LABELS = [
@@ -58,6 +57,7 @@ class CaseDocumentParser
         'periode' => 'tahun',
         'status' => 'status',
         'kualifikasi kasus' => 'kualifikasi',
+        'kualifikasi perkara' => 'kualifikasi',
         'kualifikasi' => 'kualifikasi',
     ];
 
@@ -139,12 +139,6 @@ class CaseDocumentParser
         foreach ($stages['skipped'] as $label) {
             $warnings[] = "Keterangan tahap \"{$label}\" tidak disimpan: tahap ini tidak ada di halaman publik"
                 .($kualifikasi ? ' untuk kualifikasi '.CaseModel::KUALIFIKASI[$kualifikasi] : '').'.';
-        }
-        foreach ($stages['notes'] as $key => $note) {
-            if (mb_strlen($note) > self::STAGE_NOTE_MAX) {
-                $stages['notes'][$key] = Str::limit($note, self::STAGE_NOTE_MAX - 3);
-                $warnings[] = "Keterangan tahap \"{$key}\" lebih dari ".self::STAGE_NOTE_MAX.' karakter dan dipotong.';
-            }
         }
         $structured = array_intersect(self::STRUCTURED, array_keys($sections));
         $sections = array_diff_key($sections, array_flip(self::STRUCTURED));

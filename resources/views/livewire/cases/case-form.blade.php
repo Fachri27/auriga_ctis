@@ -175,6 +175,17 @@
                 </div>
             </div>
 
+            <!-- Lokasi (teks) -->
+            <div class="mb-4">
+                <label class="text-xs font-medium text-[color:var(--muted)] mb-1.5 block">Lokasi</label>
+                <input type="text" wire:model="lokasi" maxlength="500" class="cms-input w-full"
+                    placeholder="Mis. Teluk Balikpapan, Kalimantan Timur">
+                <p class="text-xs mt-1" style="color:var(--muted)">Ditampilkan di halaman kasus apa adanya. Titik di peta di bawah hanya untuk peta.</p>
+                @error('lokasi')
+                    <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Map + search -->
             <div x-data="mapComponent(@entangle('lat').live, @entangle('lng').live)" x-init="initMap()">
                 <div wire:ignore id="map" class="w-full h-100 rounded border border-[color:var(--hairline)]"></div>
@@ -311,9 +322,9 @@
                             <span x-show="lang === 'id'">{{ $stage['label'] }}</span>
                             <span x-show="lang === 'en'">{{ $stagesEn[$step]['label'] }}</span>
                         </label>
-                        <textarea x-show="lang === 'id'" wire:model="tahapan_id.{{ $stage['key'] }}" rows="2" maxlength="500"
+                        <textarea x-show="lang === 'id'" wire:model="tahapan_id.{{ $stage['key'] }}" rows="3"
                             class="cms-input w-full" placeholder="{{ $stage['desc'] }}"></textarea>
-                        <textarea x-show="lang === 'en'" wire:model="tahapan_en.{{ $stage['key'] }}" rows="2" maxlength="500"
+                        <textarea x-show="lang === 'en'" wire:model="tahapan_en.{{ $stage['key'] }}" rows="3"
                             class="cms-input w-full" placeholder="{{ $stagesEn[$step]['desc'] }}"></textarea>
                         @error('tahapan_id.' . $stage['key'])
                             <p class="text-sm mt-1" style="color:var(--danger)">{{ $message }}</p>

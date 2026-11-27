@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 /**
  * Kasus yang sudah diimpor tidak ikut dibaca ulang di halaman impor. Perintah ini membaca ulang dokumen Google Drive-nya
  * dan menerapkan bagian "Kualifikasi Kasus" dan "Tahapan Kasus": kualifikasi, keterangan tahapan (ID), dan status.
- * Dokumen tanpa kedua bagian itu (format lama) dilewati; isi kasus lain tidak diubah.
+ * Teks "Lokasi:" dokumen juga diisikan ke kasus yang lokasinya masih kosong (kasus impor lama belum menyimpannya).
+ * Dokumen tanpa bagian kualifikasi/tahapan (format lama) hanya diambil lokasinya; isi kasus lain tidak diubah.
  */
 class SyncCaseStagesFromDocuments extends Command
 {
@@ -19,7 +20,7 @@ class SyncCaseStagesFromDocuments extends Command
         {--dry-run : Tampilkan perubahan tanpa menyimpan}
         {--case=* : Nomor kasus tertentu (bawaan: semua kasus hasil impor Google Drive)}';
 
-    protected $description = 'Perbarui kualifikasi, keterangan tahapan, dan status kasus hasil impor dari dokumen Google Drive-nya';
+    protected $description = 'Perbarui kualifikasi, keterangan tahapan, status, dan lokasi kasus hasil impor dari dokumen Google Drive-nya';
 
     public function handle(GoogleDriveService $drive, DocxReader $reader, CaseDocumentParser $parser): int
     {
@@ -32,6 +33,7 @@ class SyncCaseStagesFromDocuments extends Command
         $rows = [];
         $oldFormat = 0;
         $failed = 0;
+        $locations = 0;
 
         foreach ($cases as $case) {
             $fileId = Str::after($case->source_ref, 'gdrive:');
@@ -43,6 +45,13 @@ class SyncCaseStagesFromDocuments extends Command
                 $this->warn("{$case->case_number}: gagal dibaca ({$e->getMessage()})");
 
                 continue;
+            }
+
+            if ($case->lokasi === null && $parsed['lokasi'] !== null) {
+                $locations++;
+                if (! $this->option('dry-run')) {
+                    $case->update(['lokasi' => mb_substr($parsed['lokasi'], 0, 500)]);
+                }
             }
 
             if (! array_intersect(['kualifikasi', 'tahapan'], $parsed['sections'])) {
@@ -90,6 +99,7 @@ class SyncCaseStagesFromDocuments extends Command
             '%d dokumen berformat baru%s, %d format lama (dilewati), %d gagal dibaca.',
             count($rows), $this->option('dry-run') ? ' (dry run, belum disimpan)' : '', $oldFormat, $failed,
         ));
+        $this->info("{$locations} kasus ".($this->option('dry-run') ? 'akan diisi' : 'diisi').' lokasinya dari teks "Lokasi:" dokumen.');
 
         return $failed ? self::FAILURE : self::SUCCESS;
     }

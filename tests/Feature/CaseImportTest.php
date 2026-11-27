@@ -502,7 +502,7 @@ class CaseImportTest extends TestCase
             ->assertCount('rows', 1)
             ->assertSet('rows.0.title', 'Kasus Upload')
             ->assertSet('rows.0.selected', true)
-            ->assertSee('Lokasi tidak ditemukan')
+            ->assertSee('Titik peta tidak ditemukan otomatis')
             ->assertSee('Atur titik')
             ->assertSee('Belum ada titik');
     }

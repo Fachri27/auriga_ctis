@@ -10,7 +10,7 @@
         'Bukti'               => !empty($case->bukti) && count($case->bukti) > 0,
         'Pelapor'             => !empty($case->pelapor),
         'Pelaku'              => $actors->isNotEmpty(),
-        'Lokasi'              => !empty($location['province']),
+        'Lokasi'              => !empty($case->lokasi) || !empty($location['province']),
     ];
     $completeCount = collect($completeness)->filter()->count();
     $completePct   = round(($completeCount / count($completeness)) * 100);
@@ -209,7 +209,7 @@
             {{-- facts strip --}}
             <div class="px-5 py-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-2.5 text-xs">
                 <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Tanggal</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->event_date ?? '—' }}</p></div>
-                <div class="col-span-2"><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Lokasi</p><p class="text-[color:var(--ink-2)] truncate">{{ implode(', ', array_filter([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])) ?: '—' }}</p></div>
+                <div class="col-span-2"><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Lokasi</p><p class="text-[color:var(--ink-2)] truncate" title="{{ $case->lokasi }}">{{ $case->lokasi ?: (implode(', ', array_filter([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])) ?: '—') }}</p></div>
                 <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Pelapor</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->pelapor ?? '—' }}</p></div>
                 <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Terlapor</p><p class="text-[color:var(--ink-2)] truncate">{{ $case->terlapor ?? '—' }}</p></div>                <div><p class="font-mono-c text-[9px] tracking-widest uppercase text-[color:var(--muted)] mb-0.5">Arsip</p><p class="text-[color:var(--ink-2)]"><span class="tabular-nums">{{ $docCount }}</span> dok · <span class="tabular-nums">{{ $actorCount }}</span> aktor · <span class="tabular-nums">{{ $buktiCount }}</span> bukti</p></div>
             </div>

@@ -19,6 +19,7 @@ class CaseModel extends Model
         'event_date',
         'latitude',
         'longitude',
+        'lokasi',
         'is_public',
         'published_at',
         'is_tasks_completed',

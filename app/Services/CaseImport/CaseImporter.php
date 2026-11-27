@@ -37,7 +37,7 @@ class CaseImporter
         if ($parsed['lokasi'] === null) {
             $parsed['warnings'][] = 'Tidak ada baris "Lokasi:"; atur titik peta lewat tombol "Atur titik".';
         } elseif ($location === null) {
-            $parsed['warnings'][] = 'Lokasi tidak ditemukan di data wilayah; atur titik peta lewat tombol "Atur titik".';
+            $parsed['warnings'][] = 'Titik peta tidak ditemukan otomatis; lokasi tetap tampil sesuai dokumen. Atur titik bila kasus perlu ditampilkan di peta.';
         }
 
         $category = $this->categories->guess($parsed);
@@ -124,6 +124,8 @@ class CaseImporter
             'event_date' => $eventDate,
             'latitude' => $lat,
             'longitude' => $lng,
+            // Teks "Lokasi:" dokumen apa adanya; halaman kasus menampilkannya, titik peta hanya untuk peta.
+            'lokasi' => isset($parsed['lokasi']) ? mb_substr($parsed['lokasi'], 0, 500) : null,
             // Hasil impor selalu draft: admin memeriksa lalu mempublikasikan dari halaman detail.
             'is_public' => false,
             'created_by' => auth()->id(),

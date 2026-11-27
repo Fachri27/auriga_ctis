@@ -28,6 +28,9 @@ class CaseForm extends Component
 
     public $event_date;
 
+    // Lokasi sesuai teks dokumen (ditampilkan di halaman kasus); titik peta disimpan terpisah di lat/lng.
+    public $lokasi;
+
     public $is_public = false;
 
     // Localization
@@ -95,6 +98,7 @@ class CaseForm extends Component
         "status_id" => "required",
         "kualifikasi" => "nullable|in:pidana,perdata,administrasi",
         "event_date" => "required|date",
+        "lokasi" => "nullable|string|max:500",
         "category_ids" => "required|array|min:1",
         "category_ids.*" => "integer|exists:categories,id",
         "bukti.*" => "file|max:10240|mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx,mp4,mov,avi,zip,rar",
@@ -102,8 +106,8 @@ class CaseForm extends Component
         "cover_caption_id" => "nullable|string|max:255",
         "cover_caption_en" => "nullable|string|max:255",
         "cover_credit" => "nullable|string|max:150",
-        "tahapan_id.*" => "nullable|string|max:500",
-        "tahapan_en.*" => "nullable|string|max:500",
+        "tahapan_id.*" => "nullable|string",
+        "tahapan_en.*" => "nullable|string",
     ];
 
     protected $messages = [
@@ -111,8 +115,6 @@ class CaseForm extends Component
         "cover.mimes" => "Foto sampul harus berupa gambar JPG, PNG, atau WebP.",
         "cover.max" => "Ukuran foto sampul maksimal 8 MB.",
         "cover.dimensions" => "Foto sampul minimal 800 × 450 piksel agar tetap tajam.",
-        "tahapan_id.*.max" => "Keterangan tahapan maksimal 500 karakter.",
-        "tahapan_en.*.max" => "Keterangan tahapan maksimal 500 karakter.",
     ];
 
     public function mount($caseId = null)
@@ -141,6 +143,7 @@ class CaseForm extends Component
                 "event_date" => $this->case->event_date,
                 "lat" => $this->case->latitude,
                 "lng" => $this->case->longitude,
+                "lokasi" => $this->case->lokasi,
                 "is_public" => $this->case->is_public,
                 // 'bukti' => $this->case->bukti,
                 "korban" => $this->case->korban,
@@ -419,6 +422,7 @@ class CaseForm extends Component
                 "verified_by" => Auth::id(),
                 "latitude" => $this->lat,
                 "longitude" => $this->lng,
+                "lokasi" => trim((string) $this->lokasi) ?: null,
                 "is_public" => $this->is_public,
                 "bukti" => null,
                 "korban" => $this->korban,
@@ -597,6 +601,7 @@ class CaseForm extends Component
             "event_date",
             "latitude",
             "longitude",
+            "lokasi",
             "is_public",
             "title_id",
             "summary_id",

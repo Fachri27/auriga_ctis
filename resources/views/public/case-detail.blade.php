@@ -3,11 +3,14 @@
 @php
     $trans = $case->translations->firstWhere('locale', app()->getLocale()) ?? $case->translations->first();
     $pageTitle = strip_tags($trans?->title ?? __('Detail Kasus')) . ' — greendefender';
+    // Lokasi sesuai teks dokumen/CMS; bila kosong, nama wilayah dari titik peta (reverse geocoding).
+    $placeText = $case->lokasi
+        ?: collect([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])->filter()->join(', ');
     $pageDescription = __('Kasus #:number — :title. Status: :status. Lokasi: :location. Lacak perkembangan kasus hukum lingkungan ini.', [
         'number' => $case->case_number ?? '',
         'title' => strip_tags($trans?->title ?? ''),
         'status' => __($case->status->name ?? '-'),
-        'location' => $location['province'] ?? '-',
+        'location' => $case->lokasi ?: ($location['province'] ?? '-'),
     ]);
     $ogTitle = $pageTitle;
     $ogDescription = $pageDescription;
@@ -257,9 +260,11 @@
                                 __('Nomor Kasus') => $case->case_number,
                                 __('Tanggal Kejadian') => $case->event_date ?? '-',
                                 __('Kategori') => $kategori ?: '-',
-                                __('Provinsi') => $location['province'] ?? '-',
-                                __('Kab/Kota') => $location['district'] ?? '-',
-                                __('Desa/Kelurahan') => $location['village'] ?? '-',
+                                ...($case->lokasi ? [__('Lokasi') => $case->lokasi] : [
+                                    __('Provinsi') => $location['province'] ?? '-',
+                                    __('Kab/Kota') => $location['district'] ?? '-',
+                                    __('Desa/Kelurahan') => $location['village'] ?? '-',
+                                ]),
                                 __('Dipublikasikan') => optional($case->published_at)->format('d M Y') ?? '-',
                                 __('Diperbarui') => optional($case->updated_at)->format('d M Y, H:i') . ' WIB',
                             ] as $label => $value)
@@ -271,10 +276,11 @@
                         </dl>
                     </section>
 
-                    {{-- peta --}}
-                    @if ($case->latitude && $case->longitude)
+                    {{-- peta (teks lokasi tetap tampil walau kasus belum punya titik peta) --}}
+                    @if (($case->latitude && $case->longitude) || $case->lokasi)
                         <section>
                             <h2 class="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-4">{{ __('Lokasi') }}</h2>
+                            @if ($case->latitude && $case->longitude)
                             <div class="relative">
                                 <div id="map" class="h-52 w-full border border-gray-200"></div>
                                 <button onclick="openMapModal()" aria-label="{{ __('Perbesar peta') }}" title="{{ __('Perbesar peta') }}"
@@ -284,8 +290,9 @@
                                     </svg>
                                 </button>
                             </div>
-                            <p class="mt-2 text-xs text-gray-500">
-                                {{ collect([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])->filter()->join(', ') ?: __('Lokasi tidak diketahui') }}
+                            @endif
+                            <p class="{{ $case->latitude && $case->longitude ? 'mt-2 text-xs text-gray-500' : 'text-sm text-gray-700' }}">
+                                {{ $placeText ?: __('Lokasi tidak diketahui') }}
                             </p>
                         </section>
                     @endif
@@ -468,7 +475,7 @@
                 <div class="bg-white w-full max-w-3xl flex flex-col border border-gray-900 shadow-2xl">
                     <div class="flex items-center justify-between gap-4 px-4 py-3 border-b border-gray-200">
                         <p class="text-[11px] uppercase tracking-widest text-gray-500 truncate">
-                            {{ __('Lokasi Kasus — :place', ['place' => collect([$location['village'] ?? null, $location['district'] ?? null, $location['province'] ?? null])->filter()->join(', ') ?: __('Tidak diketahui')]) }}
+                            {{ __('Lokasi Kasus — :place', ['place' => $placeText ?: __('Tidak diketahui')]) }}
                         </p>
                         <button onclick="closeMapModal()" aria-label="{{ __('Tutup peta') }}"
                             class="flex-shrink-0 w-8 h-8 border border-gray-300 text-gray-600 hover:border-gray-900 hover:text-gray-900 transition-colors flex items-center justify-center cursor-pointer">

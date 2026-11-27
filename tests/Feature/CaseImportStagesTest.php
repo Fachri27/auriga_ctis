@@ -67,6 +67,7 @@ class CaseImportStagesTest extends TestCase
         return $this->docx([
             'Tumpahan Minyak Pertamina RU V di Teluk Balikpapan',
             'Terlapor: Pertamina RU V',
+            'Lokasi: Teluk Balikpapan, Kalimantan Timur',
             'Kronologi',
             'Pipa minyak mentah patah pada 31 Maret 2018.',
             'Perkembangan',
@@ -140,6 +141,41 @@ class CaseImportStagesTest extends TestCase
         $this->assertStringContainsString('Kualifikasi kasus "Lainnya" tidak dikenali', $parsed['warnings'][0]);
     }
 
+    public function test_parser_reads_kualifikasi_perkara_heading(): void
+    {
+        // Sebagian dokumen memakai judul "Kualifikasi Perkara"; isinya tidak boleh bocor ke Perkembangan.
+        $parsed = $this->parse($this->docx([
+            'Gugatan Kebakaran Lahan terhadap PT Contoh',
+            'Kronologi',
+            'Kebakaran terjadi pada 2015.',
+            'Perkembangan',
+            'Gugatan dikabulkan.',
+            'Kualifikasi Perkara',
+            ['dropdown' => 'Perdata (gugatan lingkungan hidup oleh pemerintah)'],
+            'Tahapan Kasus',
+            ['table' => [['Persidangan', 'Sidang pembuktian.'], ['Vonis', 'Ganti rugi Rp1 triliun.']]],
+        ]));
+
+        $this->assertSame('perdata', $parsed['kualifikasi']);
+        $this->assertSame('<p>Gugatan dikabulkan.</p>', $parsed['perkembangan']);
+        $this->assertSame(['pembuktian' => 'Sidang pembuktian.', 'vonis' => 'Ganti rugi Rp1 triliun.'], $parsed['keterangan_tahapan']);
+        $this->assertSame('vonis', $parsed['tahap']);
+    }
+
+    public function test_long_stage_notes_are_kept_whole(): void
+    {
+        $note = str_repeat('Majelis hakim mengabulkan sebagian gugatan dan menghukum tergugat membayar ganti rugi. ', 12);
+        $parsed = $this->parse($this->docx([
+            'Gugatan Karhutla', 'Kronologi', 'Kebakaran pada 2019.',
+            'Kualifikasi Kasus', ['dropdown' => 'Perdata'],
+            'Tahapan Kasus', ['table' => [['Vonis', trim($note)]]],
+        ]));
+
+        $this->assertGreaterThan(500, mb_strlen($parsed['keterangan_tahapan']['vonis']));
+        $this->assertSame(trim($note), $parsed['keterangan_tahapan']['vonis']);
+        $this->assertSame([], array_filter($parsed['warnings'], fn ($w) => str_contains($w, 'dipotong')));
+    }
+
     public function test_old_documents_have_no_kualifikasi_or_stages(): void
     {
         $parsed = $this->parse($this->docx(['Judul', 'Kronologi', 'Isi pada 2020.', 'Perkembangan', 'Masih berjalan.']));
@@ -178,6 +214,9 @@ class CaseImportStagesTest extends TestCase
             $case->translations->firstWhere('locale', 'id')->keterangan_tahapan,
         );
         $this->assertStringNotContainsString('Tahapan Kasus', $case->translations->firstWhere('locale', 'id')->perkembangan);
+        // Teks "Lokasi:" dokumen disimpan apa adanya, walau titik petanya tidak ditemukan.
+        $this->assertSame('Teluk Balikpapan, Kalimantan Timur', $case->lokasi);
+        $this->assertContains('Titik peta tidak ditemukan otomatis; lokasi tetap tampil sesuai dokumen. Atur titik bila kasus perlu ditampilkan di peta.', $preview['warnings']);
     }
 
     public function test_preview_table_shows_kualifikasi_and_stages(): void
@@ -234,6 +273,31 @@ class CaseImportStagesTest extends TestCase
         // Dokumen format lama tidak mengubah apa pun.
         $this->assertSame('pidana', $oldFormat->fresh()->kualifikasi);
         $this->assertSame($open->id, $oldFormat->fresh()->status_id);
+    }
+
+    public function test_sync_command_fills_empty_locations_from_documents(): void
+    {
+        $this->seed(StatusSeeder::class);
+        $open = Status::findByKey('open');
+        $empty = $this->importedCase('CASE-LOKA1', 'docLokasi', $open->id, 'pidana');
+        $filled = $this->importedCase('CASE-LOKA2', 'docIsi', $open->id, 'pidana');
+        $filled->update(['lokasi' => 'Diisi di CMS']);
+
+        config(['services.google_drive.api_key' => 'drive-key']);
+        $oldDocument = fn (string $id) => fn ($request) => str_contains($request->url(), 'alt=media')
+            ? Http::response($this->docx(['Kasus lama', 'Lokasi: Perairan Selat Malaka, WPP-NRI 571', 'Kronologi', 'Isi pada 2020.']))
+            : Http::response(['id' => $id, 'name' => "{$id}.docx", 'mimeType' => GoogleDriveService::DOCX]);
+        Http::fake([
+            'www.googleapis.com/drive/v3/files/docLokasi*' => $oldDocument('docLokasi'),
+            'www.googleapis.com/drive/v3/files/docIsi*' => $oldDocument('docIsi'),
+        ]);
+
+        $this->artisan('case:sync-tahapan')
+            ->expectsOutputToContain('1 kasus diisi lokasinya dari teks "Lokasi:" dokumen.')
+            ->assertSuccessful();
+
+        $this->assertSame('Perairan Selat Malaka, WPP-NRI 571', $empty->fresh()->lokasi);
+        $this->assertSame('Diisi di CMS', $filled->fresh()->lokasi);
     }
 
     private function importedCase(string $number, string $fileId, int $statusId, string $kualifikasi, ?array $notes = null): CaseModel

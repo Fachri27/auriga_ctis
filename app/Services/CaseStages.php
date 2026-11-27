@@ -64,6 +64,14 @@ class CaseStages
         'sanksi' => 'sanksi', 'hukum-tetap' => 'berkekuatan-hukum-tetap',
     ];
 
+    /** Apakah status kasus (key tabel statuses) punya tempat di tahapan jalur ini. */
+    public static function inTrack(?string $kualifikasi, ?string $statusKey): bool
+    {
+        $track = isset(self::STATUS_STEPS[$kualifikasi ?? '']) ? $kualifikasi : 'pidana';
+
+        return isset(self::STATUS_STEPS[$track][Str::slug((string) $statusKey)]);
+    }
+
     public static function isDocumentStage(string $label): bool
     {
         return isset(self::DOCUMENT_STAGES[Str::slug($label)]);
