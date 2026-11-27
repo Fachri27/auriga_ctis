@@ -145,48 +145,63 @@ class PerkaraStatistics
     }
 
     /**
-     * Grafik batang per tahun (filter tahun diabaikan, agar rentang tahun tetap utuh). Grafik ber-'unit' (vonis
-     * penjara dalam bulan, denda dalam rupiah) adalah rata-rata seperti di kpis(), dengan batang tuntutan jaksa di
-     * sebelah batang vonis agar terlihat apakah hukumannya sesuai tuntutan. Rata-rata tuntutan dihitung dari
-     * perkara yang tuntutannya tercatat.
+     * Grafik batang per tahun (filter tahun diabaikan, agar rentang tahun tetap utuh). Baris pertama: jumlah per
+     * tahun; baris kedua ('row' 2): rata-rata tuntutan & vonis penjara (rata-rata seperti di kpis(), tuntutan dari
+     * perkara yang tuntutannya tercatat) dan terdakwa individu & korporasi (dihitung seperti KPI Keterangan
+     * Terdakwa). Grafik ber-'series' digambar sebagai batang berdampingan per tahun dengan legenda; 'stack':
+     * batang bertumpuk, jumlah seri teratas ditulis di atas batang (terdakwa korporasi hanya puluhan per tahun,
+     * nyaris tak terlihat di samping ribuan terdakwa individu).
      *
      * Baris data berisi 'label' dan satu nilai per seri: 'value' untuk grafik satu seri, atau kunci dari 'series'
-     * (urutan batang; 'slot' = urutan warna kategori, vonis tetap hijau seperti sebelumnya). Tahun tanpa angka
-     * bernilai null (batangnya tidak digambar, tooltip menampilkan "–").
+     * ('slot' = urutan warna kategori). Tahun tanpa angka bernilai null (batang tidak digambar, tooltip "–").
      *
-     * @return list<array{id: string, title: string, type: string, unit: ?string, data: list<array<string, string|float|null>>, series?: list<array{key: string, name: string, slot: int}>}>
+     * @return list<array{id: string, title: string, type: string, unit: ?string, row: int, data: list<array<string, string|float|null>>, series?: list<array{key: string, name: string, slot: int}>, stack?: bool}>
      */
     public function yearlyCharts(array $filters): array
     {
-        $series = [
-            'perkara' => ['Perkara per Tahun', ['value' => 'COUNT(*)'], null],
-            'terdakwa' => ['Terdakwa per Tahun', ['value' => 'SUM(jumlah_terdakwa)'], null],
-            'pengadilan' => ['Pengadilan per Tahun', ['value' => 'COUNT(DISTINCT pengadilan)'], null],
-            'penjara' => ['Rata-rata Tuntutan & Vonis Penjara per Tahun (bulan)', ['tuntutan' => 'AVG(tuntutan_penjara)', 'vonis' => 'AVG(vonis_penjara)'], 'bulan'],
-            'denda' => ['Rata-rata Tuntutan & Vonis Denda per Tahun', ['tuntutan' => 'AVG(tuntutan_denda)', 'vonis' => 'AVG(vonis_denda)'], 'rupiah'],
+        $definitions = [
+            'perkara' => ['title' => 'Perkara per Tahun', 'values' => ['value' => 'COUNT(*)']],
+            'terdakwa' => ['title' => 'Terdakwa per Tahun', 'values' => ['value' => 'SUM(jumlah_terdakwa)']],
+            'pengadilan' => ['title' => 'Pengadilan per Tahun', 'values' => ['value' => 'COUNT(DISTINCT pengadilan)']],
+            'penjara' => [
+                'title' => 'Rata-rata Tuntutan & Vonis Penjara per Tahun (bulan)', 'unit' => 'bulan', 'row' => 2,
+                'values' => ['tuntutan' => 'AVG(tuntutan_penjara)', 'vonis' => 'AVG(vonis_penjara)'],
+            ],
+            'subjek' => [
+                'title' => 'Terdakwa Individu & Korporasi per Tahun', 'row' => 2, 'stack' => true,
+                'values' => [
+                    'individu' => "COALESCE(SUM(CASE WHEN subjek_hukum = 'Perorangan' THEN jumlah_terdakwa END), 0)",
+                    'korporasi' => "COALESCE(SUM(CASE WHEN subjek_hukum IN ('Korporasi', 'Koperasi') THEN jumlah_terdakwa END), 0)",
+                ],
+            ],
         ];
-        $names = ['tuntutan' => ['Tuntutan', 1], 'vonis' => ['Vonis', 0]];
+        $names = ['tuntutan' => ['Tuntutan', 1], 'vonis' => ['Vonis', 0], 'individu' => ['Individu', 0], 'korporasi' => ['Korporasi', 1]];
 
         $charts = [];
-        foreach ($series as $key => [$title, $aggregates, $unit]) {
+        foreach ($definitions as $key => $definition) {
+            $values = $definition['values'];
+            $unit = $definition['unit'] ?? null;
             $rows = $this->query($filters, ignore: ['tahun'])
                 ->whereNotNull('tahun')
-                ->selectRaw('tahun as lbl, '.implode(', ', array_map(fn ($sql, $alias) => "{$sql} as {$alias}", $aggregates, array_keys($aggregates))))
+                ->selectRaw('tahun as lbl, '.implode(', ', array_map(fn ($sql, $alias) => "{$sql} as {$alias}", $values, array_keys($values))))
                 ->groupBy('tahun')->orderBy('tahun')
                 ->get();
 
-            $keys = array_keys($aggregates);
+            $keys = array_keys($values);
             if ($rows->sum(fn ($r) => array_sum(array_map(fn ($k) => (float) $r->{$k}, $keys))) <= 0) {
                 continue;
             }
 
             $data = $rows->map(fn ($r) => ['label' => (string) $r->lbl] + array_combine($keys, array_map(
-                fn ($k) => $r->{$k} === null ? null : round((float) $r->{$k}, $unit === 'rupiah' ? 0 : 1), $keys,
+                fn ($k) => $r->{$k} === null ? null : round((float) $r->{$k}, 1), $keys,
             )))->all();
 
-            $chart = ['id' => "perkara-{$key}-tahun", 'title' => $title, 'type' => 'bar', 'unit' => $unit, 'data' => $data];
+            $chart = ['id' => "perkara-{$key}-tahun", 'title' => $definition['title'], 'type' => 'bar', 'unit' => $unit, 'row' => $definition['row'] ?? 1, 'data' => $data];
             if ($keys !== ['value']) {
                 $chart['series'] = array_map(fn ($k) => ['key' => $k, 'name' => $names[$k][0], 'slot' => $names[$k][1]], $keys);
+            }
+            if (! empty($definition['stack'])) {
+                $chart['stack'] = true;
             }
             $charts[] = $chart;
         }

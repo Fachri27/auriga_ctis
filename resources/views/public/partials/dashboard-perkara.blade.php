@@ -139,22 +139,27 @@
 
 {{-- ===================== GRAFIK BATANG ===================== --}}
 @if ($yearlyCharts)
-    {{-- Baris pertama: jumlah per tahun (3 kolom); baris kedua: rata-rata vonis pidana (2 kolom). --}}
-    @php [$sentenceCharts, $countCharts] = collect($yearlyCharts)->partition(fn ($ch) => !empty($ch['unit'])); @endphp
+    {{-- Baris pertama: jumlah per tahun (3 kolom); baris kedua: tuntutan & vonis penjara, terdakwa individu & korporasi (2 kolom). --}}
+    @php
+        $chartRows = collect($yearlyCharts)->groupBy('row');
+        $sentenceCharts = collect($yearlyCharts)->filter(fn ($ch) => !empty($ch['unit']));
+    @endphp
     <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-8">
-        @foreach ([[$countCharts, 'md:grid-cols-3'], [$sentenceCharts, 'md:grid-cols-2']] as [$charts, $cols])
+        @foreach ([[$chartRows->get(1, collect()), 'md:grid-cols-3'], [$chartRows->get(2, collect()), 'md:grid-cols-2']] as [$charts, $cols])
             @if ($charts->isNotEmpty())
-                <div class="grid grid-cols-1 {{ $cols }} gap-6 {{ $loop->first ? '' : 'mt-6' }}">
+                <div class="grid grid-cols-1 {{ $cols }} gap-6 {{ $loop->first || $chartRows->count() < 2 ? '' : 'mt-6' }}">
                     @foreach ($charts as $ch)
                         <div class="bg-white border border-[#E2E6DA]">
                             <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ __($ch['title']) }}</h3>
                             <div class="pub-echart" id="{{ $ch['id'] }}" data-chart="{{ json_encode($ch['data']) }}" data-type="{{ $ch['type'] }}"
                                 @if (!empty($ch['unit'])) data-unit="{{ $ch['unit'] }}" data-unit-label="{{ __($ch['unit']) }}" @endif
                                 @if (!empty($ch['series']))
-                                    {{-- Batang tuntutan & vonis berdampingan; tooltip menampilkan vonis sebagai persen tuntutan. --}}
+                                    {{-- Beberapa seri per tahun; tooltip tuntutan & vonis menampilkan vonis sebagai persen tuntutan. --}}
                                     data-series="{{ json_encode(array_map(fn ($s) => ['name' => __($s['name'])] + $s, $ch['series'])) }}"
                                     data-ratio-label="{{ __('Vonis :percent dari tuntutan') }}"
                                 @endif
+                                {{-- Batang bertumpuk; jumlah seri teratas (korporasi) ditulis di atas batang. --}}
+                                @if (!empty($ch['stack'])) data-stack="1" data-stack-label="{{ __(':count korp.') }}" @endif
                                 style="height:320px;width:100%"></div>
                         </div>
                     @endforeach
