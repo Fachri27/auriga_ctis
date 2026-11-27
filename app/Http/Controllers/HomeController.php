@@ -416,7 +416,9 @@ class HomeController extends Controller
 
             $totalPerkara = RawCase::inPeriod($yearRange)->count();
             $totalTerdakwa = RawCase::inPeriod($yearRange)->sum('jumlah_terdakwa');
-            $jmlPengadilan = RawCase::inPeriod($yearRange)->whereNotNull('pengadilan')->distinct()->count('pengadilan');
+            // Tanpa filter: angka "Jumlah Pengadilan" dari tab Dashboard spreadsheet, sama seperti dashboard Perkara.
+            $jmlPengadilan = PerkaraStatistics::sheetCourtCount()
+                ?? RawCase::inPeriod($yearRange)->whereNotNull('pengadilan')->distinct()->count('pengadilan');
             $subjekCounts = RawCase::inPeriod($yearRange)->whereNotNull('subjek_hukum')
                 ->selectRaw("CASE WHEN subjek_hukum IN ('Korporasi','Koperasi') THEN 'Korporasi' ELSE subjek_hukum END as kelompok, COUNT(*) as cnt")
                 ->groupBy('kelompok')->pluck('cnt', 'kelompok');

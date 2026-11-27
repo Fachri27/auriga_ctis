@@ -147,6 +147,47 @@
                         emphasis: { itemStyle: { color: '#0B1E07' } }
                     }]
                 });
+            } else if (el.getAttribute('data-series')) {
+                // Beberapa batang per label (mis. tuntutan & vonis per tahun): warna menurut slot palet kategori,
+                // legenda di atas, tooltip berisi semua seri plus vonis sebagai persen tuntutan.
+                var series = JSON.parse(el.getAttribute('data-series'));
+                var ratioLabel = el.getAttribute('data-ratio-label');
+                var keys = series.map(function (s) { return s.key; });
+                chart.setOption({
+                    textStyle: { fontFamily: FONT },
+                    legend: {
+                        show: series.length > 1, top: 0, left: 0, icon: 'roundRect', itemWidth: 10, itemHeight: 10, itemGap: 16,
+                        textStyle: { color: INK, fontSize: 11, fontFamily: FONT }
+                    },
+                    tooltip: {
+                        trigger: 'axis', axisPointer: { type: 'shadow' },
+                        formatter: function (params) {
+                            var lines = ['<b>' + params[0].name + '</b>'];
+                            params.forEach(function (p) {
+                                lines.push(p.marker + p.seriesName + ': ' + (p.value == null ? '–' : fmt(p.value, false)));
+                            });
+                            var row = data[params[0].dataIndex];
+                            if (ratioLabel && keys.indexOf('tuntutan') >= 0 && keys.indexOf('vonis') >= 0 && row.tuntutan > 0 && row.vonis != null) {
+                                var pct = (row.vonis / row.tuntutan * 100).toLocaleString(document.documentElement.lang === 'en' ? 'en-US' : 'id-ID', { maximumFractionDigits: 0 }) + '%';
+                                lines.push('<span style="color:' + MUTED + '">' + ratioLabel.replace(':percent', pct) + '</span>');
+                            }
+                            return lines.join('<br/>');
+                        }
+                    },
+                    grid: { left: 8, right: 16, top: 36, bottom: 10, containLabel: true },
+                    xAxis: axisCommon(labels, long),
+                    yAxis: valueAxis(unitAxis),
+                    series: series.map(function (s) {
+                        return {
+                            type: 'bar',
+                            name: s.name,
+                            data: data.map(function (d) { return d[s.key]; }),
+                            barMaxWidth: 18, barGap: '12%',
+                            itemStyle: { color: CAT[s.slot], borderRadius: [4, 4, 0, 0] },
+                            emphasis: { focus: 'series' }
+                        };
+                    })
+                });
             } else {
                 chart.setOption({
                     textStyle: { fontFamily: FONT },

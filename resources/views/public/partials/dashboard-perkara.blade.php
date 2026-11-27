@@ -150,6 +150,11 @@
                             <h3 class="px-5 py-3 border-b border-[#E2E6DA] font-data text-[11px] font-semibold tracking-[0.18em] uppercase text-gray-700">{{ __($ch['title']) }}</h3>
                             <div class="pub-echart" id="{{ $ch['id'] }}" data-chart="{{ json_encode($ch['data']) }}" data-type="{{ $ch['type'] }}"
                                 @if (!empty($ch['unit'])) data-unit="{{ $ch['unit'] }}" data-unit-label="{{ __($ch['unit']) }}" @endif
+                                @if (!empty($ch['series']))
+                                    {{-- Batang tuntutan & vonis berdampingan; tooltip menampilkan vonis sebagai persen tuntutan. --}}
+                                    data-series="{{ json_encode(array_map(fn ($s) => ['name' => __($s['name'])] + $s, $ch['series'])) }}"
+                                    data-ratio-label="{{ __('Vonis :percent dari tuntutan') }}"
+                                @endif
                                 style="height:320px;width:100%"></div>
                         </div>
                     @endforeach
@@ -160,6 +165,9 @@
             {{ __('Sumber: indeksasi putusan pidana sektor sumber daya alam dan lingkungan hidup :from–:to.', array_combine(['from', 'to'], \App\Services\PerkaraStatistics::years())) }}
             @if ($sentenceCharts->isNotEmpty())
                 {{ __('Rata-rata vonis dihitung dari semua putusan yang vonisnya tercatat, termasuk putusan bebas atau lepas (dihitung 0).') }}
+                @if ($sentenceCharts->contains(fn ($ch) => in_array('tuntutan', array_column($ch['series'] ?? [], 'key'), true)))
+                    {{ __('Rata-rata tuntutan dihitung dari perkara yang tuntutan jaksanya tercatat.') }}
+                @endif
             @endif
         </p>
     </section>

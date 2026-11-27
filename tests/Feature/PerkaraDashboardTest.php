@@ -64,14 +64,15 @@ class PerkaraDashboardTest extends TestCase
     public function test_defendant_breakdown_and_criminal_sentences(): void
     {
         $sentences = [
-            // [no_perkara, tahun, vonis_putusan, penjara (bulan), denda (Rp)]
-            ['0/Pid.B/2021/PN', 2021, 'Bersalah', 12, 500_000_000],
-            ['1/Pid.B/2022/PN', 2022, 'Bersalah', 6, 1_500_000_000],
-            ['2/Pid.B/2022/PN', 2022, 'Bebas', 0, 0],
+            // [no_perkara, tahun, vonis_putusan, tuntutan & vonis penjara (bulan), tuntutan & vonis denda (Rp)]
+            ['0/Pid.B/2021/PN', 2021, 'Bersalah', [18, 12], [1_000_000_000, 500_000_000]],
+            ['1/Pid.B/2022/PN', 2022, 'Bersalah', [12, 6], [2_000_000_000, 1_500_000_000]],
+            ['2/Pid.B/2022/PN', 2022, 'Bebas', [10, 0], [1_000_000_000, 0]],
         ];
-        foreach ($sentences as [$noPerkara, $tahun, $vonis, $penjara, $denda]) {
+        foreach ($sentences as [$noPerkara, $tahun, $vonis, [$tuntutanPenjara, $penjara], [$tuntutanDenda, $denda]]) {
             DB::table('raw_cases')->where('no_perkara', $noPerkara)->update([
-                'vonis_putusan' => $vonis, 'vonis_penjara' => $penjara, 'vonis_denda' => $denda,
+                'vonis_putusan' => $vonis, 'tuntutan_penjara' => $tuntutanPenjara, 'vonis_penjara' => $penjara,
+                'tuntutan_denda' => $tuntutanDenda, 'vonis_denda' => $denda,
             ]);
         }
 
@@ -84,16 +85,28 @@ class PerkaraDashboardTest extends TestCase
                     'Korporasi' => ['1', '16,7%'],
                     // Seperti tab Dashboard spreadsheet: perkara bebas ikut dirata-rata sebagai 0.
                     'Rata-rata Penjara' => ['6 bulan', null],
-                    'Rata-rata Denda' => ['Rp666,7 juta', null],
-                    'Total Denda' => ['Rp2 miliar', null],
+                    // Rupiah tampil lengkap, tidak diringkas ke juta/miliar.
+                    'Rata-rata Denda' => ['Rp666.666.667', null],
+                    'Total Denda' => ['Rp2.000.000.000', null],
                 ])
             // Angka tampil di atas labelnya.
-            ->assertSeeInOrder(['Keterangan Terdakwa', 'Perorangan', 'Korporasi', 'Vonis Putusan', 'Vonis Pidana', '6 bulan', 'Rata-rata Penjara', 'Rp666,7 juta', 'Rata-rata Denda', 'Rp2 miliar', 'Total Denda'])
+            ->assertSeeInOrder(['Keterangan Terdakwa', 'Perorangan', 'Korporasi', 'Vonis Putusan', 'Vonis Pidana', '6 bulan', 'Rata-rata Penjara', 'Rp666.666.667', 'Rata-rata Denda', 'Rp2.000.000.000', 'Total Denda'])
+            // Grafik rata-rata vonis yang sudah ada sekaligus memuat batang tuntutan per tahun.
             ->assertViewHas('yearlyCharts', fn ($charts) => collect($charts)->keyBy('id')->only(['perkara-penjara-tahun', 'perkara-denda-tahun'])
-                ->map(fn ($c) => [$c['unit'], $c['data']])->all() === [
-                    'perkara-penjara-tahun' => ['bulan', [['label' => '2021', 'value' => 12.0], ['label' => '2022', 'value' => 3.0]]],
-                    'perkara-denda-tahun' => ['rupiah', [['label' => '2021', 'value' => 500000000.0], ['label' => '2022', 'value' => 750000000.0]]],
-                ])
+                ->map(fn ($c) => [$c['unit'], array_column($c['series'], 'key'), $c['data']])->all() === [
+                    'perkara-penjara-tahun' => ['bulan', ['tuntutan', 'vonis'], [
+                        ['label' => '2021', 'tuntutan' => 18.0, 'vonis' => 12.0],
+                        ['label' => '2022', 'tuntutan' => 11.0, 'vonis' => 3.0],
+                    ]],
+                    'perkara-denda-tahun' => ['rupiah', ['tuntutan', 'vonis'], [
+                        ['label' => '2021', 'tuntutan' => 1000000000.0, 'vonis' => 500000000.0],
+                        ['label' => '2022', 'tuntutan' => 1500000000.0, 'vonis' => 750000000.0],
+                    ]],
+                ] && count($charts) === 5)
+            ->assertSee('Rata-rata Tuntutan &amp; Vonis Denda per Tahun', false)
+            ->assertSee('data-series="', false)
+            ->assertSee('data-ratio-label="Vonis :percent dari tuntutan"', false)
+            ->assertSee('Rata-rata tuntutan dihitung dari perkara yang tuntutan jaksanya tercatat.')
             ->assertSee('data-unit="rupiah"', false)
             ->assertSee('data-unit-label="bulan"', false);
 
@@ -101,8 +114,20 @@ class PerkaraDashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Defendant Breakdown')
             ->assertSee('6 months')
-            ->assertSee('Rp666.7 million')
+            ->assertSee('Rp666,666,667')
+            ->assertSee('Prosecution Demand')
             ->assertSee('data-unit-label="months"', false);
+    }
+
+    public function test_years_without_demands_have_no_demand_bar(): void
+    {
+        // Sebelum kolom tuntutan terisi sync: batang tuntutan kosong (null), batang vonis tetap tampil.
+        DB::table('raw_cases')->update(['vonis_penjara' => 12, 'vonis_denda' => 500_000_000]);
+
+        $this->get('/id/dashboard?mode=perkara')
+            ->assertOk()
+            ->assertViewHas('yearlyCharts', fn ($charts) => collect($charts)->firstWhere('id', 'perkara-denda-tahun')['data']
+                === [['label' => '2021', 'tuntutan' => null, 'vonis' => 500000000.0], ['label' => '2022', 'tuntutan' => null, 'vonis' => 500000000.0]]);
     }
 
     public function test_rows_without_year_count_in_totals_but_not_in_yearly_bars(): void
@@ -154,6 +179,19 @@ class PerkaraDashboardTest extends TestCase
             ->assertOk()
             ->assertViewHas('yearlyCharts', fn ($charts) => array_column($charts, 'id') === ['perkara-perkara-tahun', 'perkara-terdakwa-tahun', 'perkara-pengadilan-tahun'])
             ->assertViewHas('kpiData', fn ($kpis) => collect($kpis)->firstWhere('title', 'Rata-rata Penjara')['display'] === '–');
+    }
+
+    public function test_court_count_without_filters_follows_the_spreadsheet(): void
+    {
+        // Angka "Jumlah Pengadilan" tab Dashboard spreadsheet (disimpan chart:sync) dipakai apa adanya.
+        \App\Models\ChartDataset::create(['dataset' => 'KPI', 'label' => 'jumlah_pengadilan', 'year' => null, 'value' => 7]);
+
+        $court = fn ($kpis) => collect($kpis)->firstWhere('title', 'Pengadilan')['display'];
+        $this->get('/id/dashboard?mode=perkara')->assertViewHas('kpiData', fn ($kpis) => $court($kpis) === '7');
+        $this->getJson('/id')->assertJsonPath('kpiData.2', ['title' => 'Pengadilan', 'display' => '7']);
+
+        // Dengan filter, dihitung dari data seperti grafik Pengadilan per Tahun.
+        $this->get('/id/dashboard?mode=perkara&pulau=Sumatera')->assertViewHas('kpiData', fn ($kpis) => $court($kpis) === '1');
     }
 
     public function test_filters_narrow_the_figures_but_keep_every_classification_listed(): void

@@ -53,11 +53,12 @@
         <p class="px-6 pt-4 font-data text-[10px] tracking-[0.22em] uppercase text-gray-400">
             {{ __('Vonis Pidana') }} <span style="text-transform: none; letter-spacing: normal">· {{ __('semua putusan') }}</span>
         </p>
-        <dl class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#E2E6DA]">
+        {{-- Denda tampil lengkap (Rp8.591.625.012.579), jadi tiga kolom baru dipakai di layar lebar. --}}
+        <dl class="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-[#E2E6DA]">
             @foreach (['Rata-rata Penjara', 'Rata-rata Denda', 'Total Denda'] as $t)
             @php $k = $byTitle($t); @endphp
             <div class="px-6 py-4">
-                <dd class="font-data text-xl font-semibold text-gray-900">{{ $k['display'] }}</dd>
+                <dd class="font-data text-xl font-semibold text-gray-900 break-words">{{ $k['display'] }}</dd>
                 <dt class="font-data text-[10px] tracking-[0.18em] uppercase text-gray-500 mt-1">{{ __($t) }}</dt>
             </div>
             @endforeach

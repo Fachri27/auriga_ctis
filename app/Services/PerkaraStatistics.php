@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\RawCase;
+use App\Models\{ChartDataset, RawCase};
 use App\Services\CaseImport\LocationMatcher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -98,10 +98,11 @@ class PerkaraStatistics
             ->selectRaw('AVG(vonis_penjara) as penjara, AVG(vonis_denda) as denda, SUM(vonis_denda) as total_denda')
             ->first();
 
+        $courts = ! array_filter($filters) ? self::sheetCourtCount() : null;
         $kpis = [
             ['title' => 'Perkara', 'display' => self::number((clone $query)->count())],
             ['title' => 'Terdakwa', 'display' => self::number($terdakwa)],
-            ['title' => 'Pengadilan', 'display' => self::number((clone $query)->whereNotNull('pengadilan')->distinct()->count('pengadilan'))],
+            ['title' => 'Pengadilan', 'display' => self::number($courts ?? (clone $query)->whereNotNull('pengadilan')->distinct()->count('pengadilan'))],
         ];
         foreach (['Perorangan', 'Korporasi'] as $s) {
             $count = (int) ($subjek[$s] ?? 0);
@@ -115,6 +116,18 @@ class PerkaraStatistics
         $kpis[] = ['title' => 'Total Denda', 'display' => self::rupiah($pidana?->total_denda)];
 
         return $kpis;
+    }
+
+    /**
+     * "Jumlah Pengadilan" di tab Dashboard spreadsheet (disimpan chart:sync), dipakai untuk angka tanpa filter agar
+     * sama dengan spreadsheet. Angka itu bisa beda dari hitungan nama pengadilan di data (rumus sheet saat ini
+     * mengurangi 1); null bila belum ada, sehingga dihitung dari data.
+     */
+    public static function sheetCourtCount(): ?int
+    {
+        $value = ChartDataset::where('dataset', 'KPI')->where('label', 'jumlah_pengadilan')->value('value');
+
+        return $value === null ? null : (int) $value;
     }
 
     /**
@@ -133,31 +146,49 @@ class PerkaraStatistics
 
     /**
      * Grafik batang per tahun (filter tahun diabaikan, agar rentang tahun tetap utuh). Grafik ber-'unit' (vonis
-     * penjara dalam bulan, denda dalam rupiah) adalah rata-rata seperti di kpis().
+     * penjara dalam bulan, denda dalam rupiah) adalah rata-rata seperti di kpis(), dengan batang tuntutan jaksa di
+     * sebelah batang vonis agar terlihat apakah hukumannya sesuai tuntutan. Rata-rata tuntutan dihitung dari
+     * perkara yang tuntutannya tercatat.
      *
-     * @return list<array{id: string, title: string, type: string, unit: ?string, data: list<array{label: string, value: float}>}>
+     * Baris data berisi 'label' dan satu nilai per seri: 'value' untuk grafik satu seri, atau kunci dari 'series'
+     * (urutan batang; 'slot' = urutan warna kategori, vonis tetap hijau seperti sebelumnya). Tahun tanpa angka
+     * bernilai null (batangnya tidak digambar, tooltip menampilkan "–").
+     *
+     * @return list<array{id: string, title: string, type: string, unit: ?string, data: list<array<string, string|float|null>>, series?: list<array{key: string, name: string, slot: int}>}>
      */
     public function yearlyCharts(array $filters): array
     {
         $series = [
-            'perkara' => ['Perkara per Tahun', 'COUNT(*)', null],
-            'terdakwa' => ['Terdakwa per Tahun', 'SUM(jumlah_terdakwa)', null],
-            'pengadilan' => ['Pengadilan per Tahun', 'COUNT(DISTINCT pengadilan)', null],
-            'penjara' => ['Rata-rata Vonis Penjara per Tahun (bulan)', 'AVG(vonis_penjara)', 'bulan'],
-            'denda' => ['Rata-rata Denda per Tahun', 'AVG(vonis_denda)', 'rupiah'],
+            'perkara' => ['Perkara per Tahun', ['value' => 'COUNT(*)'], null],
+            'terdakwa' => ['Terdakwa per Tahun', ['value' => 'SUM(jumlah_terdakwa)'], null],
+            'pengadilan' => ['Pengadilan per Tahun', ['value' => 'COUNT(DISTINCT pengadilan)'], null],
+            'penjara' => ['Rata-rata Tuntutan & Vonis Penjara per Tahun (bulan)', ['tuntutan' => 'AVG(tuntutan_penjara)', 'vonis' => 'AVG(vonis_penjara)'], 'bulan'],
+            'denda' => ['Rata-rata Tuntutan & Vonis Denda per Tahun', ['tuntutan' => 'AVG(tuntutan_denda)', 'vonis' => 'AVG(vonis_denda)'], 'rupiah'],
         ];
+        $names = ['tuntutan' => ['Tuntutan', 1], 'vonis' => ['Vonis', 0]];
 
         $charts = [];
-        foreach ($series as $key => [$title, $aggregate, $unit]) {
-            $data = $this->query($filters, ignore: ['tahun'])
+        foreach ($series as $key => [$title, $aggregates, $unit]) {
+            $rows = $this->query($filters, ignore: ['tahun'])
                 ->whereNotNull('tahun')
-                ->selectRaw("tahun as lbl, {$aggregate} as total")
+                ->selectRaw('tahun as lbl, '.implode(', ', array_map(fn ($sql, $alias) => "{$sql} as {$alias}", $aggregates, array_keys($aggregates))))
                 ->groupBy('tahun')->orderBy('tahun')
-                ->get()->map(fn ($r) => ['label' => (string) $r->lbl, 'value' => round((float) $r->total, $unit === 'rupiah' ? 0 : 1)])->all();
+                ->get();
 
-            if (array_sum(array_column($data, 'value')) > 0) {
-                $charts[] = ['id' => "perkara-{$key}-tahun", 'title' => $title, 'type' => 'bar', 'unit' => $unit, 'data' => $data];
+            $keys = array_keys($aggregates);
+            if ($rows->sum(fn ($r) => array_sum(array_map(fn ($k) => (float) $r->{$k}, $keys))) <= 0) {
+                continue;
             }
+
+            $data = $rows->map(fn ($r) => ['label' => (string) $r->lbl] + array_combine($keys, array_map(
+                fn ($k) => $r->{$k} === null ? null : round((float) $r->{$k}, $unit === 'rupiah' ? 0 : 1), $keys,
+            )))->all();
+
+            $chart = ['id' => "perkara-{$key}-tahun", 'title' => $title, 'type' => 'bar', 'unit' => $unit, 'data' => $data];
+            if ($keys !== ['value']) {
+                $chart['series'] = array_map(fn ($k) => ['key' => $k, 'name' => $names[$k][0], 'slot' => $names[$k][1]], $keys);
+            }
+            $charts[] = $chart;
         }
 
         return $charts;
@@ -172,21 +203,12 @@ class PerkaraStatistics
         return $decimals ? preg_replace('/[.,]0+$/', '', $text) : $text;
     }
 
-    /** Rupiah ringkas: Rp985 juta, Rp1,2 miliar, Rp7,1 triliun. */
+    /** Rupiah lengkap, tidak diringkas ke juta/miliar (seperti tab Dashboard spreadsheet): Rp896.174.508. */
     public static function rupiah(float|string|null $amount): string
     {
         $amount = (float) $amount;
-        if ($amount <= 0) {
-            return '–';
-        }
 
-        foreach ([[1e12, 'triliun'], [1e9, 'miliar'], [1e6, 'juta']] as [$unit, $word]) {
-            if ($amount >= $unit) {
-                return 'Rp'.self::number($amount / $unit, 1).' '.__($word);
-            }
-        }
-
-        return 'Rp'.self::number($amount);
+        return $amount > 0 ? 'Rp'.self::number(round($amount)) : '–';
     }
 
     /**

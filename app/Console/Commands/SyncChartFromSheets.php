@@ -225,8 +225,10 @@ class SyncChartFromSheets extends Command
             'Jumlah Terdakwa'       => 'jumlah_terdakwa',
             'Subjek Hukum'          => 'subjek_hukum',
             'Penyertaan'            => 'penyertaan',
+            'Tuntutan Penjara'      => 'tuntutan_penjara',
             'Vonis Penjara'         => 'vonis_penjara',
             'Subsidair'             => 'subsidair',
+            'Tuntutan Denda'        => 'tuntutan_denda',
             'Vonis Denda'           => 'vonis_denda',
             'Vonis Putusan'         => 'vonis_putusan',
             'Biaya Perkara'         => 'biaya_perkara',
@@ -234,7 +236,7 @@ class SyncChartFromSheets extends Command
             'Nama Hakim'            => 'nama_hakim',
         ];
         $allColumns = array_values($colMap);
-        $decimalCols = ['vonis_penjara', 'subsidair', 'vonis_denda', 'biaya_perkara'];
+        $decimalCols = ['tuntutan_penjara', 'vonis_penjara', 'subsidair', 'tuntutan_denda', 'vonis_denda', 'biaya_perkara'];
 
         // delete(), bukan truncate(): truncate di MySQL langsung meng-commit transaksi sync.
         RawCase::query()->delete();
@@ -483,16 +485,18 @@ class SyncChartFromSheets extends Command
             ['key' => 'jumlah_pengadilan',  'col' => 11],
         ];
 
+        // Disimpan per kunci (label) dengan angkanya; jumlah_pengadilan dipakai web (PerkaraStatistics::sheetCourtCount).
         ChartDataset::where('dataset', 'KPI')->delete();
         $cnt = 0;
         foreach ($fields as $f) {
             $raw = trim($kpiRow[$f['col']] ?? '');
-            if ($raw === '' || $raw === null) continue;
+            $number = $raw === '' ? null : self::parseNumber($raw);
+            if ($number === null) continue;
             ChartDataset::create([
                 'dataset' => 'KPI',
-                'label'   => $raw,
+                'label'   => $f['key'],
                 'year'    => null,
-                'value'   => $cnt,
+                'value'   => $number,
             ]);
             $cnt++;
         }
